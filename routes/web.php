@@ -3,5 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('home'); // Mengarah ke halaman home.blade.php
+    return view('/layouts.app'); 
+});
+
+Route::get('/home', function () {
+    return view('home');
 });
