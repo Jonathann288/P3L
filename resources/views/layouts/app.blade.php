@@ -28,59 +28,40 @@
             height: auto;
         }
 
-        .dots {
-            display: flex;
-            justify-content: center;
-            margin-top: 250px;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            margin: 0 5px;
-            background-color: white;
+        .loader {
+            width: 15px;
+            aspect-ratio: 1;
             border-radius: 50%;
-            animation: bounce 1.5s infinite ease-in-out;
+            background-color: #ffffff;
+            box-shadow: #ffffff -20px 0px, #ffffff 20px 0px;
+            animation: l18 1.2s infinite;
         }
 
-        .dot:nth-child(1) {
-            animation-delay: 0s;
-        }
+        @keyframes l18 {
+            25% {
+                box-shadow: #ffffff -15px -15px, #ffffff 15px 15px;
+            }
 
-        .dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
+            50% {
+                box-shadow: #ffffff 0px -20px, #ffffff 0px 20px;
+            }
 
-        .dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
+            75% {
+                box-shadow: #ffffff 15px -15px, #ffffff -15px 15px;
+            }
 
-        @keyframes bounce {
-
-            0%,
-            80%,
             100% {
-                transform: translateY(0);
-            }
-
-            40% {
-                transform: translateY(-10px);
+                box-shadow: #ffffff 20px 0px, #ffffff -20px 0px;
             }
         }
-
     </style>
 </head>
 
 <body>
-
     <!-- Loading Screen -->
     <div id="loading-screen">
         <img src="{{ asset('images/logo.png') }}" alt="ReUseMart">
-        <div class="dots">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-        </div>
+        <div class="loader"></div>
     </div>
 
     <div id="content">
@@ -92,10 +73,9 @@
             setTimeout(function () {
                 document.getElementById("loading-screen").style.display = "none";
                 document.getElementById("content").style.display = "block";
-            }, 3500);
+            }, 1000);
         });
     </script>
-
 </body>
 
 </html>
