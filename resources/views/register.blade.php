@@ -19,7 +19,7 @@
         </a>
         <div class="w-full md:w-1/2 bg-blue-300 p-8 flex flex-col items-center justify-center">
             <div class="flex items-center space-x-2">
-                <img src="{{ asset('images/logoHome.png') }}" alt="ReUseMart" class="h-12">
+                <img src="{{ asset('images/logo6.png') }}" alt="ReUseMart" class="h-12">
             </div>
 
             <div class="mb-6 text-center">
