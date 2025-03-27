@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/home', function () {
-    return view('home'); // Mengarah ke halaman home.blade.php
+    return view('home');
 })->name('home');
 
 Route::get('/register', function () {
