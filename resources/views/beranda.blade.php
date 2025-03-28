@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReuseMart</title>
+    <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
@@ -32,7 +33,7 @@
 
                             <li>
                             <a class="text-gray-700 font-bold text-lg block relative after:content-[''] after:block after:w-0 after:h-1 
-                                after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full" href="{{ route('home') }}"> Shop </a>
+                                after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full" href="{{ route('shop') }}"> Shop </a>
                             </li>
 
                             <li>
@@ -86,7 +87,7 @@
                 </li>
 
                 <li>
-                <a href="{{ url('shop') }}" class="text-white font-bold text-lg block relative after:content-[''] after:block after:w-0 after:h-1 
+                <a href="{{ route('shop') }}" class="text-white font-bold text-lg block relative after:content-[''] after:block after:w-0 after:h-1 
                     after:bg-white-900 after:transition-all after:duration-300 hover:after:w-full">Shop</a>
                 </li>
 
@@ -103,9 +104,9 @@
         <div id="carouselExample" class="relative h-56 overflow-hidden md:h-[787px]">
             <div class="block duration-700 ease-in-out relative w-full h-full">
                 <video autoplay muted loop class="absolute top-0 left-0 w-full h-full object-cover">
-                    <source src="{{ asset('images/apple.mp4') }}" type="video/mp4">
+                    <source src="{{ asset('images/videoAwal.mp4') }}" type="video/mp4">
                 </video>
-
+                <div class="absolute top-0 left-0 w-full h-full bg-black opacity-50"></div>
                 <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
                     <h1 class="text-4xl md:text-6xl font-bold text-blue-500 drop-shadow-lg mb-4">ReuseMart</h1>
                     <p class="text-base md:text-2xl font-bold text-white drop-shadow-lg">REDUCE REUSE RECYCLE</p>
@@ -147,8 +148,8 @@
     </div>
     
     <div class="@container" data-aos="fade-down" data-aos-duration="1000" data-aos-delay="200">
-        <div class=my-10>
-            <div class="container mx-auto px-6 py-16 flex flex-col lg:flex-row items-center gap-10">
+        <div class="my-7">
+            <div class="container mx-auto px-6 py-16 flex flex-col lg:flex-row items-center gap-10 justify-center">
                 <!-- Bagian Kiri: Gambar -->
                 <div class="flex flex-col gap-5">
                     <div class="flex gap-5">
@@ -276,7 +277,7 @@
                     </swiper-slide>
                     <swiper-slide>
                         <div class="w-22 h-22 flex items-center justify-center bg-blue-100 rounded-full">
-                            <img src="images/stoller.png" alt="Icon 3" class="w-12 h-12">
+                            <img src="images/stroller.png" alt="Icon 3" class="w-12 h-12">
                         </div>
                         Perlengkapan Bayi & Anak
                     </swiper-slide>
