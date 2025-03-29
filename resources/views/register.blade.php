@@ -10,7 +10,7 @@
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <div class="flex flex-col md:flex-row rounded-3xl shadow-xl overflow-hidden max-w-4xl w-full">
-        <a href="{{ route('home') }}"
+        <a href="{{ route('shop') }}"
             class="absolute top-4 left-4 bg-white text-blue-600 p-2 rounded-full shadow-md hover:bg-gray-200 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
