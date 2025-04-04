@@ -38,7 +38,7 @@
 
                             <li>
                             <a class="text-gray-700 font-bold text-lg block relative after:content-[''] after:block after:w-0 after:h-1 
-                                after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full" href="#"> Donasi </a>
+                                after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full" href="{{ route('donasi') }}"> Donasi </a>
                             </li>
                         </ul>
                     </nav>
@@ -92,7 +92,7 @@
                 </li>
 
                 <li>
-                <a href="#" class="text-white font-bold text-lg block relative after:content-[''] after:block after:w-0 after:h-1 
+                <a href="{{ route('donasi') }}" class="text-white font-bold text-lg block relative after:content-[''] after:block after:w-0 after:h-1 
                     after:bg-white-900 after:transition-all after:duration-300 hover:after:w-full">Donasi</a>
                 </li>
             </ul>
@@ -324,11 +324,11 @@
                     <ul class="text-gray-500 dark:text-gray-400 font-medium">
                         <li class="mb-4">
                             <!-- nanti ganti ke link shop -->
-                            <a href="https://flowbite.com/" class="hover:underline text-white">Shop</a>
+                            <a href="http://127.0.0.1:8000/shop" class="hover:underline text-white">Shop</a>
                         </li>
                         <li>
                             <!-- nanti ganti ke link shop -->
-                            <a href="https://tailwindcss.com/" class="hover:underline text-white">Donasi</a>
+                            <a href="http://127.0.0.1:8000/donasi" class="hover:underline text-white">Donasi</a>
                         </li>
                     </ul>
                 </div>
