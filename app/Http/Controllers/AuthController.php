@@ -12,37 +12,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function showLoginForm()
+    public function showLoginFormPegawai()
     {
         return view('loginDashboard');  // Ganti dengan path view login yang sesuai
     }
-    // public function loginPegawai(Request $request)
-    // {
-    //     $request->validate([
-    //         'email_pegawai' => 'required|email',
-    //         'password_pegawai' => 'required'
-    //     ]);
-
-    //     $pegawai = Pegawai::with('jabatan')->where('email_pegawai', $request->email_pegawai)->first();
-
-    //     if (!$pegawai || !Hash::check($request->password_pegawai, $pegawai->password_pegawai)) {
-    //         return response()->json(['message' => 'Email atau password salah'], 401);
-    //     }
-
-    //     // Tambah validasi jabatan
-    //     if (!$pegawai->jabatan) {
-    //         return response()->json(['message' => 'Akun tidak memiliki jabatan yang valid'], 403);
-    //     }
-
-    //     $token = $pegawai->createToken('Personal Access Token', [$pegawai->jabatan->nama_jabatan])->plainTextToken;
-
-    //     return response()->json([
-    //         'message' => 'Login berhasil',
-    //         'pegawai' => $pegawai,
-    //         'role' => $pegawai->jabatan->nama_jabatan,
-    //         'token' => $token
-    //     ]);
-    // }
 
     public function loginPegawai(Request $request)
     {
@@ -81,28 +54,30 @@ class AuthController extends Controller
         }
     }
 
-    // public function showLoginOrganisasi()
-    // {
-    //     return view('organisasi.loginOrganisasi');
-    // }
+    public function showLoginOrganisasi()
+    {
+        return view('loginOrganisasi');
+    }
 
     public function loginOrganisasi(Request $request)
     {
         $request->validate([
-            'emailOrganisasi' => 'required|email',
-            'passwordOrganisasi' => 'required',
+            'email_organisasi' => 'required|email',
+            'password_organisasi' => 'required',
         ]);
-
-        $organisasi = Organisasi::where('email_organisasi', $request->emailOrganisasi)->first();
-
-        if ($organisasi && Hash::check($request->passwordOrganisasi, $organisasi->password_organisasi)) {
-            // Login sukses: simpan data ke session
-            session(['organisasi' => $organisasi]);
-
-            return redirect()->route('dashboardOrganisasi');
+    
+        // Mencari organisasi berdasarkan email
+        $organisasi = \App\Models\Organisasi::where('email_organisasi', $request->email_organisasi)->first();
+    
+        if (!$organisasi || !\Hash::check($request->password_organisasi, $organisasi->password_organisasi)) {
+            return back()->withErrors(['email_organisasi' => 'Email atau password salah'])->withInput();
         }
-
-        return back()->withErrors(['emailOrganisasi' => 'Email atau password salah'])->withInput();
+    
+        // LOGIN menggunakan GUARD 'organisasi'
+        Auth::guard('organisasi')->login($organisasi);
+    
+        // Redirect ke halaman setelah login berhasil
+        return redirect()->intended(route('organisasi.DonasiOrganisasi'));
     }
 
     public function logoutOrganisasi()
@@ -111,30 +86,42 @@ class AuthController extends Controller
         return redirect()->route('loginOrganisasi');
     }
 
+    public function showLoginForm()
+    {
+        return view('loginPembeli');  // Tampilkan view loginPembeli.blade.php
+    }
+
+    // Proses login
     public function loginPembeli(Request $request)
     {
+        // Validasi input form login
         $request->validate([
             'email_pembeli' => 'required|email',
             'password_pembeli' => 'required'
         ]);
 
+        // Mencari pembeli berdasarkan email
         $pembeli = Pembeli::where('email_pembeli', $request->email_pembeli)->first();
 
+        // Jika pembeli tidak ditemukan atau password salah
         if (!$pembeli || !Hash::check($request->password_pembeli, $pembeli->password_pembeli)) {
-            return response()->json(['message' => 'Email atau password salah'], 401);
+            return back()->withErrors(['email_pembeli' => 'Email atau password salah']);
         }
 
-        $token = $pembeli->createToken('Personal Access Token', ['pembeli'])->plainTextToken;
+        // Login pembeli menggunakan guard 'pembeli'
+        Auth::guard('pembeli')->login($pembeli);
 
-        return response()->json([
-            'message' => 'Login berhasil',
-            'pembeli' => $pembeli,
-            'role' => 'pembeli',
-            'token' => $token
-        ]);
+        // Redirect ke halaman setelah login berhasil
+        return redirect()->intended(route('pembeli.Shop-Pembeli'));  // Ganti dengan route tujuan setelah login
     }
 
-    public function loginPenitip(Request $request)
+
+    public function showLoginFormPenitip()
+    {
+        return view('loginPenitip');
+    }
+
+    public function loginPenitip(Request $request) 
     {
         $request->validate([
             'email_penitip' => 'required|email',
@@ -144,17 +131,14 @@ class AuthController extends Controller
         $penitip = Penitip::where('email_penitip', $request->email_penitip)->first();
 
         if (!$penitip || !Hash::check($request->password_penitip, $penitip->password_penitip)) {
-            return response()->json(['message' => 'Email atau password salah'], 401);
+            return back()->withErrors(['email_penitip' => 'Email atau password salah']);
         }
 
-        $token = $penitip->createToken('Personal Access Token', ['penitip'])->plainTextToken;
+        // LOGIN menggunakan GUARD 'penitip'
+        Auth::guard('penitip')->login($penitip);
 
-        return response()->json([
-            'message' => 'Login berhasil',
-            'penitip' => $penitip,
-            'role' => 'penitip',
-            'token' => $token
-        ]);
+        // Redirect ke halaman setelah login berhasil
+        return redirect()->intended(route('penitip.Shop-Penitip'));
     }
 
 }

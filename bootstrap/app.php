@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'checkjabatan' => \App\Http\Middleware\CheckJabatan::class,
             'pembeli' => \App\Http\Middleware\EnsurePembeli::class,
             'penitip' => \App\Http\Middleware\EnsurePenitip::class,
+            'organisasi' => \App\Http\Middleware\EnsureOrganisasi::class,
             // dan lainnya...
         ]);
 

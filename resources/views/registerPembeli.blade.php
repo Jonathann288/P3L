@@ -1,3 +1,4 @@
+<!-- resources/views/registerPembeli.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,50 +28,66 @@
             </div>
 
             <div class="w-full max-w-md">
-                <h2 class="text-xl font-bold mb-4 text-white">Sign Up Organisasi</h2>
+                <h2 class="text-xl font-bold mb-4 text-white">Sign Up Pembeli</h2>
 
-                <form method="POST" action="{{ route('registerOrganisasi.post') }}" class="space-y-3">
+                {{-- Tampilkan error validasi --}}
+                @if($errors->any())
+                    <div class="bg-red-100 text-red-700 p-4 mb-4 rounded">
+                        <ul>
+                            @foreach($errors->all() as $error)
+                                <li>- {{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                <form method="POST" action="{{ route('registerPembeli') }}" class="space-y-3">
                     @csrf
 
                     <div>
-                        <input type="text" name="nama_organisasi" id="nameOrganisasi" class="w-full p-2 rounded-lg"
-                            placeholder="Nama Organisasi" required autofocus>
-                    </div>
-
-                    <div>
-                        <input type="alamat" name="alamat_organisasi" id="alamatOrganisasi" class="w-full p-2 rounded-lg"
-                            placeholder="Alamat" required>
-                    </div>
-
-                    <div>
-                        <input type="tel" name="nomor_telepon" id="phoneOrganisasi" class="w-full p-2 rounded-lg"
-                            placeholder="Nomor telepon" required>
-                    </div>
-
-                    <div>
-                        <input type="email" name="email_organisasi" id="emailOrganisasi" class="w-full p-2 rounded-lg" placeholder="Email"
+                        <input type="text" name="nama_pembeli" class="w-full p-2 rounded-lg" placeholder="Nama pembeli"
                             required>
                     </div>
 
                     <div>
-                        <input type="password" name="password_organisasi" id="passwordOrganisasi" class="w-full p-2 rounded-lg"
+                        <input type="date" name="tanggal_lahir" class="w-full p-2 rounded-lg"
+                            placeholder="Tanggal Lahir" required>
+                    </div>
+
+                    <div>
+                        <input type="text" name="alamat_pembeli" class="w-full p-2 rounded-lg" placeholder="Alamat"
+                            required>
+                    </div>
+
+                    <div>
+                        <input type="tel" name="nomor_telepon_pembeli" class="w-full p-2 rounded-lg"
+                            placeholder="Nomor telepon" required>
+                    </div>
+
+                    <div>
+                        <input type="email" name="email_pembeli" class="w-full p-2 rounded-lg" placeholder="Email"
+                            required>
+                    </div>
+
+                    <div>
+                        <input type="password" name="password_pembeli" class="w-full p-2 rounded-lg"
                             placeholder="Password" required>
                     </div>
 
                     <div>
                         <button type="submit"
-                            class="w-full bg-blue-500 text-white p-2 rounded-md font-medium hover:bg-blue-600">Log
-                            In</button>
+                            class="w-full bg-blue-500 text-white p-2 rounded-md font-medium hover:bg-blue-600">Sign
+                            Up</button>
                     </div>
                 </form>
 
+
                 <div class="mt-3 text-center">
-                    <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
+                    <a href="#" class="text-black hover:underline text-sm font-bold">Lupa Password?</a>
                 </div>
 
                 <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
                     <p class="text-white font-bold">Akun kamu udah ada?</p>
-                    <a href='{{ route('loginOrganisasi') }}'
+                    <a href='{{ route('loginPembeli') }}'
                         class="bg-transparent border border-white text-white px-3 py-1 rounded-md hover:bg-white hover:text-blue-500">Log
                         in</a>
                 </div>

@@ -164,7 +164,7 @@
         <div class="bg-gray-100 py-4 max-w-6xl mx-auto">
             <div>
                 <div class="text-center text-blue-500 font-semibold text-lg">
-                    REKOMENDASI
+                    REKOMENDASI / sudah login
                 </div>
             <div class="mt-2 border-b-4 border-blue-500 w-full"></div>
         </div>

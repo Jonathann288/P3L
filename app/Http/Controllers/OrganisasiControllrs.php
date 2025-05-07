@@ -20,7 +20,12 @@ class OrganisasiControllrs extends Controller
         return view('organisasi.create');
     }
 
-    public function store(Request $request)
+    public function showRegisterOrganisasi()
+    {
+        return view('registerOrganisasi');
+    }
+
+    public function registerOrganisasi(Request $request)
     {
         $request->validate([
             'nama_organisasi' => 'required|string|max:255',
@@ -29,17 +34,13 @@ class OrganisasiControllrs extends Controller
             'email_organisasi' => 'required|string|email|max:255|unique:organisasi,email_organisasi',
             'password_organisasi' => 'required|string|min:8',
         ]);
+        
 
-        $lastOrganisasi = DB::table('organisasi')
-            ->select('id')
-            ->where('id', 'like', 'OR%')
-            ->orderByDesc('id')
-            ->first();
+        // Buat ID otomatis
+        $last = DB::table('organisasi')->select('id')->where('id', 'like', 'OR%')->orderByDesc('id')->first();
+        $newId = 'OR' . str_pad(($last ? intval(substr($last->id, 2)) + 1 : 1), 3, '0', STR_PAD_LEFT);
 
-        $newNumber = $lastOrganisasi ? ((int) substr($lastOrganisasi->id, 2)) + 1 : 1;
-        $newId = 'OR' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
-
-        Organisasi::create([
+        $organisasi = Organisasi::create([
             'id' => $newId,
             'nama_organisasi' => $request->nama_organisasi,
             'alamat_organisasi' => $request->alamat_organisasi,
@@ -48,8 +49,9 @@ class OrganisasiControllrs extends Controller
             'password_organisasi' => Hash::make($request->password_organisasi),
         ]);
 
-        return redirect()->route('organisasi.index')->with('success', 'Organisasi berhasil didaftarkan.');
+        return redirect()->route('loginOrganisasi')->with('success', 'Akun berhasil dibuat, silakan login!');
     }
+
 
     public function show($id)
     {
@@ -91,4 +93,3 @@ class OrganisasiControllrs extends Controller
         return view('organisasi.index', compact('organisasi'));
     }
 }
-

@@ -10,42 +10,38 @@ use Illuminate\Support\Facades\Auth;
 
 class PembeliControllrs extends Controller
 {
+    public function showRegisterForm()
+    {
+        return view('registerPembeli'); // Pastikan view ini ada di resources/views/pembeli/register.blade.php
+    }
+
     public function registerPembeli(Request $request)
     {
-        // Validasi input (hapus 'id' dari validasi)
         $request->validate([
             'nama_pembeli' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date',
             'nomor_telepon_pembeli' => 'required|string|max:20',
-            'email_pembeli' => 'required|string|email|max:255|unique:pegawai,email_pegawai',
+            'email_pembeli' => 'required|string|email|max:255|unique:pembeli,email_pembeli',
             'password_pembeli' => 'required|string|min:8',
             'foto_pembeli' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'total_poin'=> 'nullable|integer'
+            'total_poin' => 'nullable|integer'
         ]);
-    
-        // Generate ID baru
+
+        // Generate ID unik
         $lastPembeli = DB::table('pembeli')
             ->select('id')
             ->where('id', 'like', 'PB%')
             ->orderByDesc('id')
             ->first();
-    
-        if ($lastPembeli) {
-            $lastNumber = (int) substr($lastPembeli->id, 2); // Ambil angka setelah "pb"
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-    
-        $newId = 'PB' . str_pad($newNumber, 3, '0', STR_PAD_LEFT); // contoh: pb011
-    
-        // Simpan foto jika ada
+
+        $newNumber = $lastPembeli ? ((int) substr($lastPembeli->id, 2)) + 1 : 1;
+        $newId = 'PB' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+
         $foto_pembeli_path = null;
         if ($request->hasFile('foto_pembeli')) {
             $foto_pembeli_path = $request->file('foto_pembeli')->store('images', 'public');
         }
-    
-        // Simpan ke database
+
         $pembeli = Pembeli::create([
             'id' => $newId,
             'nama_pembeli' => $request->nama_pembeli,
@@ -54,27 +50,23 @@ class PembeliControllrs extends Controller
             'email_pembeli' => $request->email_pembeli,
             'password_pembeli' => Hash::make($request->password_pembeli),
             'foto_pembeli' => $foto_pembeli_path,
-            'total_poin' =>$request->total_poin
+            'total_poin' => $request->total_poin ?? 0
         ]);
-    
-        return response()->json([
-            'pembeli' => $pembeli,
-            'message' => 'Pembeli registered successfully'
-        ], 201);
+
+        return redirect()->route('loginPembeli')->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
     public function show()
     {
-        try{
+        try {
             $pembeli = Auth::user();
 
             return response()->json([
                 "status" => true,
                 "message" => "Get Successful",
                 "pembeli" => $pembeli
-            ],200);
-        }
-        catch(Exception $e){
+            ], 200);
+        } catch (Exception $e) {
             return response()->json([
                 "status" => false,
                 "message" => "Something went wrong",
@@ -86,7 +78,7 @@ class PembeliControllrs extends Controller
     public function update(Request $request)
     {
         try {
-            $pembeli = Auth::guard('pembeli')->user(); 
+            $pembeli = Auth::guard('pembeli')->user();
             if (!$pembeli) {
                 return response()->json(['message' => 'Pembeli tidak ditemukan'], 404);
             }

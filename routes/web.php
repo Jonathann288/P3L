@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PembeliControllrs;
+use App\Http\Controllers\PenitipControllrs;
+use App\Http\Controllers\organisasiControllrs;
+
 
 Route::get('/', function () {
     return view('beranda');
@@ -31,29 +35,57 @@ Route::get('/register', function () {
     return view('register');
 })->name('register');
 
-Route::get('/login', function () {
-    return view('login');
-})->name('login');
+// Menampilkan form login Penitip
+Route::get('login-penitip', [AuthController::class, 'showLoginFormPenitip'])->name('loginPenitip');
 
-Route::get('/registerOrganisasi', function () {
-    return view('registerOrganisasi');
-})->name('registerOrganisasi');
+// Menangani form login (POST) Penitip
+Route::post('login-penitip', [AuthController::class, 'loginPenitip'])->name('loginPenitip.post');
 
-Route::get('/loginOrganisasi', function () {
-    return view('loginOrganisasi');
-})->name('loginOrganisasi');
+// Proteksi route dengan middleware 'penitip'
+Route::middleware(['penitip'])->group(function () {
+    // Halaman shop untuk Penitip
+    Route::get('/Shop-Penitip', function () {
+        return view('penitip.Shop-Penitip');
+    })->name('penitip.Shop-Penitip');
+});
 
-Route::get('/login-organisasi', [AuthController::class, 'showLoginOrganisasi'])->name('loginOrganisasi');
-Route::post('/login-organisasi', [AuthController::class, 'loginOrganisasi'])->name('loginOrganisasi.post');
+
+Route::get('/registerPembeli', [PembeliControllrs::class, 'showRegisterForm'])->name('registerPembeliForm');
+Route::post('/registerPembeli', [PembeliControllrs::class, 'registerPembeli'])->name('registerPembeli');
+
+Route::get('/registerPenitip', [PenitipControllrs::class, 'showRegisterFormPenitip'])->name('registerPenitipForm');
+Route::post('/registerPenitip', [PenitipControllrs::class, 'registerPenitip'])->name('registerPenitip.post');
+
+
+
+// Menampilkan form login
+Route::get('login-pembeli', [AuthController::class, 'showLoginForm'])->name('loginPembeli');
+// Menangani form login (POST)
+Route::post('login-pembeli', [AuthController::class, 'loginPembeli'])->name('loginPembeli.post');
+Route::middleware(['pembeli'])->group(function () {
+    // Halaman shop untuk pembeli
+    Route::get('/Shop-Pembeli', function () {
+        return view('pembeli.Shop-Pembeli');
+    })->name('pembeli.Shop-Pembeli');
+});
+
+Route::get('/registerOrganisasi', [organisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
+// Route::post('/registerOrganisasi', [organisasiControllrs::class, 'registerOrganisasi'])->name('registerOrganisasi.post');
+Route::get('/loginOrganisasi', [AuthController::class, 'showLoginOrganisasi'])->name('loginOrganisasi');
+Route::post('/loginOrganisasi', [AuthController::class, 'loginOrganisasi'])->name('loginOrganisasi.post');
+
 Route::post('/logout-organisasi', [AuthController::class, 'logoutOrganisasi'])->name('logoutOrganisasi');
 
-Route::get('/dashboard-organisasi', function () {
-    $organisasi = session('organisasi');
-    if (!$organisasi) return redirect()->route('loginOrganisasi');
-    return view('organisasi.donasi', compact('organisasi'));
-})->name('dashboardOrganisasi');
+// Proses form register
+Route::post('/registerOrganisasi', [organisasiControllrs::class, 'registerOrganisasi'])->name('registerOrganisasi.post');
 
-Route::get('/loginDashboard', [AuthController::class, 'showLoginForm'])->name('loginDashboard');
+Route::middleware(['organisasi'])->group(function () {
+    Route::get('/donasi-organisasi', function () {
+        return view('organisasi.donasi-organisasi');
+    })->name('organisasi.DonasiOrganisasi');
+});
+
+Route::get('/loginDashboard', [AuthController::class, 'showLoginFormPegawai'])->name('loginDashboard');
 Route::post('/loginDashboard', [AuthController::class, 'loginPegawai'])->name('loginPegawai.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -64,7 +96,7 @@ Route::middleware(['checkjabatan:Admin'])->group(function () {
 });
 Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::get('/DashboardOwner', function () {
-        return view('DashboardOwner');
+        return view('owner.DashboardOwner');
     })->name('owner.DashboardOwner');
 });
 Route::middleware(['checkjabatan:Customer Service'])->group(function () {

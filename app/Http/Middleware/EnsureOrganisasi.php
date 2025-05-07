@@ -10,11 +10,11 @@ class EnsurePenitip
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::guard('penitip')->check()) {
+        if (Auth::guard('organisasi')->check()) {
             return $next($request);
         }
     
-        return redirect()->route('loginPenitip')->with('message', 'Anda harus login sebagai Pembeli untuk mengakses halaman ini.');
+        return redirect()->route('loginOrganisasi')->with('message', 'Anda harus login sebagai Pembeli untuk mengakses halaman ini.');
     }
 }
 

@@ -10,10 +10,11 @@ class EnsurePembeli
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user() instanceof \App\Models\Pembeli) {
+        if (Auth::guard('pembeli')->check()) {
             return $next($request);
         }
-
-        return response()->json(['message' => 'Unauthorized: Only Pembeli can access this route'], 401);
+    
+        return redirect()->route('loginPembeli')->with('message', 'Anda harus login sebagai Pembeli untuk mengakses halaman ini.');
     }
 }
+

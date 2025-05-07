@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Organisasi extends Authenticatable
 {
-    use HasFactory, HasApiTokens;
+    use HasFactory;
     protected $table = 'organisasi';
 
     protected $primaryKey = 'id_organisasi';
