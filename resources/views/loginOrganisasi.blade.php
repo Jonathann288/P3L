@@ -6,16 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReUseMart - Sign Up</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Axios CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <!-- CSRF Token
-    <meta name="csrf-token" content="{{ csrf_token() }}"> -->
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <a href="{{ route('shop') }}"
+    <a href="{{ route('donasi') }}"
         class="absolute top-4 left-4 bg-white text-blue-600 p-2 rounded-full shadow-md hover:bg-gray-200 flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -33,17 +27,18 @@
             </div>
 
             <div class="w-full max-w-md">
-                <h2 class="text-xl font-bold mb-4 text-white">Login</h2>
+                <h2 class="text-xl font-bold mb-4 text-white">Login Organisasi</h2>
 
-                <form id="loginForm" class="space-y-3">
+                <form method="POST" action="{{ route('loginOrganisasi.post') }}" class="space-y-3">
+                    @csrf
 
                     <div>
-                        <input type="email" name="email" id="email" class="w-full p-2 rounded-lg" placeholder="Email"
+                        <input type="email" name="emailOrganisasi" id="emailOrganisasi" class="w-full p-2 rounded-lg" placeholder="Email"
                             required>
                     </div>
 
                     <div>
-                        <input type="password" name="password" id="password" class="w-full p-2 rounded-lg"
+                        <input type="password" name="passwordOrganisasi" id="passwordOrganisasi" class="w-full p-2 rounded-lg"
                             placeholder="Password" required>
                     </div>
 
@@ -60,7 +55,7 @@
 
                 <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
                     <p class="text-white font-bold">Baru di ReUseMart? </p>
-                    <a href='{{ route('register') }}'
+                    <a href='{{ route('registerOrganisasi') }}'
                         class="bg-transparent border border-white text-white px-3 py-1 rounded-md hover:bg-white hover:text-blue-500">Sign
                         up</a>
                 </div>
@@ -80,7 +75,6 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="{{ asset('js/login.js') }}"></script>
 </body>
+
 </html>

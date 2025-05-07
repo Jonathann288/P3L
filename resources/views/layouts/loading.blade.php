@@ -88,11 +88,15 @@
                     <ul class="text-gray-500 dark:text-gray-400 font-medium">
                         <li class="mb-4">
                             <!-- nanti ganti ke link shop -->
-                            <a href="https://flowbite.com/" class="hover:underline text-white">Shop</a>
+                            <a href="http://127.0.0.1:8000/shop" class="hover:underline text-white">Shop</a>
+                        </li>
+                        <li class="mb-4">
+                            <!-- nanti ganti ke link shop -->
+                            <a href="http://127.0.0.1:8000/donasi" class="hover:underline text-white">Donasi</a>
                         </li>
                         <li>
                             <!-- nanti ganti ke link shop -->
-                            <a href="https://tailwindcss.com/" class="hover:underline text-white">Donasi</a>
+                            <a href="http://127.0.0.1:8000/" class="hover:underline text-white">Beranda</a>
                         </li>
                     </ul>
                 </div>
