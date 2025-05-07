@@ -26,7 +26,7 @@
             <!-- Menu Navigasi -->
             <div class="hidden md:flex space-x-6 text-gray-700">
                 <a href="{{ route('beranda') }}" class="hover:underline">Beranda</a>
-                <a href="#" class="hover:underline">Donasi</a>
+                <a href="{{ route('donasi')}}" class="hover:underline">Donasi</a>
             </div>
         </div>
 
