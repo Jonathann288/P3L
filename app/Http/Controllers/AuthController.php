@@ -12,6 +12,38 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    public function showLoginForm()
+    {
+        return view('loginDashboard');  // Ganti dengan path view login yang sesuai
+    }
+    // public function loginPegawai(Request $request)
+    // {
+    //     $request->validate([
+    //         'email_pegawai' => 'required|email',
+    //         'password_pegawai' => 'required'
+    //     ]);
+
+    //     $pegawai = Pegawai::with('jabatan')->where('email_pegawai', $request->email_pegawai)->first();
+
+    //     if (!$pegawai || !Hash::check($request->password_pegawai, $pegawai->password_pegawai)) {
+    //         return response()->json(['message' => 'Email atau password salah'], 401);
+    //     }
+
+    //     // Tambah validasi jabatan
+    //     if (!$pegawai->jabatan) {
+    //         return response()->json(['message' => 'Akun tidak memiliki jabatan yang valid'], 403);
+    //     }
+
+    //     $token = $pegawai->createToken('Personal Access Token', [$pegawai->jabatan->nama_jabatan])->plainTextToken;
+
+    //     return response()->json([
+    //         'message' => 'Login berhasil',
+    //         'pegawai' => $pegawai,
+    //         'role' => $pegawai->jabatan->nama_jabatan,
+    //         'token' => $token
+    //     ]);
+    // }
+
     public function loginPegawai(Request $request)
     {
         $request->validate([
@@ -19,25 +51,34 @@ class AuthController extends Controller
             'password_pegawai' => 'required'
         ]);
 
+        // Cari pegawai berdasarkan email
         $pegawai = Pegawai::with('jabatan')->where('email_pegawai', $request->email_pegawai)->first();
 
+        // Cek apakah pegawai ada dan passwordnya cocok
         if (!$pegawai || !Hash::check($request->password_pegawai, $pegawai->password_pegawai)) {
-            return response()->json(['message' => 'Email atau password salah'], 401);
+            return back()->withErrors(['email_pegawai' => 'Email atau password salah']);
         }
 
-        // Tambah validasi jabatan
-        if (!$pegawai->jabatan) {
-            return response()->json(['message' => 'Akun tidak memiliki jabatan yang valid'], 403);
+        // Login menggunakan session
+        Auth::guard('pegawai')->login($pegawai);
+
+        // Arahkan ke halaman sesuai dengan jabatan
+        switch ($pegawai->jabatan->nama_jabatan) {
+            case 'Admin':
+                return redirect()->route('admin.Dashboard');
+            case 'Customer Service':
+                return redirect()->route('CustomerService.DashboardCS');
+            case 'Owner':
+                return redirect()->route('owner.DashboardOwner');
+            case 'Gudang':
+                return redirect()->route('gudang.DashboardGudang');
+            case 'Hunter':
+                return redirect()->route('hunter.DashboardHunter');
+            case 'Kurir':
+                return redirect()->route('kurir.DashboardKurir');
+            default:
+                return redirect()->route('loginDashboard')->with('error', 'Jabatan tidak dikenal.');
         }
-
-        $token = $pegawai->createToken('Personal Access Token', [$pegawai->jabatan->nama_jabatan])->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login berhasil',
-            'pegawai' => $pegawai,
-            'role' => $pegawai->jabatan->nama_jabatan,
-            'token' => $token
-        ]);
     }
 
     // public function showLoginOrganisasi()

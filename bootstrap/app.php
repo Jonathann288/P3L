@@ -11,7 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            // 'auth' => \App\Http\Middleware\Authenticate::class,
+            'checkjabatan' => \App\Http\Middleware\CheckJabatan::class,
+            'pembeli' => \App\Http\Middleware\EnsurePembeli::class,
+            'penitip' => \App\Http\Middleware\EnsurePenitip::class,
+            // dan lainnya...
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

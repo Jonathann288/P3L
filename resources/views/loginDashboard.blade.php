@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReUseMart - Sign Up</title>
+    <title>Login - Pegawai</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -29,15 +30,15 @@
             <div class="w-full max-w-md">
                 <h2 class="text-xl font-bold mb-4 text-white">Login</h2>
 
-                <form id="loginForm" class="space-y-3">
-
+                <form action="{{ route('loginPegawai.post') }}" method="POST" class="space-y-3">
+                    @csrf
                     <div>
-                        <input type="email" name="email" id="email" class="w-full p-2 rounded-lg" placeholder="Email"
+                        <input type="email" name="email_pegawai" id="email_pegawai" class="w-full p-2 rounded-lg" placeholder="Email"
                             required>
                     </div>
 
                     <div>
-                        <input type="password" name="password" id="password" class="w-full p-2 rounded-lg"
+                        <input type="password" name="password_pegawai" id="password_pegawai" class="w-full p-2 rounded-lg"
                             placeholder="Password" required>
                     </div>
 
@@ -50,13 +51,6 @@
 
                 <div class="mt-3 text-center">
                     <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
-                </div>
-
-                <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
-                    <p class="text-white font-bold">Baru di ReUseMart? </p>
-                    <a href='{{ route('register') }}'
-                        class="bg-transparent border border-white text-white px-3 py-1 rounded-md hover:bg-white hover:text-blue-500">Sign
-                        up</a>
                 </div>
             </div>
         </div>

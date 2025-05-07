@@ -43,14 +43,6 @@ Route::get('/loginOrganisasi', function () {
     return view('loginOrganisasi');
 })->name('loginOrganisasi');
 
-// Route::get('/organisasi', [OrganisasiControllrs::class, 'index'])->name('organisasi.index');
-// Route::get('/organisasi/create', [OrganisasiControllrs::class, 'create'])->name('organisasi.create');
-// Route::post('/organisasi', [OrganisasiControllrs::class, 'store'])->name('organisasi.store');
-// Route::get('/organisasi/{id}', [OrganisasiControllrs::class, 'show'])->name('organisasi.show');
-// Route::get('/organisasi/{id}/edit', [OrganisasiControllrs::class, 'edit'])->name('organisasi.edit');
-// Route::put('/organisasi/{id}', [OrganisasiControllrs::class, 'update'])->name('organisasi.update');
-// Route::delete('/organisasi/{id}', [OrganisasiControllrs::class, 'destroy'])->name('organisasi.destroy');
-// Route::get('/organisasi-search', [OrganisasiControllrs::class, 'search'])->name('organisasi.search');
 Route::get('/login-organisasi', [AuthController::class, 'showLoginOrganisasi'])->name('loginOrganisasi');
 Route::post('/login-organisasi', [AuthController::class, 'loginOrganisasi'])->name('loginOrganisasi.post');
 Route::post('/logout-organisasi', [AuthController::class, 'logoutOrganisasi'])->name('logoutOrganisasi');
@@ -60,13 +52,38 @@ Route::get('/dashboard-organisasi', function () {
     if (!$organisasi) return redirect()->route('loginOrganisasi');
     return view('organisasi.donasi', compact('organisasi'));
 })->name('dashboardOrganisasi');
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/organisasi/me', function (Request $request) {
-        return response()->json([
-            'message' => 'Data organisasi login berhasil diambil',
-            'organisasi' => $request->user()
-        ]);
-    });
-    Route::put('/updateorganisasi', [OrganisasiControllrs::class, 'update']);
-    Route::get('/showorganisasi', [OrganisasiControllrs::class, 'showLogin']);
+
+Route::get('/loginDashboard', [AuthController::class, 'showLoginForm'])->name('loginDashboard');
+Route::post('/loginDashboard', [AuthController::class, 'loginPegawai'])->name('loginPegawai.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::middleware(['checkjabatan:Admin'])->group(function () {
+    Route::get('/Dashboard', function () {
+        return view('admin.Dashboard');
+    })->name('admin.Dashboard');
+});
+Route::middleware(['checkjabatan:Owner'])->group(function () {
+    Route::get('/DashboardOwner', function () {
+        return view('DashboardOwner');
+    })->name('owner.DashboardOwner');
+});
+Route::middleware(['checkjabatan:Customer Service'])->group(function () {
+    Route::get('/DashboardCS', function () {
+        return view('customerservice.DashboardCS');
+    })->name('CustomerService.DashboardCS');
+});
+Route::middleware(['checkjabatan:Gudang'])->group(function () {
+    Route::get('/DashboardGudang', function () {
+        return view('gudang.DashboardGudang');
+    })->name('gudang.DashboardGudang');
+});
+Route::middleware(['checkjabatan:Kurir'])->group(function () {
+    Route::get('/DashboardKurir', function () {
+        return view('kurir.DashboardKurir');
+    })->name('kurir.DashboardKurir');
+});
+Route::middleware(['checkjabatan:Hunter'])->group(function () {
+    Route::get('/DashboardHunter', function () {
+        return view('hunter.DashboardHunter');
+    })->name('hunter.DashboardHunter');
 });

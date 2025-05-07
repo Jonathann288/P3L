@@ -4,17 +4,29 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 class CheckJabatan
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  string  $jabatan
+     * @return mixed
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, $jabatan)
     {
-        return $next($request);
+        // Ambil data user dari guard pegawai
+        $pegawai = Auth::guard('pegawai')->user();
+
+        // Cek apakah user punya jabatan yang cocok
+        if ($pegawai && $pegawai->jabatan && $pegawai->jabatan->nama_jabatan === $jabatan) {
+            return $next($request);
+        }
+
+        // Jika tidak cocok, arahkan ke halaman 403 (Forbidden)
+        return redirect()->route('loginDashboard'); // Atau bisa redirect ke halaman lain sesuai keinginan
     }
 }
