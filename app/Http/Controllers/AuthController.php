@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pegawai;
+use Illuminate\Support\Facades\DB;
 use App\Models\Organisasi;
 use App\Models\Pembeli;
 use App\Models\Penitip;
@@ -40,10 +41,10 @@ class AuthController extends Controller
         ]);
     }
 
-    // public function showLoginOrganisasi()
-    // {
-    //     return view('organisasi.loginOrganisasi');
-    // }
+    public function showLoginOrganisasi()
+    {
+        return view('loginOrganisasi');
+    }
 
     public function loginOrganisasi(Request $request)
     {
@@ -70,27 +71,33 @@ class AuthController extends Controller
         return redirect()->route('loginOrganisasi');
     }
 
+    public function showLoginForm()
+    {
+        return view('loginPembeli');  // Tampilkan view loginPembeli.blade.php
+    }
+
+    // Proses login
     public function loginPembeli(Request $request)
     {
+        // Validasi input form login
         $request->validate([
             'email_pembeli' => 'required|email',
             'password_pembeli' => 'required'
         ]);
 
+        // Mencari pembeli berdasarkan email
         $pembeli = Pembeli::where('email_pembeli', $request->email_pembeli)->first();
 
+        // Jika pembeli tidak ditemukan atau password salah
         if (!$pembeli || !Hash::check($request->password_pembeli, $pembeli->password_pembeli)) {
-            return response()->json(['message' => 'Email atau password salah'], 401);
+            return back()->withErrors(['email_pembeli' => 'Email atau password salah.']);
         }
 
-        $token = $pembeli->createToken('Personal Access Token', ['pembeli'])->plainTextToken;
+        // Login pembeli menggunakan Auth
+        Auth::login($pembeli);
 
-        return response()->json([
-            'message' => 'Login berhasil',
-            'pembeli' => $pembeli,
-            'role' => 'pembeli',
-            'token' => $token
-        ]);
+        // Redirect ke halaman setelah login berhasil
+        return redirect()->intended('/shop');  // Ganti dengan URL tujuan setelah login berhasil
     }
 
     public function loginPenitip(Request $request)

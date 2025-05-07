@@ -28,23 +28,21 @@ class Penitip extends Authenticatable
         'badge',
         'jumlah_penjualan',
         'foto_profil',
-        'rating_penitip'
+        'rating_penitip',
     ];
 
     protected $hidden = [
-        'password_pembeli',
-        'remember_token',
+        'password_penitip',  
+        'remember_token',  
     ];
 
-    // Untuk auth menggunakan kolom email_pembeli
     public function getEmailForPasswordReset()
     {
-        return $this->email_pembeli;
+        return $this->email_penitip;
     }
 
-    // Untuk auth menggunakan kolom password_pembeli
     public function getAuthPassword()
     {
-        return $this->password_pembeli;
+        return $this->password_penitip;
     }
 }

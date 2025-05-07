@@ -33,7 +33,7 @@
             </div>
 
             <div class="w-full max-w-md">
-                <h2 class="text-xl font-bold mb-4 text-white">Login</h2>
+                <h2 class="text-xl font-bold mb-4 text-white">Login Penitip</h2>
 
                 <form id="loginForm" class="space-y-3">
 

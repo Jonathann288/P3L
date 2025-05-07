@@ -24,6 +24,7 @@ class Organisasi extends Authenticatable
         'email_organisasi',
         'password_organisasi',
     ];
+    
 
     protected $hidden = [
         'password_organisasi',
