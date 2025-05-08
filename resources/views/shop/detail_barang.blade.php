@@ -1,7 +1,37 @@
-@extends('layouts.loading')
-@section('content')
-<div id="content" style="display: none;" class="min-h-screen">
-    <nav class="fixed top-0 left-0 w-full z-50">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReuseMart - Detail Barang</title>
+    <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link rel="stylesheet" href="{{asset('css/style.css')}}"> 
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .rating-stars {
+            display: inline-flex;
+            position: relative;
+            unicode-bidi: bidi-override;
+            color: #ddd;
+            font-size: 24px;
+        }
+        .rating-stars .filled {
+            color: #fbbf24;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 90%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="w-full">
         <div class="bg-blue-300 text-sm py-2 px-6 flex justify-around items-center">
             <!-- Ikon Sosial Media & Text -->
             <div class="flex items-center space-x-2">
@@ -80,92 +110,81 @@
         </div>
     </nav>
 
-    <div class="mt-24 px-4 pt-20">
-        <div class="bg-blue-600 rounded-lg p-4 w-full max-w-6xl mx-auto">
-            <!-- Wrapper Scroll untuk Mobile -->
-            <div class="overflow-x-auto md:overflow-hidden pl-4 pr-4">
-                <div class="flex md:grid md:grid-cols-5 gap-6 text-center">
-                    
-                    <!-- Kategori -->
-                    @foreach ($kategoris as $index => $kategori)
-                    <a href="{{ route('shop.category', $kategori->id_kategori) }}" class="cursor-pointer">
-                        <div class="flex flex-col items-center min-w-[25%] md:min-w-0 transition-all">
-                            <div class="w-16 h-16 bg-white rounded-md flex items-center justify-center">
-                                <img src="{{ $images[$index] ?? 'images/default.png' }}" alt="Icon {{ $index + 1 }}" class="w-12 h-12">
-                            </div>
-                            <p class="text-white mt-2 text-sm">{{ $kategori->nama_kategori }}</p>
+    <!-- Main Content -->
+    <main class="pb-12 px-4 max-w-6xl mx-auto">
+        <!-- Product Section -->
+        <div class="flex flex-col md:flex-row gap-8 pt-8">
+            <!-- Product Images -->
+            <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
+                <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
+                    <!-- Ganti dengan gambar dari database -->
+                    <img src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}" class="max-h-full max-w-full">
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="w-full md:w-1/2">
+                <!-- Nama Barang -->
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ $barang->nama_barang }}</h1>
+                
+                <!-- Rating -->
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center">
+                        <div class="rating-stars">
+                            <span>★★★★★</span>
+                            <!-- Hitung persentase rating -->
+                            <span class="filled" style="width: {{ ($barang->rating_barang / 5) * 100 }}%">★★★★★</span>
                         </div>
-                    </a>
-                    @endforeach
+                        <span class="ml-1 text-gray-700">{{ number_format($barang->rating_barang, 1) }}</span>
+                    </div>
+                    <span class="mx-2 text-gray-400">|</span>
+                    <span class="text-gray-600">{{ $barang->jumlah_penilaian }} Penilaian</span>
+                    <span class="mx-2 text-gray-400">|</span>
+                    <span class="text-gray-600">{{ $barang->jumlah_terjual }} Terjual</span>
+                </div>
+
+                <!-- Price -->
+                <div class="mb-6">
+                    <p class="text-3xl font-bold text-red-600">Rp{{ number_format($barang->harga_barang, 0, ',', '.') }}</p>
+                    @if($barang->harga_asli)
+                    <div class="flex items-center mt-1">
+                        <p class="text-lg text-gray-500 line-through mr-2">Rp{{ number_format($barang->harga_asli, 0, ',', '.') }}</p>
+                        @php
+                            $diskon = (($barang->harga_asli - $barang->harga_barang) / $barang->harga_asli) * 100;
+                        @endphp
+                        <span class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-sm font-medium">-{{ floor($diskon) }}%</span>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
+    <script>
+        document.getElementById("menu-toggle").addEventListener("click", function () {
+            document.getElementById("mobile-menu").classList.toggle("hidden");
+        });
 
-    <div class="my-10 px-4">
-        <div class="bg-gray-100 py-4 max-w-6xl mx-auto">
-            <div>
-                <div class="text-center text-blue-500 font-semibold text-lg">
-                    REKOMENDASI
-                </div>
-            <div class="mt-2 border-b-4 border-blue-500 w-full"></div>
-        </div>
-    </div>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("content").style.display = "block";
+        });
 
-    <div class="my-3 px-4">
-        <div class="py-2 max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            @foreach ($barang as $item)
-                <div class="group flex w-full max-w-[450px] flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md p-3 h-full">
-                    <!-- 1. Link pada Gambar Produk -->
-                    <a 
-                        class="relative flex h-36 overflow-hidden rounded-xl" 
-                        href="{{ route('shop.detail_barang', $item->id_barang) }}"  <!-- Tambahkan route di sini -->
-                    >
-                        <img 
-                            class="absolute top-0 right-0 h-full w-full object-cover" 
-                            src="{{ $item->foto_barang }}" 
-                            alt="{{ $item->nama_barang }}"
-                        >
-                    </a>
+        // Quantity controls
+        const minusBtn = document.querySelector('.fa-minus').parentElement;
+        const plusBtn = document.querySelector('.fa-plus').parentElement;
+        const quantityInput = document.querySelector('input[type="text"]');
 
-                    <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
-                        <!-- 2. Link pada Judul Produk -->
-                        <a href="{{ route('shop.detail_barang', $item->id_barang) }}">  <!-- Tambahkan route di sini -->
-                            <h5 class="text-base tracking-tight text-slate-900 hover:text-blue-600">
-                                {{ $item->nama_barang }}
-                            </h5>
-                        </a>
+        minusBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            if (value > 1) {
+                quantityInput.value = value - 1;
+            }
+        });
 
-                        <div class="mt-1 mb-2 flex items-center justify-between">
-                            <p>
-                                <span class="text-xl font-bold text-slate-900">
-                                    Rp {{ number_format($item->harga_barang, 0, ',', '.') }}
-                                </span>
-                            </p>
-                        </div>
-
-                        <!-- Tombol "Add to Cart" (opsional) -->
-                        <div class="mt-auto">
-                            <button class="w-full rounded-md bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-gray-700">
-                                Add to cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-    
-</div>
-<!-- Script Toggle Menu -->
-<script>
-    document.getElementById("menu-toggle").addEventListener("click", function () {
-        document.getElementById("mobile-menu").classList.toggle("hidden");
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById("content").style.display = "block";
-    });
-</script>
-@endsection
+        plusBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            quantityInput.value = value + 1;
+        });
+    </script>
+</body>
+</html>

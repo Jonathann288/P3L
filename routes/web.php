@@ -5,19 +5,23 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PembeliControllrs;
 use App\Http\Controllers\PenitipControllrs;
 use App\Http\Controllers\OrganisasiControllrs;
+use App\Http\Controllers\KategoriBarangControllers;
+use App\Http\Controllers\BarangControllers;
 
 
 Route::get('/', function () {
     return view('beranda');
 })->name('beranda');
+Route::get('/shop/barang/', function () {
+    return view('shop.detail_barang');
+})->name('shop.detail_barang');
 
-Route::get('/shop', function () {
-    return view('shop');
-})->name('shop');
-
-// Route::get('/user', function () {
-//     return view('user');
-// })->name('user');
+Route::get('/shop', [BarangControllers::class, 'showShop'])->name('shop');
+Route::get('/shop/category/{id}', [KategoriBarangControllers::class, 'filterByCategory'])->name('shop.category');
+Route::get('/shop/barang/{id_barang}', [BarangControllers::class, 'showDetail'])->name('shop.detail_barang');
+// Route::get('/shop/barang/{id}', function($id) {
+//     return view('shop.detail_barang', ['barang' => \App\Models\Barang::findOrFail($id)]);
+// });
 
 Route::get('/penitip', function () {
     return view('penitip');

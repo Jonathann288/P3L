@@ -3,24 +3,47 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\kategoribarang;
+use App\Models\KategoriBarang;
+use App\Models\Barang;
 
 class KategoriBarangControllers extends Controller
 {
+    public function filterByCategory($id)
+    {
+        $kategoris = KategoriBarang::all();
+        $images = [
+            asset('images/gadgets.png'),
+            asset('images/shopping.png'),
+            asset('images/electric-appliances.png'),
+            asset('images/stationery.png'),
+            asset('images/hobbies.png'),
+            asset('images/stroller.png'),
+            asset('images/gadgets.png'),
+            asset('images/sport-car.png'),
+            asset('images/workspace.png'),
+            asset('images/cosmetics.png'),
+        ];
+        $selectedKategori = KategoriBarang::findOrFail($id);
+        $barang = Barang::where('id_kategori', $id)->get();
+        $title = $selectedKategori->nama_kategori;
+
+        return view('shop.category', compact('kategoris', 'barang', 'images', 'title', 'selectedKategori'));
+    }
+
     public function index()
     {
-        $kategoribarang = kategoribarang::all();
-        return response()->json($kategoribarang);
+        $kategoribarang = KategoriBarang::all();
+        return view('shop', compact('kategoribarang'));
     }
 
     public function update(Request $request, $id)
     {
-        $kategoribarang = kategoribarang::find($id);
+        $kategoribarang = KategoriBarang::find($id);
         if (!$kategoribarang) {
             return response()->json(['message' => 'kategoribarang tidak ditemukan'], 404);
         }
 
-        $validateData = $request-> validate([
+        $validateData = $request->validate([
             'nama_sub_kategori' => 'required|string|max:255',
         ]);
 
@@ -34,7 +57,7 @@ class KategoriBarangControllers extends Controller
 
     public function destroy($id)
     {
-        $kategoribarang = kategoribarang::find($id);
+        $kategoribarang = KategoriBarang::find($id);
         if (!$kategoribarang) {
             return response()->json(['message' => 'kategoribarang tidak ditemukan'], 404);
         }
@@ -43,14 +66,11 @@ class KategoriBarangControllers extends Controller
         return response()->json(['message' => 'kategoribarang berhasil dihapus']);
     }
 
-    // Cari organisasi berdasarkan nama
     public function search(Request $request)
     {
         $keyword = $request->input('keyword');
-        $results = kategoribarang::where('nama_kategori', 'LIKE', '%' . $keyword . '%')->get();
+        $results = KategoriBarang::where('nama_kategori', 'LIKE', '%' . $keyword . '%')->get();
 
         return response()->json($results);
     }
-
-    
 }
