@@ -29,31 +29,31 @@
             <div class="w-full max-w-md">
                 <h2 class="text-xl font-bold mb-4 text-white">Sign Up Organisasi</h2>
 
-                <form method="POST" action="{{ route('registerOrganisasi.post') }}" class="space-y-3">
+                <form method="POST" action="{{ route('registerOrganisasi') }}" class="space-y-3">
                     @csrf
 
                     <div>
-                        <input type="text" name="nama_organisasi" id="nameOrganisasi" class="w-full p-2 rounded-lg"
+                        <input type="text" name="nama_organisasi"  class="w-full p-2 rounded-lg"
                             placeholder="Nama Organisasi" required autofocus>
                     </div>
 
                     <div>
-                        <input type="alamat" name="alamat_organisasi" id="alamatOrganisasi" class="w-full p-2 rounded-lg"
+                        <input type="alamat" name="alamat_organisasi" class="w-full p-2 rounded-lg"
                             placeholder="Alamat" required>
                     </div>
 
                     <div>
-                        <input type="tel" name="nomor_telepon" id="phoneOrganisasi" class="w-full p-2 rounded-lg"
+                        <input type="tel" name="nomor_telepon"  class="w-full p-2 rounded-lg"
                             placeholder="Nomor telepon" required>
                     </div>
 
                     <div>
-                        <input type="email" name="email_organisasi" id="emailOrganisasi" class="w-full p-2 rounded-lg" placeholder="Email"
+                        <input type="email" name="email_organisasi"  class="w-full p-2 rounded-lg" placeholder="Email"
                             required>
                     </div>
 
                     <div>
-                        <input type="password" name="password_organisasi" id="passwordOrganisasi" class="w-full p-2 rounded-lg"
+                        <input type="password" name="password_organisasi" class="w-full p-2 rounded-lg"
                             placeholder="Password" required>
                     </div>
 

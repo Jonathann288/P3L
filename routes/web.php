@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PembeliControllrs;
 use App\Http\Controllers\PenitipControllrs;
-use App\Http\Controllers\organisasiControllrs;
+use App\Http\Controllers\OrganisasiControllrs;
 
 
 Route::get('/', function () {
@@ -69,20 +69,17 @@ Route::middleware(['pembeli'])->group(function () {
     })->name('pembeli.Shop-Pembeli');
 });
 
-Route::get('/registerOrganisasi', [organisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
-// Route::post('/registerOrganisasi', [organisasiControllrs::class, 'registerOrganisasi'])->name('registerOrganisasi.post');
+Route::get('/registerOrganisasi', [OrganisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
+Route::post('/registerOrganisasi', [OrganisasiControllrs::class, 'registerOrganisasi'])->name('registerOrganisasi');
 Route::get('/loginOrganisasi', [AuthController::class, 'showLoginOrganisasi'])->name('loginOrganisasi');
 Route::post('/loginOrganisasi', [AuthController::class, 'loginOrganisasi'])->name('loginOrganisasi.post');
 
 Route::post('/logout-organisasi', [AuthController::class, 'logoutOrganisasi'])->name('logoutOrganisasi');
 
-// Proses form register
-Route::post('/registerOrganisasi', [organisasiControllrs::class, 'registerOrganisasi'])->name('registerOrganisasi.post');
-
 Route::middleware(['organisasi'])->group(function () {
     Route::get('/donasi-organisasi', function () {
         return view('organisasi.donasi-organisasi');
-    })->name('organisasi.DonasiOrganisasi');
+    })->name('organisasi.donasi-organisasi');
 });
 
 Route::get('/loginDashboard', [AuthController::class, 'showLoginFormPegawai'])->name('loginDashboard');

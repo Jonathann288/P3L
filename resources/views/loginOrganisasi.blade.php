@@ -33,12 +33,12 @@
                     @csrf
 
                     <div>
-                        <input type="email" name="emailOrganisasi" id="emailOrganisasi" class="w-full p-2 rounded-lg" placeholder="Email"
+                        <input type="email" name="email_organisasi" class="w-full p-2 rounded-lg" placeholder="Email"
                             required>
                     </div>
 
                     <div>
-                        <input type="password" name="passwordOrganisasi" id="passwordOrganisasi" class="w-full p-2 rounded-lg"
+                        <input type="password" name="password_organisasi" class="w-full p-2 rounded-lg"
                             placeholder="Password" required>
                     </div>
 

@@ -67,7 +67,7 @@ class AuthController extends Controller
         ]);
     
         // Mencari organisasi berdasarkan email
-        $organisasi = \App\Models\Organisasi::where('email_organisasi', $request->email_organisasi)->first();
+        $organisasi = Organisasi::where('email_organisasi', $request->email_organisasi)->first();
     
         if (!$organisasi || !\Hash::check($request->password_organisasi, $organisasi->password_organisasi)) {
             return back()->withErrors(['email_organisasi' => 'Email atau password salah'])->withInput();
@@ -77,7 +77,7 @@ class AuthController extends Controller
         Auth::guard('organisasi')->login($organisasi);
     
         // Redirect ke halaman setelah login berhasil
-        return redirect()->intended(route('organisasi.DonasiOrganisasi'));
+        return redirect()->intended(route('organisasi.donasi-organisasi'));
     }
 
     public function logoutOrganisasi()
