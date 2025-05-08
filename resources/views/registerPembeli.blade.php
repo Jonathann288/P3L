@@ -1,4 +1,3 @@
-<!-- resources/views/registerPembeli.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 

@@ -64,10 +64,6 @@
                     </div>
                 </form>
 
-                <div class="mt-3 text-center">
-                    <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
-                </div>
-
                 <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
                     <p class="text-white font-bold">Akun kamu udah ada?</p>
                     <a href='{{ route('loginOrganisasi') }}'

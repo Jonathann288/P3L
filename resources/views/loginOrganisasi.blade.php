@@ -29,6 +29,28 @@
             <div class="w-full max-w-md">
                 <h2 class="text-xl font-bold mb-4 text-white">Login Organisasi</h2>
 
+                @if (session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    {{ session('success') }}
+                </div>
+                @endif
+
+                @if (session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {{ session('error') }}
+                </div>
+                @endif
+
+                @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
                 <!-- Toast for error message -->
                 <div id="toast" class="fixed top-5 right-5 bg-red-500 text-white px-4 py-2 rounded shadow-lg opacity-0 transition-opacity duration-500 z-50">
                     <span id="toast-message"></span>
@@ -38,13 +60,16 @@
                     @csrf
 
                     <div>
-                        <input type="email" name="emailOrganisasi" id="emailOrganisasi" class="w-full p-2 rounded-lg"
-                            placeholder="Email" required>
+                        <input type="email" name="emailOrganisasi" id="emailOrganisasi" class="w-full p-2 rounded-lg @error('emailOrganisasi') border-red-500 @enderror"
+                            placeholder="Email" value="{{ old('emailOrganisasi') }}" required>
                     </div>
 
                     <div>
                         <input type="password" name="passwordOrganisasi" id="passwordOrganisasi"
-                            class="w-full p-2 rounded-lg" placeholder="Password" required>
+                            class="w-full p-2 rounded-lg @error('passwordOrganisasi') border-red-500 @enderror" placeholder="Password" required>
+                        @error('passwordOrganisasi')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
@@ -55,7 +80,7 @@
                 </form>
 
                 <div class="mt-3 text-center">
-                    <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
+                    <a href='{{ route('LupaPasswordOrg.lupaPasswordOrganisasi') }}' class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
                 </div>
 
                 <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
@@ -96,8 +121,8 @@
         }
 
         window.onload = () => {
-            @if (session('error'))
-                showToast(@json(session('error')));
+            @if (session('toast_error'))
+                showToast(@json(session('toast_error')));
             @endif
         };
     </script>

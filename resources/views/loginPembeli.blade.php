@@ -29,17 +29,27 @@
             <div class="w-full max-w-md">
                 <h2 class="text-xl font-bold mb-4 text-white">Login Pembeli</h2>
 
+                @if (session('loginError'))
+                    <div class="bg-red-100 text-red-700 px-4 py-2 rounded mb-3">
+                        {{ session('loginError') }}
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('loginPembeli.post') }}" class="space-y-3">
                     @csrf
                     <div>
-                        <input type="email" name="email_pembeli" id="email" class="w-full p-2 rounded-lg" placeholder="Email"
-                            required>
+                        <input type="email" name="email_pembeli" id="email" class="w-full p-2 rounded-lg"
+                            placeholder="Email" required>
                     </div>
 
                     <div>
                         <input type="password" name="password_pembeli" id="password" class="w-full p-2 rounded-lg"
                             placeholder="Password" required>
                     </div>
+
+                    @error('passwordOrganisasi')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
 
                     <div>
                         <button type="submit"
@@ -48,8 +58,9 @@
                     </div>
                 </form>
 
+
                 <div class="mt-3 text-center">
-                    <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
+                    <a href="{{ route('LupaPasswordPembeli.lupaPasswordPembeli') }}" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
                 </div>
 
                 <div class="mt-4 flex items-center justify-center space-x-2 text-sm">

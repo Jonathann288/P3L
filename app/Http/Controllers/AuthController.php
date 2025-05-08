@@ -84,21 +84,22 @@ class AuthController extends Controller
             'email_pembeli' => 'required|email',
             'password_pembeli' => 'required'
         ]);
-
+    
         // Mencari pembeli berdasarkan email
         $pembeli = Pembeli::where('email_pembeli', $request->email_pembeli)->first();
-
+    
         // Jika pembeli tidak ditemukan atau password salah
         if (!$pembeli || !Hash::check($request->password_pembeli, $pembeli->password_pembeli)) {
-            return back()->withErrors(['email_pembeli' => 'Email atau password salah.']);
+            return back()->with('loginError', 'Email atau password salah.');
         }
-
-        // Login pembeli menggunakan Auth
-        Auth::login($pembeli);
-
-        // Redirect ke halaman setelah login berhasil
-        return redirect()->intended('/shop');  // Ganti dengan URL tujuan setelah login berhasil
+    
+        // Simpan data ke session (manual login)
+        session(['pembeli' => $pembeli]);
+    
+        // Redirect ke halaman shop
+        return redirect()->route('shop');
     }
+    
 
     public function loginPenitip(Request $request)
     {
