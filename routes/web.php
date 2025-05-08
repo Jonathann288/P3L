@@ -120,3 +120,22 @@ Route::middleware(['checkjabatan:Hunter'])->group(function () {
         return view('hunter.DashboardHunter');
     })->name('hunter.DashboardHunter');
 });
+
+
+Route::get('/resetPasswordOrganisasi', function () {
+    return view('LupaPasswordOrg.resetPasswordOrganisasi');
+})->name('LupaPasswordOrg.resetPasswordOrganisasi');
+
+Route::get('/resetPasswordPembeli', function () {
+    return view('LupaPasswordPembeli.resetPasswordPembeli');
+})->name('LupaPasswordPembeli.resetPasswordPembeli');
+
+
+
+Route::get('/lupaPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'showLinkForm'])->name('LupaPasswordOrg.lupaPasswordOrganisasi');
+Route::post('/lupaPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'lupaPasswordOrganisasiPost'])->name('LupaPasswordOrg.lupaPasswordOrganisasi.post');
+Route::get('/pesanLupaPasswordOrganisasi/{token}', [lupaPasswordOrganisasiControllers::class, 'showLinkForm'])->name('password.forgot.link');
+
+Route::get('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('LupaPasswordPembeli.lupaPasswordPembeli');
+Route::post('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'lupaPasswordPembeliPost'])->name('LupaPasswordPembeli.lupaPasswordPembeli.post');
+Route::get('/pesanLupaPasswordPembeli/{token}', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('password.forgot.link');
