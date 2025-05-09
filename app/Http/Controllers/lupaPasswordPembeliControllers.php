@@ -21,9 +21,9 @@ class lupaPasswordPembeliControllers extends Controller
         $request->validate([
             'email_pembeli' => 'required|email|exists:pembeli,email_pembeli'
         ]);
-    
+
         $token = Str::random(65);
-    
+
         DB::table("password_forgot_pembeli_tabel")->insert([
             "email_pembeli" => $request->email_pembeli,
             "token" => $token,
@@ -31,11 +31,12 @@ class lupaPasswordPembeliControllers extends Controller
             "updated_at" => now(),
         ]);
 
-        Mail::send("LupaPasswordPembeli.PesanLupaPasswordPembeli", ["token" => $token], function($message) use ($request){
+        // Kirim email dengan token
+        Mail::send("LupaPasswordPembeli.PesanLupaPasswordPembeli", ["token" => $token], function ($message) use ($request) {
             $message->to($request->email_pembeli);
             $message->subject("Reset Password Pembeli");
         });
 
-        return redirect()->route('loginPembeli')->with('success', 'Berhasil mengirimkan link ke email anda.');
+        return redirect()->route('loginPembeli')->with('status', 'Berhasil mengirimkan link ke email anda.');
     }
 }

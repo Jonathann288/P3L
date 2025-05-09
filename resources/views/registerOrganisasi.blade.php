@@ -6,9 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReUseMart - Sign Up</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Efek blur untuk background */
+        .background-blur {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3); /* Layer semi-transparan */
+            backdrop-filter: blur(10px); /* Efek blur */
+            z-index: -1; /* Menempatkan di belakang konten */
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <!-- Tambahkan elemen untuk efek blur -->
+    <div class="background-blur"></div>
+
     <div class="flex flex-col md:flex-row rounded-3xl shadow-xl overflow-hidden max-w-4xl w-full">
         <a href="{{ route('donasi') }}"
             class="absolute top-4 left-4 bg-white text-blue-600 p-2 rounded-full shadow-md hover:bg-gray-200 flex items-center justify-center">
@@ -59,14 +75,10 @@
 
                     <div>
                         <button type="submit"
-                            class="w-full bg-blue-500 text-white p-2 rounded-md font-medium hover:bg-blue-600">Log
-                            In</button>
+                            class="w-full bg-blue-500 text-white p-2 rounded-md font-medium hover:bg-blue-600">Sign
+                            Up</button>
                     </div>
                 </form>
-
-                <div class="mt-3 text-center">
-                    <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
-                </div>
 
                 <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
                     <p class="text-white font-bold">Akun kamu udah ada?</p>

@@ -7,6 +7,8 @@ use App\Http\Controllers\PenitipControllrs;
 use App\Http\Controllers\OrganisasiControllrs;
 use App\Http\Controllers\KategoriBarangControllers;
 use App\Http\Controllers\BarangControllers;
+use App\Http\Controllers\lupaPasswordOrganisasiControllers;
+use App\Http\Controllers\lupaPasswordPembeliControllers;
 
 
 Route::get('/', function () {
@@ -121,6 +123,10 @@ Route::middleware(['checkjabatan:Hunter'])->group(function () {
     })->name('hunter.DashboardHunter');
 });
 
+Route::get('/profilPembeli', function () {
+    return view('pembeli.profilPembeli');
+})->name('pembeli.profilPembeli');
+
 
 Route::get('/resetPasswordOrganisasi', function () {
     return view('LupaPasswordOrg.resetPasswordOrganisasi');
@@ -139,3 +145,15 @@ Route::get('/pesanLupaPasswordOrganisasi/{token}', [lupaPasswordOrganisasiContro
 Route::get('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('LupaPasswordPembeli.lupaPasswordPembeli');
 Route::post('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'lupaPasswordPembeliPost'])->name('LupaPasswordPembeli.lupaPasswordPembeli.post');
 Route::get('/pesanLupaPasswordPembeli/{token}', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('password.forgot.link');
+
+
+
+
+
+
+// Menampilkan form reset password
+Route::get('/resetPasswordOrganisasi/{token}', [lupaPasswordOrganisasiControllers::class, 'showResetPasswordForm'])->name('resetPasswordOrganisasi');
+
+
+// Menangani form reset password
+Route::post('/resetPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'resetPasswordOrganisasi'])->name('resetPasswordOrganisasi.post');
