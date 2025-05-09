@@ -27,12 +27,30 @@
             display: none;
             margin-top: 10px;
         }
+
+        .tambah-pegawai-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .tambah-pegawai-btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <h1>Dashboard Admin</h1>
 
     <h2>Daftar Pegawai</h2>
+
+    <!-- Tombol Tambah Pegawai -->
+    <a href="{{ url('/registerPegawai') }}">
+        <button class="tambah-pegawai-btn">Tambah Pegawai</button>
+    </a>
 
     <table id="pegawaiTable">
         <thead>
@@ -73,9 +91,7 @@
                                 <input type="text" name="nomor_telepon_pegawai" value="{{ $pegawai->nomor_telepon_pegawai }}" required>
                                 <select name="id_jabatan" required>
                                     @foreach ($jabatans as $jabatan)
-                                        <option value="{{ $jabatan->id_jabatan }}" {{ $pegawai->id_jabatan == $jabatan->id_jabatan ? 'selected' : '' }}>
-                                            {{ $jabatan->nama_jabatan }}
-                                        </option>
+                                        <option value="{{ $jabatan->id_jabatan }}" {{ $pegawai->id_jabatan == $jabatan->id_jabatan ? 'selected' : '' }}>{{ $jabatan->nama_jabatan }}</option>
                                     @endforeach
                                 </select>
                                 <button type="submit">Simpan</button>
