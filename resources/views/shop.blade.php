@@ -120,8 +120,8 @@
                     <!-- 1. Link pada Gambar Produk -->
                     <a 
                         class="relative flex h-36 overflow-hidden rounded-xl" 
-                        href="{{ route('shop.detail_barang', $item->id_barang) }}"  <!-- Tambahkan route di sini -->
-                    >
+                        href="{{ route('shop.detail_barang', $item->id_barang) }}"  >
+
                         <img 
                             class="absolute top-0 right-0 h-full w-full object-cover" 
                             src="{{ $item->foto_barang }}" 

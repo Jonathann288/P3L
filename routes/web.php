@@ -9,6 +9,7 @@ use App\Http\Controllers\KategoriBarangControllers;
 use App\Http\Controllers\BarangControllers;
 use App\Http\Controllers\lupaPasswordOrganisasiControllers;
 use App\Http\Controllers\lupaPasswordPembeliControllers;
+use App\Http\Controllers\PegawaiControllers;
 
 
 Route::get('/', function () {
@@ -61,6 +62,34 @@ Route::post('/registerPembeli', [PembeliControllrs::class, 'registerPembeli'])->
 
 Route::get('/registerPenitip', [PenitipControllrs::class, 'showRegisterFormPenitip'])->name('registerPenitipForm');
 Route::post('/registerPenitip', [PenitipControllrs::class, 'registerPenitip'])->name('registerPenitip.post');
+
+//pegawai
+Route::get('/admin/dashboard', [PegawaiControllers::class, 'adminDashboard'])->name('admin.dashboard');
+
+
+// Daftar pegawai (register)
+Route::post('/registerPegawai', [PegawaiControllers::class, 'registerPegawai'])->name('registerPegawai.post');
+
+// Tampilkan semua pegawai
+Route::get('/registerPegawai', [PegawaiControllers::class, 'showRegisterForm'])->name('registerPegawaiForm');
+
+// Tampilkan detail pegawai berdasarkan ID
+Route::get('/pegawai/{id}', [PegawaiControllers::class, 'show']);
+
+// Login (tampilkan data pegawai yang login)
+Route::get('/pegawai-login', [PegawaiControllers::class, 'showLogin'])->middleware('auth');
+
+// Cari pegawai berdasarkan nama
+Route::get('/pegawai-search', [PegawaiControllers::class, 'searchByNama']);
+
+// Route ke dashboard admin
+Route::get('/admin/dashboard', [PegawaiControllers::class, 'adminDashboard'])->name('admin.dashboard');
+
+// Route update pegawai
+Route::put('/pegawai/{id}', [PegawaiControllers::class, 'update'])->name('pegawai.update');
+
+// Route delete pegawai
+Route::delete('/pegawai/{id}', [PegawaiControllers::class, 'destroy'])->name('pegawai.destroy');
 
 
 

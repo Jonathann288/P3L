@@ -33,13 +33,13 @@
                 <form action="{{ route('loginPegawai.post') }}" method="POST" class="space-y-3">
                     @csrf
                     <div>
-                        <input type="email" name="email_pegawai" id="email_pegawai" class="w-full p-2 rounded-lg" placeholder="Email"
-                            required>
+                        <input type="email" name="email_pegawai" id="email_pegawai" class="w-full p-2 rounded-lg"
+                            placeholder="Email" required>
                     </div>
 
                     <div>
-                        <input type="password" name="password_pegawai" id="password_pegawai" class="w-full p-2 rounded-lg"
-                            placeholder="Password" required>
+                        <input type="password" name="password_pegawai" id="password_pegawai"
+                            class="w-full p-2 rounded-lg" placeholder="Password" required>
                     </div>
 
                     <div>
@@ -50,8 +50,10 @@
                 </form>
 
                 <div class="mt-3 text-center">
-                    <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
+                    <a href="{{ route('LupaPasswordPembeli.lupaPasswordPembeli') }}"
+                        class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
                 </div>
+
             </div>
         </div>
 
@@ -69,4 +71,5 @@
         </div>
     </div>
 </body>
+
 </html>

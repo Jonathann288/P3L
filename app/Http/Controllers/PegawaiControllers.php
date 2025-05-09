@@ -10,50 +10,65 @@ use Illuminate\Support\Facades\Auth;
 
 class PegawaiControllers extends Controller
 {
-    public function registerPegawai(Request $request)
+
+    public function showRegisterForm()
     {
-        // Validasi input
-        $request->validate([
-            'id_jabatan' => 'required|exists:jabatan,id_jabatan',
-            'nama_pegawai' => 'required|string|max:255',
-            'tanggal_lahir_pegawai' => 'required|date',
-            'nomor_telepon_pegawai' => 'required|string|max:20',
-            'email_pegawai' => 'required|string|email|max:255|unique:pegawai,email_pegawai',
-            'password_pegawai' => 'required|string|min:8',
-        ]);
-
-         // Generate ID baru
-         $lastPegawai = DB::table('pegawai')
-         ->select('id')
-         ->where('id', 'like', 'PG%')
-         ->orderByDesc('id')
-         ->first();
- 
-        if ($lastPegawai) {
-            $lastNumber = (int) substr($lastPegawai->id, 2); // Ambil angka setelah "pb"
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-    
-        $newId = 'PG' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
-
-        // Simpan ke database
-        $pegawai = Pegawai::create([
-            'id' => $newId,
-            'id_jabatan' => $request->id_jabatan, // isi foreign key
-            'nama_pegawai' => $request->nama_pegawai,
-            'tanggal_lahir_pegawai' => $request->tanggal_lahir_pegawai,
-            'nomor_telepon_pegawai' => $request->nomor_telepon_pegawai,
-            'email_pegawai' => $request->email_pegawai,
-            'password_pegawai' => Hash::make($request->password_pegawai),
-        ]);
-    
-        return response()->json([
-            'pegawai' => $pegawai,
-            'message' => 'Pegawai registered successfully'
-        ], 201);
+        $jabatans = \App\Models\Jabatan::all();
+        return view('registerPegawai', compact('jabatans'));
     }
+public function adminDashboard()
+{
+    $pegawais = \App\Models\Pegawai::all(); // Ambil semua data pegawai
+    $jabatans = \App\Models\Jabatan::all(); // Ambil semua data jabatan
+    return view('admin.Dashboard', compact('pegawais', 'jabatans')); // Kirimkan pegawais dan jabatans ke view
+}
+
+
+
+
+    public function registerPegawai(Request $request)
+{
+    // Validasi input
+    $request->validate([
+        'id_jabatan' => 'required|exists:jabatan,id_jabatan',
+        'nama_pegawai' => 'required|string|max:255',
+        'tanggal_lahir_pegawai' => 'required|date',
+        'nomor_telepon_pegawai' => 'required|string|max:20',
+        'email_pegawai' => 'required|string|email|max:255|unique:pegawai,email_pegawai',
+        'password_pegawai' => 'required|string|min:8',
+    ]);
+
+    // Generate ID baru
+    $lastPegawai = DB::table('pegawai')
+        ->select('id')
+        ->where('id', 'like', 'PG%')
+        ->orderByDesc('id')
+        ->first();
+
+    if ($lastPegawai) {
+        $lastNumber = (int) substr($lastPegawai->id, 2);
+        $newNumber = $lastNumber + 1;
+    } else {
+        $newNumber = 1;
+    }
+
+    $newId = 'PG' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+
+    // Simpan ke database
+    Pegawai::create([
+        'id' => $newId,
+        'id_jabatan' => $request->id_jabatan,
+        'nama_pegawai' => $request->nama_pegawai,
+        'tanggal_lahir_pegawai' => $request->tanggal_lahir_pegawai,
+        'nomor_telepon_pegawai' => $request->nomor_telepon_pegawai,
+        'email_pegawai' => $request->email_pegawai,
+        'password_pegawai' => Hash::make($request->password_pegawai),
+    ]);
+
+    // Redirect ke dashboard admin
+    return redirect()->route('admin.dashboard')->with('success', 'Pegawai berhasil ditambahkan!');
+}
+
 
     public function update(Request $request, $id)
     {
@@ -62,7 +77,7 @@ class PegawaiControllers extends Controller
             return response()->json(['message' => 'Pegawai tidak ditemukan'], 404);
         }
 
-        $validateData = $request-> validate([
+        $validateData = $request->validate([
             'id_jabatan' => 'required|exists:jabatan,id_jabatan',
             'nama_pegawai' => 'required|string|max:255',
             'tanggal_lahir_pegawai' => 'required|date',
@@ -82,7 +97,7 @@ class PegawaiControllers extends Controller
         $pegawai = Pegawai::all();
         return response()->json($pegawai);
     }
-    
+
     public function showLogin()
     {
         $pegawai = Auth::user(); // atau request()->user()
