@@ -5,21 +5,7 @@
         <div class="bg-blue-300 text-sm py-2 px-6 flex justify-around items-center">
             <div class="flex items-center space-x-2">
                 <span class="font-semibold">Ikuti kami di</span>
-                <a href="#" class="text-gray-700 hover:text-gray-900">
-                    <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M21.7 8.037a4.26 4.26 0 0 0-.789-1.964 2.84 2.84 0 0 0-1.984-.839c-2.767-.2-6.926-.2-6.926-.2s-4.157 0-6.928.2a2.836 2.836 0 0 0-1.983.839 4.225 4.225 0 0 0-.79 1.965 30.146 30.146 0 0 0-.2 3.206v1.5a30.12 30.12 0 0 0 .2 3.206c.094.712.364 1.39.784 1.972.604.536 1.38.837 2.187.848 1.583.151 6.731.2 6.731.2s4.161 0 6.928-.2a2.844 2.844 0 0 0 1.985-.84 4.27 4.27 0 0 0 .787-1.965 30.12 30.12 0 0 0 .2-3.206v-1.516a30.672 30.672 0 0 0-.202-3.206Zm-11.692 6.554v-5.62l5.4 2.819-5.4 2.801Z" clip-rule="evenodd"/>
-                    </svg>
-                </a>
-                <a href="#" class="text-gray-700 hover:text-gray-900">
-                    <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path fill="currentColor" fill-rule="evenodd" d="M3 8a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Zm5-3a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H8Zm7.597 2.214a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2h-.01a1 1 0 0 1-1-1ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm-5 3a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z" clip-rule="evenodd"/>
-                    </svg>
-                </a>
-                <a href="#" class="text-gray-700 hover:text-gray-900">
-                    <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M13.135 6H15V3h-1.865a4.147 4.147 0 0 0-4.142 4.142V9H7v3h2v9.938h3V12h2.021l.592-3H12V6.591A.6.6 0 0 1 12.592 6h.543Z" clip-rule="evenodd"/>
-                    </svg>
-                </a>
+                <!-- Social Media Icons -->
             </div>
 
             <div class="hidden md:flex space-x-6 text-gray-700">
@@ -46,11 +32,11 @@
                         </button>
                         <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
                             <a href="{{ route('penitip.profilPenitip') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
-                                <form action="{{ route('logout.penitip') }}" method="POST">
-                                    @csrf
-                                    <button type="submit"
-                                        class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
-                                </form>
+                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Transaksi</a>
+                            <form action="#" method="POST">
+                                @csrf
+                                <button type="submit" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
+                            </form>
                         </div>
                     </div>
                 @else
@@ -102,7 +88,7 @@
         <div class="bg-gray-100 py-4 max-w-6xl mx-auto">
             <div>
                 <div class="text-center text-blue-500 font-semibold text-lg">
-                    REKOMENDASI
+                    {{ $title ?? 'REKOMENDASI' }}
                 </div>
             <div class="mt-2 border-b-4 border-blue-500 w-full"></div>
         </div>
@@ -112,43 +98,27 @@
         <div class="py-2 max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             @foreach ($barang as $item)
                 <div class="group flex w-full max-w-[450px] flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md p-3 h-full">
-                    <!-- 1. Link pada Gambar Produk -->
-                    <a 
-                        class="relative flex h-36 overflow-hidden rounded-xl" 
-                        href="{{ route('penitip.detail_barangPenitip', $item->id_barang) }}"  <!-- Tambahkan route di sini -->
-                    >
-                        <img 
-                            class="absolute top-0 right-0 h-full w-full object-cover" 
-                            src="{{ $item->foto_barang }}" 
-                            alt="{{ $item->nama_barang }}"
-                        >
+                    <a class="relative flex h-36 overflow-hidden rounded-xl" href="{{ route('penitip.detail_barangPenitip', $item->id_barang) }}">
+                        <img class="absolute top-0 right-0 h-full w-full object-cover" src="{{ asset($item->foto_barang) }}" alt="product image" />
                     </a>
-
                     <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
-                        <!-- 2. Link pada Judul Produk -->
-                        <a href="{{ route('penitip.detail_barangPenitip', $item->id_barang) }}">  <!-- Tambahkan route di sini -->
-                            <h5 class="text-base tracking-tight text-slate-900 hover:text-blue-600">
-                                {{ $item->nama_barang }}
-                            </h5>
+                        <a href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}">
+                            <h5 class="text-base tracking-tight text-slate-900">{{ $item->nama_barang }}</h5>
                         </a>
-
                         <div class="mt-1 mb-2 flex items-center justify-between">
                             <p>
-                                <span class="text-xl font-bold text-slate-900">
-                                    Rp {{ number_format($item->harga_barang, 0, ',', '.') }}
-                                </span>
+                                <span class="text-xl font-bold text-slate-900">Rp {{ number_format($item->harga_barang, 0, ',', '.') }}</span>
                             </p>
                         </div>
-
-                        <!-- Tombol "Add to Cart" (opsional) -->
                         <div class="mt-auto">
-                            <button class="w-full rounded-md bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-gray-700">
+                            <a href="#" class="flex items-center justify-center rounded-md bg-slate-900 px-3 py-1 text-center text-xs font-medium text-white hover:bg-gray-700">
                                 Add to cart
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
             @endforeach
+            
         </div>
     </div>
     
@@ -163,7 +133,7 @@
         document.getElementById("content").style.display = "block";
     });
 
-    const toggle = document.getElementById('dropdownToggle');
+        const toggle = document.getElementById('dropdownToggle');
         const menu = document.getElementById('dropdownMenu');
         
         toggle.addEventListener('click', () => {

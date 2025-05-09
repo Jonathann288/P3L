@@ -84,13 +84,17 @@ class PenitipControllrs extends Controller
         }
     }
 
-    public function show($id)
+    public function show()
     {
-        $penitip = Penitip::find($id);
-        if (!$penitip) {
-            return response()->json(['message' => 'Organisasi tidak ditemukan'], 404);
+        try {
+            // Ambil data pembeli yang sedang login
+            $penitip = Auth::guard('penitip')->user();
+
+            // Return view dengan data pembeli
+            return view('penitip.profilPenitip', compact('penitip'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-        return response()->json($penitip);
     }
 
     public function update(Request $request, $id)

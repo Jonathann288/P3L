@@ -115,6 +115,18 @@ class AuthController extends Controller
         return redirect()->intended(route('pembeli.Shop-Pembeli'));  // Ganti dengan route tujuan setelah login
     }
 
+    public function logoutPembeli()
+    {
+        // Menggunakan guard pembeli untuk logout
+        Auth::guard('pembeli')->logout();
+        
+        // Hapus sesi pembeli jika diperlukan
+        session()->forget('pembeli');
+
+        // Redirect ke halaman login pembeli
+        return redirect()->route('loginPembeli');
+    }
+
 
     public function showLoginFormPenitip()
     {
@@ -139,6 +151,18 @@ class AuthController extends Controller
 
         // Redirect ke halaman setelah login berhasil
         return redirect()->intended(route('penitip.Shop-Penitip'));
+    }
+
+        public function logoutPenitip()
+    {
+        // Menggunakan guard pembeli untuk logout
+        Auth::guard('penitip')->logout();
+        
+        // Hapus sesi pembeli jika diperlukan
+        session()->forget('penitip');
+
+        // Redirect ke halaman login pembeli
+        return redirect()->route('loginPenitip');
     }
 
 }
