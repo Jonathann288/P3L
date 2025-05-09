@@ -16,31 +16,34 @@
             <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
             <nav>
                 <div class="space-y-4">
-                    <div class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                    <a href="/profil" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <img src="images/fotoprofil.jpg" alt="profile" class="w-8 h-8 rounded-full object-cover">
                         <span>Profil Saya</span>
-                    </div>
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    </a>
+                    <a href="{{ route('pembeli.history') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>History</span>
-                    </div>
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    </a>
+                    <a href="/pengaturan" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Pengaturan</span>
-                    </div>
+                    </a>
                 </div>
             </nav>
         </div>
+
         <!-- Bottom buttons -->
         <div class="space-y-4 mt-auto">
-            <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
-                <a href="http://127.0.0.1:8000/Shop-Pembeli">Kembali</a>
-            </button>
-            <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
+            <a href="http://127.0.0.1:8000/Shop-Pembeli"
+                class="block w-full py-2 text-center bg-blue-600 text-white rounded-lg hover:bg-blue-500">
+                Kembali
+            </a>
+            <a href="/logout" class="block w-full py-2 text-center bg-red-600 text-white rounded-lg hover:bg-red-500">
                 Keluar
-            </button>
+            </a>
         </div>
     </div>
+
 
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
@@ -52,7 +55,7 @@
             <!-- Profile Card -->
             <div class="bg-white p-6 rounded-lg shadow-md text-center">
                 <div class="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-6">
-                    <img src="images/fotoprofil.jpg" alt="Foto Profil"class="w-full h-full object-cover rounded-full">
+                    <img src="images/fotoprofil.jpg" alt="Foto Profil" class="w-full h-full object-cover rounded-full">
                 </div>
                 <div class="font-semibold text-xl mb-2">John Doe</div>
                 <button class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-500 w-full mt-4">

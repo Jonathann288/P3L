@@ -113,6 +113,4 @@ class PembeliControllrs extends Controller
             ], 400);
         }
     }
-
-
 }

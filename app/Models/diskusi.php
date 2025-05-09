@@ -13,6 +13,7 @@ class diskusi extends Model
     protected $fillable = [
         'id_pegawai',
         'id_pembeli',
+        'id_barang',
         'pesan',
         'tanggal_diskusi',
     ];

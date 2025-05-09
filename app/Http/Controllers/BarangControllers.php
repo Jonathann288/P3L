@@ -35,10 +35,72 @@ class BarangControllers extends Controller
         return view('shop', compact('kategoris', 'barang', 'images'));
     }
 
+    public function showShopPembeli()
+    {
+        // Ambil semua kategori
+        $kategoris = KategoriBarang::all();
+
+        // Ambil semua barang
+        $barang = Barang::all();
+
+        // List gambar kategori (pastikan urutannya benar)
+        $images = [
+            asset('images/gadgets.png'),
+            asset('images/shopping.png'),
+            asset('images/electric-appliances.png'),
+            asset('images/stationery.png'),
+            asset('images/hobbies.png'),
+            asset('images/stroller.png'),
+            asset('images/sport-car.png'),
+            asset('images/agriculture.png'),
+            asset('images/workspace.png'),
+            asset('images/cosmetics.png'),
+        ];
+
+        // Kirim data ke view
+        return view('pembeli.Shop-Pembeli', compact('kategoris', 'barang', 'images'));
+    }
+
+    public function showShopPenitip()
+    {
+        // Ambil semua kategori
+        $kategoris = KategoriBarang::all();
+
+        // Ambil semua barang
+        $barang = Barang::all();
+
+        // List gambar kategori (pastikan urutannya benar)
+        $images = [
+            asset('images/gadgets.png'),
+            asset('images/shopping.png'),
+            asset('images/electric-appliances.png'),
+            asset('images/stationery.png'),
+            asset('images/hobbies.png'),
+            asset('images/stroller.png'),
+            asset('images/sport-car.png'),
+            asset('images/agriculture.png'),
+            asset('images/workspace.png'),
+            asset('images/cosmetics.png'),
+        ];
+
+        // Kirim data ke view
+        return view('penitip.Shop-Penitip', compact('kategoris', 'barang', 'images'));
+    }
+
     public function showDetail($id_barang)
     {
         $barang = Barang::findOrFail($id_barang);
         return view('shop.detail_barang', compact('barang'));
+    }
+    public function showDetailPembeli($id_barang)
+    {
+        $barang = Barang::findOrFail($id_barang);
+        return view('pembeli.detail_barangPembeli', compact('barang'));
+    }
+    public function showDetailPenitip($id_barang)
+    {
+        $barang = Barang::findOrFail($id_barang);
+        return view('penitip.detail_barangPenitip', compact('barang'));
     }
     
     // Simpan barang baru

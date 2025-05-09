@@ -12,6 +12,7 @@ class Barang extends Model
 
     protected $fillable = [
         'id',
+        'id_barang',
         'id_kategori',
         'nama_barang',
         'foto_barang',
@@ -39,5 +40,10 @@ class Barang extends Model
     public function penitip()
     {
         return $this->belongsTo(penitip::class, 'id'); // Asumsi relasi ke tabel penitip
+    }
+
+    public function diskusi()
+    {
+        return $this->hasMany(Diskusi::class, 'id_barang');
     }
 }

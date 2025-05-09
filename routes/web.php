@@ -9,6 +9,9 @@ use App\Http\Controllers\KategoriBarangControllers;
 use App\Http\Controllers\BarangControllers;
 use App\Http\Controllers\lupaPasswordOrganisasiControllers;
 use App\Http\Controllers\lupaPasswordPembeliControllers;
+use App\Http\Controllers\DiskusiControllers;
+use App\Http\Controllers\RequestDonasiControllers;
+
 
 
 Route::get('/', function () {
@@ -49,10 +52,12 @@ Route::post('login-penitip', [AuthController::class, 'loginPenitip'])->name('log
 
 // Proteksi route dengan middleware 'penitip'
 Route::middleware(['penitip'])->group(function () {
-    // Halaman shop untuk Penitip
-    Route::get('/Shop-Penitip', function () {
-        return view('penitip.Shop-Penitip');
-    })->name('penitip.Shop-Penitip');
+    Route::get('/Shop-Penitip', [BarangControllers::class, 'showShopPenitip'])->name('penitip.Shop-Penitip');
+    Route::get('/profilPenitip', function () {
+        return view('penitip.profilPenitip');
+    })->name('penitip.profilPenitip');
+    Route::get('/Penitip/categoryPembeli/{id}', [KategoriBarangControllers::class, 'filterByCategoryPenitip'])->name('penitip.categoryPenitip');
+    Route::get('/Penitip/barang/{id_barang}', [BarangControllers::class, 'showDetailPenitip'])->name('penitip.detail_barangPenitip');
 });
 
 
@@ -63,16 +68,15 @@ Route::get('/registerPenitip', [PenitipControllrs::class, 'showRegisterFormPenit
 Route::post('/registerPenitip', [PenitipControllrs::class, 'registerPenitip'])->name('registerPenitip.post');
 
 
-
 // Menampilkan form login
 Route::get('login-pembeli', [AuthController::class, 'showLoginForm'])->name('loginPembeli');
 // Menangani form login (POST)
 Route::post('login-pembeli', [AuthController::class, 'loginPembeli'])->name('loginPembeli.post');
 Route::middleware(['pembeli'])->group(function () {
-    // Halaman shop untuk pembeli
-    Route::get('/Shop-Pembeli', function () {
-        return view('pembeli.Shop-Pembeli');
-    })->name('pembeli.Shop-Pembeli');
+    Route::get('/Shop-Pembeli', [BarangControllers::class, 'showShopPembeli'])->name('pembeli.Shop-Pembeli');
+    Route::get('/profilPembeli', [PembeliControllrs::class, 'show'])->name('pembeli.profilPembeli');
+    Route::get('/Pembeli/categoryPembeli/{id}', [KategoriBarangControllers::class, 'filterByCategoryPembeli'])->name('pembeli.categoryPembeli');
+    Route::get('/Pembeli/barang/{id_barang}', [BarangControllers::class, 'showDetailPembeli'])->name('pembeli.detail_barangPembeli');
 });
 
 Route::get('/registerOrganisasi', [OrganisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
@@ -87,6 +91,10 @@ Route::middleware(['organisasi'])->group(function () {
         return view('organisasi.donasi-organisasi');
     })->name('organisasi.donasi-organisasi');
 });
+
+
+Route::get('/request-barang', [RequestDonasiControllers::class, 'create'])->name('requestBarang.create');
+Route::post('/request-barang', [RequestDonasiControllers::class, 'store'])->name('requestBarang.store');
 
 Route::get('/loginDashboard', [AuthController::class, 'showLoginFormPegawai'])->name('loginDashboard');
 Route::post('/loginDashboard', [AuthController::class, 'loginPegawai'])->name('loginPegawai.post');
@@ -123,11 +131,6 @@ Route::middleware(['checkjabatan:Hunter'])->group(function () {
     })->name('hunter.DashboardHunter');
 });
 
-Route::get('/profilPembeli', function () {
-    return view('pembeli.profilPembeli');
-})->name('pembeli.profilPembeli');
-
-
 Route::get('/resetPasswordOrganisasi', function () {
     return view('LupaPasswordOrg.resetPasswordOrganisasi');
 })->name('LupaPasswordOrg.resetPasswordOrganisasi');
@@ -149,6 +152,9 @@ Route::get('/pesanLupaPasswordPembeli/{token}', [lupaPasswordPembeliControllers:
 
 
 
+
+
+Route::post('/diskusi', [DiskusiControllers::class, 'store'])->name('diskusi.store');
 
 
 // Menampilkan form reset password

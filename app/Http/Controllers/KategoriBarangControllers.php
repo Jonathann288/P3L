@@ -30,6 +30,49 @@ class KategoriBarangControllers extends Controller
         return view('shop.category', compact('kategoris', 'barang', 'images', 'title', 'selectedKategori'));
     }
 
+    public function filterByCategoryPembeli($id)
+    {
+        $kategoris = KategoriBarang::all();
+        $images = [
+            asset('images/gadgets.png'),
+            asset('images/shopping.png'),
+            asset('images/electric-appliances.png'),
+            asset('images/stationery.png'),
+            asset('images/hobbies.png'),
+            asset('images/stroller.png'),
+            asset('images/gadgets.png'),
+            asset('images/sport-car.png'),
+            asset('images/workspace.png'),
+            asset('images/cosmetics.png'),
+        ];
+        $selectedKategori = KategoriBarang::findOrFail($id);
+        $barang = Barang::where('id_kategori', $id)->get();
+        $title = $selectedKategori->nama_kategori;
+
+        return view('pembeli.categoryPembeli', compact('kategoris', 'barang', 'images', 'title', 'selectedKategori'));
+    }
+    public function filterByCategoryPenitip($id)
+    {
+        $kategoris = KategoriBarang::all();
+        $images = [
+            asset('images/gadgets.png'),
+            asset('images/shopping.png'),
+            asset('images/electric-appliances.png'),
+            asset('images/stationery.png'),
+            asset('images/hobbies.png'),
+            asset('images/stroller.png'),
+            asset('images/gadgets.png'),
+            asset('images/sport-car.png'),
+            asset('images/workspace.png'),
+            asset('images/cosmetics.png'),
+        ];
+        $selectedKategori = KategoriBarang::findOrFail($id);
+        $barang = Barang::where('id_kategori', $id)->get();
+        $title = $selectedKategori->nama_kategori;
+
+        return view('penitip.categoryPenitip', compact('kategoris', 'barang', 'images', 'title', 'selectedKategori'));
+    }
+
     public function index()
     {
         $kategoribarang = KategoriBarang::all();
