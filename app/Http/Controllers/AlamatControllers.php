@@ -4,73 +4,56 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Alamat;
+use App\Models\Pembeli;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class AlamatControllers extends Controller
 {
     // Menampilkan semua data alamat
-    public function index()
+    public function showAlamat()
     {
-        // Ambil ID pembeli yang sedang login
-        $pembeli = Auth::guard('pembeli')->user();
-    
-        // Ambil alamat milik pembeli tersebut
-        $alamat = Alamat::where('id_pembeli', $pembeli->id_pembeli)->get();
-    
-        // Cek apakah pembeli sudah memiliki alamat
-        if ($alamat->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Alamat belum diisi.'
-            ]);
+        try {
+            // Ambil data pembeli yang sedang login
+            $pembeli = Auth::guard('pembeli')->user();
+
+            // Ambil data alamat yang berelasi dengan pembeli
+            $alamat = ($pembeli)->alamat ?? collect();
+
+            // Return view dengan data alamat
+            return view('pembeli.AlamatPembeli', compact('pembeli','alamat'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-    
-        // Jika alamat ditemukan, kembalikan datanya
-        return response()->json([
-            'success' => true,
-            'data' => $alamat
-        ]);
     }
 
-
-    // Menampilkan form tambah alamat
-    // public function create()
-    // {
-    //     return view('alamat.create');
-    // }
-
-    // Menyimpan data alamat baru
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
-            'nama_jalan' => 'required|string',
+            'nama_jalan' => 'required|string|max:255',
             'kode_pos' => 'required|integer',
-            'kecamatan' => 'required|string',
-            'kelurahan' => 'required|string',
-            'status_default' => 'required|string',
-            'kabupaten' => 'required|string',
-            'deskripsi_alamat' => 'required|string',
+            'kecamatan' => 'required|string|max:255',
+            'kelurahan' => 'required|string|max:255',
+            'status_default' => 'required|string|max:255',
+            'kabupaten' => 'required|string|max:255',
+            'deskripsi_alamat' => 'required|string|max:255',
         ]);
-    
+
+        // Generate ID unik untuk alamat
         $lastAlamat = DB::table('alamat')
             ->select('id')
             ->where('id', 'like', 'ALT%')
             ->orderByDesc('id')
             ->first();
-    
-        if ($lastAlamat) {
-            $lastNumber = (int) substr($lastAlamat->id, 3); // Ambil angka setelah "pb"
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-    
+
+        $newNumber = $lastAlamat ? ((int) substr($lastAlamat->id, 3)) + 1 : 1;
         $newId = 'ALT' . str_pad($newNumber, 2, '0', STR_PAD_LEFT);
-    
-        $alamat = Alamat::create([
-            'id' => $newId,
-            'id_pembeli' => Auth::id(),
+
+        // Simpan data alamat dengan ID yang sudah digenerate
+        Alamat::create([
+            'id' => $newId, // ID unik untuk alamat
+            'id_pembeli' => Auth::guard('pembeli')->user()->id_pembeli,
             'nama_jalan' => $request->nama_jalan,
             'kode_pos' => $request->kode_pos,
             'kecamatan' => $request->kecamatan,
@@ -79,70 +62,31 @@ class AlamatControllers extends Controller
             'kabupaten' => $request->kabupaten,
             'deskripsi_alamat' => $request->deskripsi_alamat,
         ]);
-    
-        return response()->json([
-            'success' => true,
-            'message' => 'Data alamat berhasil ditambahkan.',
-            'data' => $alamat
-        ]);
-    }
-    
 
-    // Menampilkan form edit alamat
-    public function edit($id_alamat)
-    {
-        $alamat = Alamat::findOrFail($id_alamat);
-        return view('alamat.edit', compact('alamat'));
+        return redirect()->route('pembeli.alamatPembeli')->with('success', 'Alamat berhasil ditambahkan.');
     }
 
-    // Mengupdate data alamat
-    public function update(Request $request, $id_alamat)
-    {
 
-        $alamat = Alamat::where('id_alamat', $id_alamat)->where('id_pembeli', Auth::id())->first();
+    // public function update(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'nama_alamat' => 'required',
+    //         'detail_alamat' => 'required',
+    //     ]);
 
-        if (!$alamat) {
-            return response()->json(['message' => 'Alamat tidak ditemukan atau bukan milik Anda'], 404);
-        }
+    //     $alamat = Alamat::find($id);
+    //     $alamat->update([
+    //         'nama_alamat' => $request->nama_alamat,
+    //         'detail_alamat' => $request->detail_alamat,
+    //     ]);
 
-        $request->validate([
-            'nama_jalan' => 'required|string',
-            'kode_pos' => 'required|integer',
-            'kecamatan' => 'required|string',
-            'kelurahan' => 'required|string',
-            'status_default' => 'required|string',
-            'kabupaten' => 'required|string',
-            'deskripsi_alamat' => 'required|string',
-        ]);
+    //     return redirect()->route('pembeli.alamatPembeli')->with('success', 'Alamat berhasil diupdate.');
+    // }
 
-        $alamat = Alamat::findOrFail($id_alamat);
-        $alamat->update($request->only([
-            'nama_jalan', 'kode_pos', 'kecamatan', 'kelurahan', 'status_default', 'kabupaten', 'deskripsi_alamat'
-        ]));
+    // public function destroy($id)
+    // {
+    //     Alamat::destroy($id);
+    //     return redirect()->route('pembeli.alamatPembeli')->with('success', 'Alamat berhasil dihapus.');
+    // }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Data alamat berhasil diperbarui.',
-            'data' => $alamat
-        ]);
-    }
-
-    public function destroy($id)
-    {
-        $alamat = Alamat::findOrFail($id);
-        $alamat->delete();
-    
-        return response()->json([
-            'success' => true,
-            'message' => 'Data alamat berhasil dihapus.'
-        ]);
-    }
-
-    public function search(Request $request)
-    {
-        $keyword = $request->input('keyword');
-        $results = Alamat::where('status_default', 'LIKE', '%' . $keyword . '%')->get();
-
-        return response()->json($results);
-    }
 }

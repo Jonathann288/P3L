@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PembeliControllrs;
 use App\Http\Controllers\PenitipControllrs;
+use App\Http\Controllers\AlamatControllers;
 use App\Http\Controllers\OrganisasiControllrs;
 use App\Http\Controllers\KategoriBarangControllers;
 use App\Http\Controllers\BarangControllers;
@@ -72,6 +73,8 @@ Route::middleware(['pembeli'])->group(function () {
     Route::get('/Shop-Pembeli', [BarangControllers::class, 'showShopPembeli'])->name('pembeli.Shop-Pembeli');
     Route::get('/profilPembeli', [PembeliControllrs::class, 'show'])->name('pembeli.profilPembeli');
     Route::put('/profilPembeli', [PembeliControllrs::class, 'update'])->name('pembeli.update');
+    Route::get('/alamatPembeli', [AlamatControllers::class, 'showAlamat'])->name('pembeli.AlamatPembeli');
+    Route::post('/alamatPembeli/store', [AlamatControllers::class, 'store'])->name('pembeli.storeAlamat');
     Route::get('/Pembeli/categoryPembeli/{id}', [KategoriBarangControllers::class, 'filterByCategoryPembeli'])->name('pembeli.categoryPembeli');
     Route::get('/Pembeli/barang/{id_barang}', [BarangControllers::class, 'showDetailPembeli'])->name('pembeli.detail_barangPembeli');
     Route::post('/logout-pembeli', [AuthController::class, 'logoutPembeli'])->name('logout.pembeli');

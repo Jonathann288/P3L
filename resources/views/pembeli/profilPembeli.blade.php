@@ -26,13 +26,13 @@
                         <span>{{ $pembeli->nama_pembeli }}</span>
                     </div>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <i class="fa-solid fa-clock-rotate-left" ></i>
                         <span>History</span>
                     </div>
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('pembeli.alamatPembeli') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Alamat</span>
-                    </div>
+                    </a>
                 </div>
             </nav>
         </div>
