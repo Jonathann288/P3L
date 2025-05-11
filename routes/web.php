@@ -75,9 +75,13 @@ Route::post('login-pembeli', [AuthController::class, 'loginPembeli'])->name('log
 Route::middleware(['pembeli'])->group(function () {
     Route::get('/Shop-Pembeli', [BarangControllers::class, 'showShopPembeli'])->name('pembeli.Shop-Pembeli');
     Route::get('/profilPembeli', [PembeliControllrs::class, 'show'])->name('pembeli.profilPembeli');
+    Route::put('/profilPembeli', [PembeliControllrs::class, 'update'])->name('pembeli.update');
     Route::get('/Pembeli/categoryPembeli/{id}', [KategoriBarangControllers::class, 'filterByCategoryPembeli'])->name('pembeli.categoryPembeli');
     Route::get('/Pembeli/barang/{id_barang}', [BarangControllers::class, 'showDetailPembeli'])->name('pembeli.detail_barangPembeli');
+    Route::post('/logout-pembeli', [AuthController::class, 'logoutPembeli'])->name('logout.pembeli');
 });
+
+Route::get('/profilOrganisasi', [OrganisasiControllrs::class, 'showOrganisasi'])->name('organisasi.profilOrganisasi');
 
 Route::get('/registerOrganisasi', [OrganisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
 Route::post('/registerOrganisasi', [OrganisasiControllrs::class, 'registerOrganisasi'])->name('registerOrganisasi');
@@ -150,9 +154,12 @@ Route::post('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'lup
 Route::get('/pesanLupaPasswordPembeli/{token}', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('password.forgot.link');
 
 
-
-
-
+Route::middleware(['organisasi'])->group(function () {
+    Route::get('/organisasi/profilOrganisasi', [OrganisasiControllrs::class, 'showOrganisasi'])->name('organisasi.profilOrganisasi');
+    Route::post('/organisasi/update-profil', [OrganisasiControllrs::class, 'updateProfil'])->name('organisasi.updateProfil');
+    Route::get('/organisasi/requestDonasiOrganisasi', [RequestDonasiControllers::class, 'requestDonasiOrganisasi'])->name('organisasi.requestDonasiOrganisasi');
+});
+Route::put('/organisasi/updatePassword', [lupaPasswordOrganisasiControllers::class, 'updatePassword'])->name('organisasi.updatePassword');
 
 Route::post('/diskusi', [DiskusiControllers::class, 'store'])->name('diskusi.store');
 

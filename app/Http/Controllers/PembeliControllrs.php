@@ -59,58 +59,36 @@ class PembeliControllrs extends Controller
     public function show()
     {
         try {
-            $pembeli = Auth::user();
+            $pembeli = Auth::guard('pembeli')->user();
 
-            return response()->json([
-                "status" => true,
-                "message" => "Get Successful",
-                "pembeli" => $pembeli
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong",
-                "pembeli" => $e->getMessage()
-            ], 400);
+            return view('pembeli.profilPembeli', compact('pembeli'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
     public function update(Request $request)
     {
-        try {
-            $pembeli = Auth::guard('pembeli')->user();
-            if (!$pembeli) {
-                return response()->json(['message' => 'Pembeli tidak ditemukan'], 404);
-            }
+        $request->validate([
+            'id_pembeli' => 'required|exists:pembeli,id_pembeli',
+            'nama_pembeli' => 'required|string|max:255',
+            'email_pembeli' => 'required|email',
+            'nomor_telepon_pembeli' => 'required',
+            'tanggal_lahir' => 'required|date',
+        ]);
 
-            $validatedData = $request->validate([
-                'nama_pembeli' => 'required|string|max:255',
-                'tanggal_lahir' => 'required|date',
-                'nomor_telepon_pembeli' => 'required|string|max:20',
-                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
+        $pembeli = Pembeli::find($request->id_pembeli);
 
-            if ($request->hasFile('profile_picture')) {
-                // Hapus gambar lama jika bukan default
-                if ($pembeli->foto_pembeli && $pembeli->foto_pembeli !== 'images/default.png') {
-                    Storage::disk('public')->delete($pembeli->foto_pembeli);
-                }
-
-                $validatedData['foto_pembeli'] = $request->file('profile_picture')->store('images', 'public');
-            }
-
-            $pembeli->update($validatedData);
-
-            return response()->json([
-                'pembeli' => $pembeli,
-                'message' => 'Data pembeli berhasil diperbarui'
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Terjadi kesalahan saat memperbarui data pembeli",
-                "error" => $e->getMessage()
-            ], 400);
+        if (!$pembeli) {
+            return redirect()->back()->with('error', 'Data Pembeli tidak ditemukan!');
         }
+
+        $pembeli->nama_pembeli = $request->nama_pembeli;
+        $pembeli->email_pembeli = $request->email_pembeli;
+        $pembeli->nomor_telepon_pembeli = $request->nomor_telepon_pembeli;
+        $pembeli->tanggal_lahir = $request->tanggal_lahir;
+        $pembeli->save();
+
+        return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
     }
 }

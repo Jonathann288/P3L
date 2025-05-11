@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Hash;
+use Illuminate\Support\Facades\Auth;
 
 
 class lupaPasswordOrganisasiControllers extends Controller
@@ -49,35 +50,52 @@ class lupaPasswordOrganisasiControllers extends Controller
         return view('LupaPasswordOrg.resetPasswordOrganisasi', compact('token'));
     }
 
-    public function resetPasswordOrganisasi(Request $request)
+    // public function resetPasswordOrganisasi(Request $request)
+    // {
+    //     // Validasi data
+    //     $request->validate([
+    //         'password_organisasi' => 'required|string|min:8|confirmed',
+    //         'token' => 'required|string',
+    //     ]);
+
+    //     // Cek apakah token valid
+    //     $tokenData = DB::table('password_forgot')->where('token', $request->token)->first();
+
+    //     if (!$tokenData) {
+    //         return back()->withErrors(['token' => 'Token tidak valid']);
+    //     }
+
+    //     // Temukan organisasi berdasarkan email dari token
+    //     $organisasi = Organisasi::where('email_organisasi', $tokenData->email_organisasi)->first();
+
+    //     if (!$organisasi) {
+    //         return back()->withErrors(['email' => 'Organisasi tidak ditemukan']);
+    //     }
+
+    //     // Update password organisasi
+    //     $organisasi->password = Hash::make($request->password_organisasi);
+    //     $organisasi->save();
+
+    //     // Hapus token setelah berhasil reset
+    //     DB::table('password_forgot')->where('token', $request->token)->delete();
+
+    //     return redirect()->route('loginOrganisasi')->with('success', 'Password berhasil diperbarui.');
+    // }
+
+    public function updatePassword(Request $request)
     {
-        // Validasi data
+        $organisasi = Auth::guard('organisasi')->user();
+
         $request->validate([
             'password_organisasi' => 'required|string|min:8|confirmed',
-            'token' => 'required|string',
         ]);
 
-        // Cek apakah token valid
-        $tokenData = DB::table('password_forgot')->where('token', $request->token)->first();
-
-        if (!$tokenData) {
-            return back()->withErrors(['token' => 'Token tidak valid']);
-        }
-
-        // Temukan organisasi berdasarkan email dari token
-        $organisasi = Organisasi::where('email_organisasi', $tokenData->email_organisasi)->first();
-
-        if (!$organisasi) {
-            return back()->withErrors(['email' => 'Organisasi tidak ditemukan']);
-        }
-
-        // Update password organisasi
-        $organisasi->password = Hash::make($request->password_organisasi);
+        // Enkripsi dan update password
+        $organisasi->password_organisasi = bcrypt($request->password_organisasi);
         $organisasi->save();
 
-        // Hapus token setelah berhasil reset
-        DB::table('password_forgot')->where('token', $request->token)->delete();
-
-        return redirect()->route('loginOrganisasi')->with('success', 'Password berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Password berhasil diperbarui!');
     }
+
+
 }
