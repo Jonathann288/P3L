@@ -105,9 +105,9 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Main Content Section - Discussion Form and Comments -->
     <main class="pb-12 px-4 max-w-6xl mx-auto">
-        <!-- Product Section -->
+        <!-- Product Section (keeping this part unchanged) -->
         <div class="flex flex-col md:flex-row gap-8 pt-8">
             <!-- Product Images -->
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
@@ -155,14 +155,38 @@
                         </div>
                     @endif
                 </div>
+
+                <!-- Deskripsi Barang -->
+                <div class="mt-6 bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">Deskripsi Barang</h2>
+                    <p class="text-gray-700 leading-relaxed">
+                        {{ $barang->deskripsi_barang }}
+                        <br><br>
+                        Detail Barang:
+                    <ul class="list-disc list-inside mt-2 text-gray-700">
+                        <li>Berat: {{ $barang->berat_barang }} Kg</li>
+                    </ul>
+                    </p>
+                </div>
+
+                @if($barang->kategori && $barang->kategori->nama_kategori === 'Elektronik')
+                    <div class="mt-4">
+                        <p class="text-md text-gray-700 font-semibold">Garansi:</p>
+                        <p class="text-gray-800">
+                            {{ \Carbon\Carbon::parse($barang->garansi_barang)->translatedFormat('d F Y') }}
+                        </p>
+                    </div>
+                @endif
             </div>
         </div>
 
+        <!-- Discussion Section -->
         <div class="mt-8">
             <!-- Form Diskusi -->
-            <!-- Form Diskusi -->
-            <form id="formDiskusi" action="#" method="POST" class="bg-white p-4 rounded-lg shadow-md">
-                <h1 class="text-lg font-semibold text-gray-800 mb-4">Diskusi Produk</h1>
+            <form id="formDiskusi" action="{{ route('diskusi.store') }}" method="POST"
+                class="bg-white p-4 rounded-lg shadow-md">
+
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Diskusi Produk</h2>
                 @csrf
                 <input type="hidden" name="id_barang" value="{{ $barang->id }}">
                 <textarea name="pesan" rows="3" required
@@ -176,68 +200,91 @@
                 </div>
             </form>
 
+            <!-- Display success message if exists -->
+            @if(session('success'))
+                <div class="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+                    role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
 
-            <!-- List Komentar -->
             <div id="listKomentar" class="mt-6 space-y-4">
-                @foreach ($barang->diskusi as $komen)
+                @forelse ($barang->diskusi as $komen)
                     <div class="bg-gray-100 p-4 rounded-lg shadow-sm">
                         <div class="flex justify-between items-center mb-1">
-                            <p class="font-semibold text-gray-800">{{ $komen->pembeli->nama }}</p>
-                            <span class="text-sm text-gray-500">{{ $komen->tanggal_diskusi->diffForHumans() }}</span>
+                            <p class="font-semibold text-gray-800">
+                                @if($komen->id_pembeli)
+                                    {{ $komen->pembeli->nama_pembeli ?? 'Pembeli' }}
+                                @elseif($komen->id_pegawai)
+                                    <span class="text-blue-600">{{ $komen->pegawai->nama_pegawai ?? 'Admin' }} <span
+                                            class="bg-blue-100 text-xs px-2 py-1 rounded">Staff</span></span>
+                                @else
+                                    Pengguna
+                                @endif
+                            </p>
+                            <span class="text-sm text-gray-500">
+                                {{ $komen->tanggal_diskusi->diffForHumans() }}
+                            </span>
                         </div>
-                        <p class="text-gray-700">{{ $komen->pesan }}</p>
+                        <p class="text-gray-700 mt-2">{{ $komen->pesan }}</p>
                     </div>
-                @endforeach
-            </div>
-
-            <!-- List Komentar -->
-            <div id="listKomentar" class="mt-6 space-y-4">
-                @foreach ($barang->diskusi as $komen)
-                    <div class="bg-gray-100 p-4 rounded-lg shadow-sm">
-                        <div class="flex justify-between items-center mb-1">
-                            <p class="font-semibold text-gray-800">{{ $komen->pembeli->nama }}</p>
-                            <span class="text-sm text-gray-500">{{ $komen->tanggal_diskusi->diffForHumans() }}</span>
-                        </div>
-                        <p class="text-gray-700">{{ $komen->pesan }}</p>
+                @empty
+                    <div id="emptyMessage" class="text-center py-8 text-gray-500">
+                        <p>Belum ada diskusi untuk produk ini.</p>
+                        <p class="text-sm mt-2">Jadilah yang pertama bertanya!</p>
                     </div>
-                @endforeach
+                @endforelse
+
             </div>
-
-
+        </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Tangani pengiriman formulir
-            document.getElementById('formDiskusi').addEventListener('submit', function (event) {
-                event.preventDefault(); // Mencegah pengiriman formulir secara tradisional
+            const form = document.querySelector('form[action="{{ route('diskusi.store') }}"]');
 
-                const formData = new FormData(this); // Ambil data formulir
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
 
-                // Mendapatkan input pesan dan ID barang
-                const pesan = formData.get('pesan');
-                const id_barang = formData.get('id_barang');
-                const nama_pembeli = "{{ Auth::guard('pembeli')->user()->nama_pembeli }}";
-                const waktu_diskusi = new Date().toLocaleString(); // Tanggal dan waktu lokal
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: formData
+                });
 
-                // Tambahkan komentar baru ke dalam list komentar
-                const komentarBaru = `
-                <div class="bg-gray-100 p-4 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-center mb-1">
-                        <p class="font-semibold text-gray-800">${nama_pembeli}</p>
-                        <span class="text-sm text-gray-500">${waktu_diskusi}</span>
-                    </div>
-                    <p class="text-gray-700">${pesan}</p>
-                </div>
-            `;
-                // Tambahkan komentar baru ke dalam div #listKomentar
-                document.getElementById('listKomentar').insertAdjacentHTML('beforeend', komentarBaru);
+                if (response.ok) {
+                    const result = await response.json();
 
-                // Kosongkan textarea setelah pengiriman
-                document.querySelector('textarea[name="pesan"]').value = '';
+                    const komentarBaru = `
+    <div class="bg-gray-100 p-4 rounded-lg shadow-sm">
+        <div class="flex justify-between items-center mb-1">
+            <p class="font-semibold text-gray-800">${result.nama}</p>
+            <span class="text-sm text-gray-500">${result.tanggal}</span>
+        </div>
+        <p class="text-gray-700 mt-2">${result.pesan}</p>
+    </div>
+`;
+
+
+                    // Hapus pesan kosong jika ada
+                    const emptyMsg = document.getElementById('emptyMessage');
+                    if (emptyMsg) {
+                        emptyMsg.remove();
+                    }
+
+                    document.getElementById('listKomentar').insertAdjacentHTML('beforeend', komentarBaru);
+                    form.reset();
+                } else {
+                    alert("Gagal mengirim komentar.");
+                }
             });
         });
     </script>
+
 
 </body>
 

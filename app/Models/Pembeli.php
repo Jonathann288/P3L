@@ -41,4 +41,10 @@ class Pembeli extends Authenticatable
     {
         return $this->password_pembeli;
     }
+
+    public function pembeli()
+    {
+        return $this->belongsTo(Pembeli::class);
+    }
+
 }

@@ -32,7 +32,7 @@ class Barang extends Model
         'garansi_barang' => 'datetime',
     ];
 
-    public function kategoribarang()
+    public function kategori()
     {
         return $this->belongsTo(kategoribarang::class, 'id_kategori');
     }

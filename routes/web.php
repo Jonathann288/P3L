@@ -12,8 +12,6 @@ use App\Http\Controllers\lupaPasswordPembeliControllers;
 use App\Http\Controllers\DiskusiControllers;
 use App\Http\Controllers\RequestDonasiControllers;
 
-
-
 Route::get('/', function () {
     return view('beranda');
 })->name('beranda');
@@ -170,3 +168,13 @@ Route::get('/resetPasswordOrganisasi/{token}', [lupaPasswordOrganisasiController
 
 // Menangani form reset password
 Route::post('/resetPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'resetPasswordOrganisasi'])->name('resetPasswordOrganisasi.post');
+
+
+
+
+
+Route::post('/diskusi/store', [DiskusiControllers::class, 'store'])->name('diskusi.store');
+Route::get('/diskusi/show/{id_barang}', [DiskusiControllers::class, 'show'])->name('diskusi.show');
+
+// Routes for staff replies (if needed)
+Route::post('/diskusi/reply', [DiskusiControllers::class, 'reply'])->name('diskusi.reply');

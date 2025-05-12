@@ -22,13 +22,14 @@ class diskusi extends Model
         'tanggal_diskusi' => 'datetime',
     ];
 
+    public function pembeli()
+    {
+        return $this->belongsTo(Pembeli::class, 'id_pembeli');
+    }
+
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'id_pegawai');
     }
 
-    public function pembeli()
-    {
-        return $this->belongsTo(Pembeli::class, 'id_pembeli');
-    }
 }

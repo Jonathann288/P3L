@@ -94,15 +94,24 @@ class BarangControllers extends Controller
     }
     public function showDetailPembeli($id_barang)
     {
-        $barang = Barang::findOrFail($id_barang);
+        // Eager load kategori, diskusi with relations to pembeli and pegawai
+        $barang = Barang::with(['kategori', 'diskusi.pembeli', 'diskusi.pegawai'])
+            ->findOrFail($id_barang);
+
+        // Load diskusi with proper sorting (newest first)
+        $barang->setRelation('diskusi', $barang->diskusi->sortByDesc('tanggal_diskusi'));
+
         return view('pembeli.detail_barangPembeli', compact('barang'));
     }
+
+
+
     public function showDetailPenitip($id_barang)
     {
         $barang = Barang::findOrFail($id_barang);
         return view('penitip.detail_barangPenitip', compact('barang'));
     }
-    
+
     // Simpan barang baru
     public function store(Request $request)
     {
