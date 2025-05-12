@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\JabatanControllers;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PembeliControllrs;
@@ -11,6 +12,7 @@ use App\Http\Controllers\KategoriBarangControllers;
 use App\Http\Controllers\BarangControllers;
 use App\Http\Controllers\lupaPasswordOrganisasiControllers;
 use App\Http\Controllers\lupaPasswordPembeliControllers;
+use App\Http\Controllers\OwnerControllers;
 
 
 Route::get('/', function () {
@@ -123,18 +125,29 @@ Route::get('/dashboard', [PegawaiControllers::class, 'showDashboard'])->name('da
 Route::middleware(['checkjabatan:Admin'])->group(function () {
     Route::post('/admin/update-profil', [PegawaiControllers::class, 'updateProfilAdmin'])->name('admin.updateProfil');
     Route::get('/admin/Dashboard', [PegawaiControllers::class, 'showDashboard'])->name('admin.Dashboard');
+    //pegawai
     Route::get('/DashboardPegawai', [PegawaiControllers::class, 'showlistPegawai'])->name('admin.DashboardPegawai');
     Route::post('/DashboardPegawai/register', [PegawaiControllers::class, 'registerPegawai'])->name('admin.pegawai.register');
     Route::put('/DashboardPegawai/update/{id}', [PegawaiControllers::class, 'update'])->name('admin.pegawai.update');
     Route::delete('/DashboardPegawai/delete/{id}', [PegawaiControllers::class, 'destroy'])->name('admin.pegawai.delete');
+    //jabatan
+    Route::get('/admin/DashboardJabatan', [JabatanControllers::class, 'jabatanView'])->name('admin.DashboardJabatan');
+    Route::post('/admin/DashboardJabatan/store', [JabatanControllers::class, 'store'])->name('admin.jabatan.store');
+    Route::put('/admin/DashboardJabatan/update/{id}', [JabatanControllers::class, 'update']);
+    Route::delete('/admin/DashboardJabatan/delete/{id}', [JabatanControllers::class, 'destroy'])->name('admin.jabatan.delete');
+});
+
+//Owner
+Route::middleware(['auth:pegawai'])->group(function () {
+    Route::get('/dashboard-owner', [OwnerControllers::class, 'showDashboard'])->name('owner.DashboardOwner');
+    Route::get('/dashboard-donasi', [OwnerControllers::class, 'showDonasiDashboard'])->name('owner.DashboardDonasi');
+    Route::post('/dashboard-donasi/update/{id_barang}/{id_request}', [OwnerControllers::class, 'updateDonasi'])->name('owner.UpdateDonasi');
+    Route::get('/dashboard-history-donasi', [OwnerControllers::class, 'showHistoryDonasi'])->name('owner.DashboardHistoryDonasi');
 });
 
 
-Route::middleware(['checkjabatan:Owner'])->group(function () {
-    Route::get('/DashboardOwner', function () {
-        return view('owner.DashboardOwner');
-    })->name('owner.DashboardOwner');
-});
+
+
 Route::middleware(['checkjabatan:Customer Service'])->group(function () {
     Route::get('/DashboardCS', function () {
         return view('customerservice.DashboardCS');

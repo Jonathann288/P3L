@@ -21,8 +21,8 @@
         <div>
             <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
             <nav>
-               <div class="space-y-4">
-                   <a href="{{ route('owner.DashboardOwner') }}"
+                <div class="space-y-4">
+                    <a href="{{ route('owner.DashboardOwner') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-user-circle mr-2"></i>
                         <span>Profile Owner</span>
@@ -49,44 +49,37 @@
     </div>
 
     <!-- Main Content -->
-    <div class="p-8 bg-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-semibold text-gray-800">Profil Pembeli</h1>
-        </div>
 
-        <div class="grid md:grid-cols-3 gap-8">
-            <!-- Info Sections -->
-            <div class="col-span-5 space-y-6">
-                <!-- Personal Info -->
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-800">Informasi Pribadi</h2>
-                        <button class="text-blue-600 hover:underline">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex justify-between">
-                            <span class="font-semibold text-gray-600">Nama Lengkap:</span>
-                            <span>{{ $pegawai->nama_pegawai }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-semibold text-gray-600">Email:</span>
-                            <span>{{ $pegawai->email_pegawai }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-semibold text-gray-600">Nomor Telepon:</span>
-                            <span>{{ $pegawai->nomor_telepon_pegawai }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-semibold text-gray-600">Jabatan</span>
-                            <span>{{ $pegawai->Jabatan->nama_jabatan }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-6">History Donasi ke Organisasi</h1>
+
+        <table class="min-w-full bg-white shadow-md rounded">
+            <thead>
+                <tr class="bg-gray-200 text-left">
+                    <th class="py-2 px-4">Organisasi</th>
+                    <th class="py-2 px-4">Nama Penerima</th>
+                    <th class="py-2 px-4">Tanggal Donasi</th>
+                    <th class="py-2 px-4">Nama Barang</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($donasis as $donasi)
+                <tr class="border-t">
+                    <td class="py-2 px-4">{{ $donasi->requestdonasi->organisasi->nama_organisasi ?? '-' }}</td>
+                    <td class="py-2 px-4">{{ $donasi->nama_penerima }}</td>
+                    <td class="py-2 px-4">{{ \Carbon\Carbon::parse($donasi->tanggal_donasi)->format('d-m-Y') }}</td>
+                    <td class="py-2 px-4">{{ $donasi->barang->nama_barang ?? '-' }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
+
+
+
+
+</html>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 </body>

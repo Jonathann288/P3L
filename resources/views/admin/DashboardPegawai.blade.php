@@ -69,13 +69,15 @@
         </div>
         <!-- Search functionality -->
         <div class="mb-4">
-        <form action="{{ route('admin.DashboardPegawai') }}" method="GET" class="flex items-center bg-white rounded-lg shadow-sm overflow-hidden">
-    <input type="text" name="search" id="searchInput" placeholder="Cari nama pegawai..." class="w-full px-4 py-2 focus:outline-none" value="{{ request('search') }}">
-    <button type="submit" class="bg-blue-500 text-white px-4 py-2 hover:bg-blue-600">
-        <i ></i> Cari
-    </button>
-</form>
-    </div>
+            <form action="{{ route('admin.DashboardPegawai') }}" method="GET"
+                class="flex items-center bg-white rounded-lg shadow-sm overflow-hidden">
+                <input type="text" name="search" id="searchInput" placeholder="Cari nama pegawai..."
+                    class="w-full px-4 py-2 focus:outline-none" value="{{ request('search') }}">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 hover:bg-blue-600">
+                    <i></i> Cari
+                </button>
+            </form>
+        </div>
 
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <table class="min-w-full bg-white">
@@ -258,8 +260,8 @@
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
         }
-        
-        
+
+
 
     </script>
 

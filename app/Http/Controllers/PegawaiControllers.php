@@ -144,19 +144,27 @@ class PegawaiControllers extends Controller
 
 
 
-    public function login(Request $request)
-    {
-        $credentials = $request->only('email_pegawai', 'password_pegawai');
+public function login(Request $request)
+{
+    $credentials = $request->only('email_pegawai', 'password_pegawai');
 
-        $pegawai = Pegawai::where('email_pegawai', $credentials['email_pegawai'])->first();
+    $pegawai = Pegawai::where('email_pegawai', $credentials['email_pegawai'])->first();
 
-        if ($pegawai && Hash::check($credentials['password_pegawai'], $pegawai->password_pegawai)) {
-            Auth::guard('pegawai')->login($pegawai); // Gunakan guard pegawai
+    if ($pegawai && Hash::check($credentials['password_pegawai'], $pegawai->password_pegawai)) {
+        Auth::guard('pegawai')->login($pegawai); // Gunakan guard pegawai
+
+        if ($pegawai->id_jabatan == 2) {
+            return redirect()->route('owner.DashboardOwner');
+        } elseif ($pegawai->id_jabatan == 1) {
             return redirect()->route('admin.Dashboard');
         } else {
-            return redirect()->back()->with('error', 'Email atau password salah');
+            return redirect()->back()->with('error', 'Jabatan tidak dikenali');
         }
+    } else {
+        return redirect()->back()->with('error', 'Email atau password salah');
     }
+}
+
 
 
     public function show($id)
