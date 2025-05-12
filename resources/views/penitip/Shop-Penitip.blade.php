@@ -3,7 +3,6 @@
 <div id="content" style="display: none;" class="min-h-screen">
     <nav class="fixed top-0 left-0 w-full z-50">
         <div class="bg-blue-300 text-sm py-2 px-6 flex justify-around items-center">
-            <!-- Ikon Sosial Media & Text -->
             <div class="flex items-center space-x-2">
                 <span class="font-semibold">Ikuti kami di</span>
                 <a href="#" class="text-gray-700 hover:text-gray-900">
@@ -23,38 +22,48 @@
                 </a>
             </div>
 
-            <!-- Menu Navigasi -->
             <div class="hidden md:flex space-x-6 text-gray-700">
                 <a href="{{ route('beranda') }}" class="hover:underline">Beranda</a>
-                <a href="{{ route('donasi')}}" class="hover:underline">Donasi</a>
-                <a href="{{ route('loginPenitip')}}" class="hover:underline">Login Sebagai Penitip</a>
             </div>
         </div>
 
         <div class="bg-blue-600 p-4">
             <div class="container mx-auto flex items-center justify-between flex-wrap">
-                <!-- Logo -->
                 <div class="flex items-center space-x-2">
                     <img src="{{ asset('images/logo6.png') }}" alt="ReUseMart" class="h-12">
                 </div>
 
-                <!-- Input Pencarian -->
                 <div class="hidden md:block flex-grow mx-4">
                     <input type="text" placeholder="Mau cari apa nih kamu?" 
                         class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none">
                 </div>
 
-                <!-- Tombol Login & Sign In (Hanya Muncul di Desktop) -->
-                <div class="hidden md:flex space-x-2">
-                    <button class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-blue-800 active:bg-blue-900">
-                        <a href="{{ route('loginPembeli') }}">Log In</a>
-                    </button>
-                    <button class="bg-white text-black px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-gray-200 active:bg-gray-300">
-                    <a href="{{ route('registerPembeli') }}">Sign in</a>
-                    </button>
-                </div>
+                <!-- Cek Autentikasi -->
+                @if(Auth::guard('penitip')->check())
+                    <div class="relative">
+                        <button id="dropdownToggle" class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md hover:bg-blue-800">
+                            {{ Auth::guard('penitip')->user()->nama_penitip }}
+                        </button>
+                        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+                            <a href="{{ route('penitip.profilPenitip') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
+                                <form action="{{ route('logout.penitip') }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                        class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
+                                </form>
+                        </div>
+                    </div>
+                @else
+                    <div class="hidden md:flex space-x-2">
+                        <a href="{{ route('loginPembeli') }}" class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md hover:bg-blue-800">
+                            Log In
+                        </a>
+                        <a href="{{ route('registerPembeli') }}" class="bg-white text-black px-4 py-2 rounded-lg font-bold shadow-md hover:bg-gray-200">
+                            Sign In
+                        </a>
+                    </div>
+                @endif
 
-                <!-- Hamburger Menu (Mobile) -->
                 <div class="md:hidden flex items-center">
                     <button id="menu-toggle" class="text-white focus:outline-none">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -62,20 +71,6 @@
                         </svg>
                     </button>
                 </div>
-            </div>
-
-            <!-- Menu Mobile (Muncul saat tombol hamburger diklik) -->
-            <div id="mobile-menu" class="hidden md:hidden mt-4">
-                <!-- Input Pencarian di Mobile -->
-                <input type="text" placeholder="Mau cari apa nih kamu?" 
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none mb-2">
-                <button class="bg-blue-700 text-white w-full px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-blue-800 active:bg-blue-900">
-                    Log In
-                </button>
-                <button class="bg-white text-black w-full px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-gray-200 active:bg-gray-300 mt-2">
-                    Sign In
-                </button>
-
             </div>
         </div>
     </nav>
@@ -88,7 +83,7 @@
                     
                     <!-- Kategori -->
                     @foreach ($kategoris as $index => $kategori)
-                    <a href="{{ route('shop.category', $kategori->id_kategori) }}" class="cursor-pointer">
+                    <a href="{{ route('penitip.categoryPenitip', $kategori->id_kategori) }}" class="cursor-pointer">
                         <div class="flex flex-col items-center min-w-[25%] md:min-w-0 transition-all">
                             <div class="w-16 h-16 bg-white rounded-md flex items-center justify-center">
                                 <img src="{{ $images[$index] ?? 'images/default.png' }}" alt="Icon {{ $index + 1 }}" class="w-12 h-12">
@@ -120,7 +115,7 @@
                     <!-- 1. Link pada Gambar Produk -->
                     <a 
                         class="relative flex h-36 overflow-hidden rounded-xl" 
-                        href="{{ route('shop.detail_barang', $item->id_barang) }}"  <!-- Tambahkan route di sini -->
+                        href="{{ route('penitip.detail_barangPenitip', $item->id_barang) }}"  <!-- Tambahkan route di sini -->
                     >
                         <img 
                             class="absolute top-0 right-0 h-full w-full object-cover" 
@@ -131,7 +126,7 @@
 
                     <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
                         <!-- 2. Link pada Judul Produk -->
-                        <a href="{{ route('shop.detail_barang', $item->id_barang) }}">  <!-- Tambahkan route di sini -->
+                        <a href="{{ route('penitip.detail_barangPenitip', $item->id_barang) }}">  <!-- Tambahkan route di sini -->
                             <h5 class="text-base tracking-tight text-slate-900 hover:text-blue-600">
                                 {{ $item->nama_barang }}
                             </h5>
@@ -167,5 +162,18 @@
     document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("content").style.display = "block";
     });
+
+    const toggle = document.getElementById('dropdownToggle');
+        const menu = document.getElementById('dropdownMenu');
+        
+        toggle.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
 </script>
 @endsection

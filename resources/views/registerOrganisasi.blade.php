@@ -11,11 +11,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Efek blur untuk background */
+        .background-blur {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3); /* Layer semi-transparan */
+            backdrop-filter: blur(10px); /* Efek blur */
+            z-index: -1; /* Menempatkan di belakang konten */
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <!-- Tambahkan elemen untuk efek blur -->
+    <div class="background-blur"></div>
+
     <div class="flex flex-col md:flex-row rounded-3xl shadow-xl overflow-hidden max-w-4xl w-full">
-        <a href="{{ route('shop') }}"
+        <a href="{{ route('donasi') }}"
             class="absolute top-4 left-4 bg-white text-blue-600 p-2 rounded-full shadow-md hover:bg-gray-200 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -32,45 +48,46 @@
             </div>
 
             <div class="w-full max-w-md">
-                <h2 class="text-xl font-bold mb-4 text-white">Sign Up</h2>
+                <h2 class="text-xl font-bold mb-4 text-white">Sign Up Organisasi</h2>
 
-                <form method="POST" action="{{ route('register') }}" class="space-y-3">
+                <form method="POST" action="{{ route('registerOrganisasi') }}" class="space-y-3">
                     @csrf
 
                     <div>
-                        <input type="text" name="name" id="name" class="w-full p-2 rounded-lg"
-                            placeholder="Nama Lengkap" required autofocus>
+                        <input type="text" name="nama_organisasi"  class="w-full p-2 rounded-lg"
+                            placeholder="Nama Organisasi" required autofocus>
                     </div>
 
                     <div>
-                        <input type="tel" name="phone" id="phone" class="w-full p-2 rounded-lg"
+                        <input type="alamat" name="alamat_organisasi" class="w-full p-2 rounded-lg"
+                            placeholder="Alamat" required>
+                    </div>
+
+                    <div>
+                        <input type="tel" name="nomor_telepon"  class="w-full p-2 rounded-lg"
                             placeholder="Nomor telepon" required>
                     </div>
 
                     <div>
-                        <input type="email" name="email" id="email" class="w-full p-2 rounded-lg" placeholder="Email"
+                        <input type="email" name="email_organisasi"  class="w-full p-2 rounded-lg" placeholder="Email"
                             required>
                     </div>
 
                     <div>
-                        <input type="password" name="password" id="password" class="w-full p-2 rounded-lg"
+                        <input type="password" name="password_organisasi" class="w-full p-2 rounded-lg"
                             placeholder="Password" required>
                     </div>
 
                     <div>
                         <button type="submit"
-                            class="w-full bg-blue-500 text-white p-2 rounded-md font-medium hover:bg-blue-600">Log
-                            In</button>
+                            class="w-full bg-blue-500 text-white p-2 rounded-md font-medium hover:bg-blue-600">Sign
+                            Up</button>
                     </div>
                 </form>
 
-                <div class="mt-3 text-center">
-                    <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
-                </div>
-
                 <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
                     <p class="text-white font-bold">Akun kamu udah ada?</p>
-                    <a href='{{ route('login') }}'
+                    <a href='{{ route('loginOrganisasi') }}'
                         class="bg-transparent border border-white text-white px-3 py-1 rounded-md hover:bg-white hover:text-blue-500">Log
                         in</a>
                 </div>

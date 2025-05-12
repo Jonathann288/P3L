@@ -40,6 +40,26 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'pegawai' => [
+            'driver' => 'session',
+            'provider' => 'pegawai',
+        ],
+        'pembeli' => [
+            'driver' => 'session',
+            'provider' => 'pembeli',
+        ],
+        'penitip' => [
+            'driver' => 'session',
+            'provider' => 'penitip',
+        ],
+        'organisasi' => [
+            'driver' => 'session',
+            'provider' => 'organisasi',
+        ],
     ],
 
     /*
@@ -63,6 +83,23 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+         
+        'pegawai' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Pegawai::class),
+        ],
+        'pembeli' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Pembeli::class),
+        ],
+        'penitip' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Penitip::class),
+        ],
+        'organisasi' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\Organisasi::class),
         ],
 
         // 'users' => [
