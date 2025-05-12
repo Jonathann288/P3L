@@ -82,7 +82,12 @@ class AuthController extends Controller
 
     public function logoutOrganisasi()
     {
+        Auth::guard('organisasi')->logout();
+        
+        // Hapus sesi pembeli jika diperlukan
         session()->forget('organisasi');
+
+        // Redirect ke halaman login pembeli
         return redirect()->route('loginOrganisasi');
     }
 

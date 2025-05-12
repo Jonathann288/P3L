@@ -122,7 +122,7 @@
                         <div class="rating-stars">
                             <span>★★★★★</span>
                             <!-- Hitung persentase rating -->
-                            <span class="filled" style="width: {{ ($barang->rating_barang / 5) * 100 }}%">★★★★★</span>
+                            <span class="filled" >{{ ($barang->rating_barang / 5) * 100 }}%</span>
                         </div>
                         <span class="ml-1 text-gray-700">{{ number_format($barang->rating_barang, 1) }}</span>
                     </div>

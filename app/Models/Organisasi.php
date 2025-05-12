@@ -28,6 +28,10 @@ class Organisasi extends Authenticatable
         'password_organisasi',
         'token',
     ];
-    
+ 
+        public function requestDonasi()
+    {
+        return $this->hasMany(RequestDonasi::class, 'id_organisasi', 'id_organisasi');
+    }
 }
 

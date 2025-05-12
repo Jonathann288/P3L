@@ -27,7 +27,8 @@ class Penitip extends Authenticatable
         'badge',
         'jumlah_penjualan',
         'foto_profil',
-        'rating_penitip'
+        'rating_penitip',
+        'foto_ktp'
     ];
 
     protected $hidden = [

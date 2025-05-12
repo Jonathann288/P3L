@@ -32,11 +32,11 @@
                                 {{ Auth::guard('organisasi')->user()->nama_organisasi }}
                             </button>
                             <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
-                                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
-                                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Transaksi</a>
-                                <form action="#" method="POST">
+                                <a href="{{ route('organisasi.profilOrganisasi') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
+                                <form action="{{ route('logout.organisasi') }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
+                                    <button type="submit"
+                                        class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
                                 </form>
                             </div>
                         </div>

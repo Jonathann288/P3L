@@ -15,11 +15,12 @@ class PegawaiControllers extends Controller
     public function showlistPegawai()
     {
         try {
+            $pegawaiLogin = Auth::guard('pegawai')->user();
             // Ambil semua data pegawai beserta jabatannya
             $pegawai = Pegawai::with('jabatan')->get();
             $jabatan = Jabatan::all();
             // Return ke view dengan data pegawai
-            return view('admin.DashboardPegawai', compact('pegawai','jabatan'));
+            return view('admin.DashboardPegawai', compact('pegawai','jabatan','pegawaiLogin'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -64,29 +65,21 @@ class PegawaiControllers extends Controller
 
     public function update(Request $request, $id)
     {
-        // Cari Pegawai berdasarkan ID
-        $pegawai = Pegawai::with('jabatan')->find($id); // Load relasi jabatan
+        $pegawai = Pegawai::find($id);
         if (!$pegawai) {
             return redirect()->back()->with('error', 'Pegawai tidak ditemukan');
         }
 
-        // Validasi data yang diterima
-        $validateData = $request->validate([
+        $validatedData = $request->validate([
             'id_jabatan' => 'required|exists:jabatan,id_jabatan',
             'nama_pegawai' => 'required|string|max:255',
             'tanggal_lahir_pegawai' => 'required|date',
             'nomor_telepon_pegawai' => 'required|string|max:20',
         ]);
 
-        // Update data pegawai
-        $pegawai->id_jabatan = $validateData['id_jabatan'];
-        $pegawai->nama_pegawai = $validateData['nama_pegawai'];
-        $pegawai->tanggal_lahir_pegawai = $validateData['tanggal_lahir_pegawai'];
-        $pegawai->nomor_telepon_pegawai = $validateData['nomor_telepon_pegawai'];
-        $pegawai->save();
+        $pegawai->update($validatedData);
 
-        // Redirect kembali ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', 'Pegawai berhasil diperbarui');
+        return redirect()->route('admin.DashboardPegawai')->with('success', 'Pegawai berhasil diperbarui');
     }
 
 
@@ -96,13 +89,27 @@ class PegawaiControllers extends Controller
         return response()->json($pegawai);
     }
     
-    public function showLogin()
+    public function showLoginAdmin()
     {
-        $pegawai = Auth::user(); // atau request()->user()
-        return response()->json([
-            'message' => 'Data organisasi login berhasil diambil',
-            'Pegawai' => $pegawai
-        ]);
+        $pegawai = Auth::guard('pegawai')->user();
+
+        // Passing data ke view
+        return view('admin.dashboard', compact('pegawai'));
+    }
+    
+    public function showLoginPegawai()
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+
+        // Passing data ke view
+        return view('admin.DashboardPegawai', compact('pegawai'));
+    }
+    public function showLoginCS()
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+
+        // Passing data ke view
+        return view('CustomerService.DashboardCS', compact('pegawai'));
     }
 
     public function show($id)
@@ -116,13 +123,14 @@ class PegawaiControllers extends Controller
 
     public function destroy($id)
     {
-        $pegawai = Pegawai::find($id);
-        if (!$pegawai) {
-            return response()->json(['message' => 'pegawai tidak ditemukan'], 404);
-        }
+        try {
+            $pegawai = Pegawai::findOrFail($id);
+            $pegawai->delete();
 
-        $pegawai->delete();
-        return response()->json(['message' => 'pegawai berhasil dihapus']);
+            return redirect()->route('admin.DashboardPegawai')->with('success', 'Pegawai berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus pegawai: ' . $e->getMessage());
+        }
     }
 
     // Cari organisasi berdasarkan nama

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Organisasi;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class OrganisasiControllrs extends Controller
 {
@@ -34,7 +35,7 @@ class OrganisasiControllrs extends Controller
             'email_organisasi' => 'required|string|email|max:255|unique:organisasi,email_organisasi',
             'password_organisasi' => 'required|string|min:8',
         ]);
-        
+
 
         // Buat ID otomatis
         $last = DB::table('organisasi')->select('id')->where('id', 'like', 'OR%')->orderByDesc('id')->first();
@@ -53,10 +54,10 @@ class OrganisasiControllrs extends Controller
     }
 
 
-    public function show($id)
+    public function showOrganisasi()
     {
-        $organisasi = Organisasi::findOrFail($id);
-        return view('organisasi.show', compact('organisasi'));
+        $organisasi = Auth::guard('organisasi')->user();
+        return view('organisasi.profilOrganisasi', compact('organisasi'));
     }
 
     public function edit($id)
@@ -92,4 +93,26 @@ class OrganisasiControllrs extends Controller
         $organisasi = Organisasi::where('nama_organisasi', 'LIKE', "%$keyword%")->get();
         return view('organisasi.index', compact('organisasi'));
     }
+
+    // public function updateProfil(Request $request)
+    // {
+    //     $request->validate([
+    //         'nama_organisasi' => 'required|string|max:255',
+    //         'email_organisasi' => 'required|email|max:255',
+    //         'nomor_telepon' => 'required|string|max:11',
+    //         'alamat_organisasi' => 'required|string|max:255',
+    //     ]);
+
+    //     $organisasi = Auth::guard('organisasi')->user();
+
+    //     $organisasi->update([
+    //         'nama_organisasi' => $request->nama_organisasi,
+    //         'email_organisasi' => $request->email_organisasi,
+    //         'nomor_telepon' => $request->nomor_telepon,
+    //         'alamat_organisasi' => $request->alamat_organisasi,
+    //     ]);
+
+    //     return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
+    // }
+
 }
