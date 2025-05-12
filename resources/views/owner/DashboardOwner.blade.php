@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
+    <title>Dashboard Owner</title>
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,13 +19,13 @@
     <!-- Sidebar Navigation -->
     <div class="bg-gray-800 text-white p-6 flex flex-col justify-between">
         <div>
-            <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
+            <h2 class="text-xl font-semibold mb-8">Owner</h2>
             <nav>
                <div class="space-y-4">
                    <a href="{{ route('owner.DashboardOwner') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-user-circle mr-2"></i>
-                        <span>Profile Owner</span>
+                        <span>Profile Saya</span>
                     </a>
                     <a href="{{ route('owner.DashboardDonasi') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
@@ -51,7 +51,7 @@
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-semibold text-gray-800">Profil Pembeli</h1>
+            <h1 class="text-3xl font-semibold text-gray-800">Profil Saya</h1>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
