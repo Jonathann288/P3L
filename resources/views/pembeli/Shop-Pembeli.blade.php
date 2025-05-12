@@ -29,7 +29,7 @@
                         <div class="relative">
                             <button id="dropdownToggle"
                                 class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md hover:bg-blue-800 flex items-center space-x-2">
-                                <img src="{{ asset('images/fotoprofil.jpg' . Auth::guard('pembeli')->user()->foto_pembeli) }}"
+                                <img src="{{asset(Auth::guard('pembeli')->user()->foto_pembeli) }}"
                                     alt="profile" class="w-8 h-8 rounded-full object-cover">
                                 <span>{{ Auth::guard('pembeli')->user()->nama_pembeli }}</span>
                             </button>

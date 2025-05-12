@@ -26,7 +26,7 @@
                         <span>{{ $pembeli->nama_pembeli }}</span>
                     </a>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fa-solid fa-clock-rotate-left" ></i>
+                        <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>History</span>
                     </div>
                     <a href="{{ route('pembeli.AlamatPembeli') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
@@ -46,81 +46,117 @@
 
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
-    <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-semibold">Daftar Alamat</h2>
-            <button onclick="toggleModal('add')" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Tambah Alamat</button>
-        </div>
+        <div class="max-w-5xl mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <!-- Search Bar -->
+                <form action="{{ route('pembeli.alamat.search') }}" method="GET" class="flex items-center gap-2">
+                    <input type="text" name="nama_jalan" placeholder="Cari Nama Jalan..." 
+                        class="w-full p-2 border rounded-lg" 
+                        value="{{ request('nama_jalan') }}">
+                    
+                    <select name="status_default" class="w-full p-2 border rounded-lg">
+                        <option value="" disabled selected>Status Alamat</option>
+                        <option value="Rumah {{ request('status_default') == 'Rumah' ? 'selected' : '' }}">Rumah</option>
+                        <option value="Toko {{ request('status_default') == 'Toko' ? 'selected' : '' }}">Toko</option>
+                        <option value="Gudang {{ request('status_default') == 'Gudang' ? 'selected' : '' }}">Gudang</option>
+                        <option value="Apartemen {{ request('status_default') == 'Apartemen' ? 'selected' : '' }}">Apartemen</option>
+                    </select>
+                    
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        Cari
+                    </button>
+                </form>
 
-        <!-- Alamat List -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @if ($alamat->isNotEmpty())
-                @foreach ($alamat as $item)
-                    <div class="bg-white p-4 rounded-lg shadow-md">
-                        <div class="font-bold">{{ $item->nama_jalan }}</div>
-                        <div>{{ $item->kode_pos }}</div>
-                        
-                        <!-- Tombol Edit dan Hapus -->
-                        <div class="flex space-x-2 mt-4">
-                            <button 
-                                onclick="editAlamat('{{ $item->id }}', '{{ $item->nama_alamat }}', '{{ $item->detail_alamat }}')" 
-                                class="bg-yellow-500 text-white px-4 py-1 rounded-lg"
-                            >
-                                Edit
-                            </button>
-                            <form action="{{ route('alamat.destroy', $item->id) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="bg-red-600 text-white px-4 py-1 rounded-lg">
-                                    Hapus
+                <!-- Button Tambah Alamat -->
+                <button onclick="toggleModal('add')" class="bg-green-600 text-white px-4 py-2 rounded-lg">
+                    Tambah Alamat
+                </button>
+            </div>
+
+
+            <!-- Alamat List -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @if ($alamat->isNotEmpty())
+                    @foreach ($alamat as $item)
+                        <div class="bg-white p-4 rounded-lg shadow-md">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="font-bold text-lg">{{ $pembeli->nama_pembeli }}</div>
+                                    <div class="text-sm text-gray-500">(+62) {{ $pembeli->nomor_telepon_pembeli }}</div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <div class="text-blue-500 cursor-pointer hover:underline" onclick="editAlamat('{{ $item->id }}', '{{ $item->nama_jalan }}', '{{ $item->deskripsi_alamat }}')">Ubah</div>
+                                    <form action="{{ route('pembeli.alamat.delete', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus alamat ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:underline">Hapus</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-gray-700">
+                                {{ $item->nama_jalan }}, {{ $item->kelurahan }}, {{ $item->kecamatan }},
+                                {{ $item->kabupaten }},  {{ $item->kode_pos }}
+                            </div>
+                            <div class="mt-2 text-sm text-gray-500">
+                                {{ $item->status_default}}
+                            </div>
+                            <div class="flex space-x-2 mt-4">
+                                <button id="btn-utama-{{ $item->id }}" 
+                                        onclick="aturSebagaiUtama('{{ $item->id }}')" 
+                                        class="border border-gray-300 px-2 py-1 rounded hover:bg-gray-100">
+                                    Atur sebagai utama
                                 </button>
-                            </form>
+                            </div>
                         </div>
-                    </div>
-                @endforeach
-            @else
-                <p>Belum ada alamat yang ditambahkan.</p>
-            @endif
+                    @endforeach
+                @else
+                    <p>Belum ada alamat yang ditambahkan.</p>
+                @endif
+            </div>
         </div>
-
-
     </div>
 
     <!-- Modal -->
     <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 justify-center items-center">
         <div class="bg-white p-8 rounded-lg w-1/3">
             <h2 class="text-xl mb-4 font-semibold" id="modalTitle">Tambah Alamat</h2>
-            <form id="modalForm" method="POST">
+            <form id="modalForm" method="POST" action="">
                 @csrf
                 <input type="hidden" id="alamatId">
                 <div class="space-y-4">
                     <div>
                         <label class="block">Nama Jalan:</label>
-                        <input type="text" name="nama_jalan" class="w-full p-2 border rounded-lg" required>
+                        <input type="text" name="nama_jalan" id="nama_jalan" class="w-full p-2 border rounded-lg" required>
                     </div>
                     <div>
                         <label class="block">Kode Pos:</label>
-                        <input type="number" name="kode_pos" class="w-full p-2 border rounded-lg" required>
+                        <input type="number" name="kode_pos" id="kode_pos" class="w-full p-2 border rounded-lg" required>
                     </div>
                     <div>
                         <label class="block">Kecamatan:</label>
-                        <input type="text" name="kecamatan" class="w-full p-2 border rounded-lg" required>
+                        <input type="text" name="kecamatan" id="kecamatan" class="w-full p-2 border rounded-lg" required>
                     </div>
                     <div>
                         <label class="block">Kelurahan:</label>
-                        <input type="text" name="kelurahan" class="w-full p-2 border rounded-lg" required>
+                        <input type="text" name="kelurahan" id="kelurahan" class="w-full p-2 border rounded-lg" required>
                     </div>
                     <div>
-                        <label class="block">Status Default:</label>
-                        <input type="text" name="status_default" class="w-full p-2 border rounded-lg" required>
+                        <label class="block">Status Alamat:</label>
+                        <select name="status_default" id="status_default" class="w-full p-2 border rounded-lg" required >
+                            <option value="" disabled selected>Pilih alamat sebagai</option>
+                            <option value="Rumah">Rumah</option>
+                            <option value="Toko">Toko</option>
+                            <option value="Gudang">Gudang</option>
+                            <option value="Apartemen">Apartemen</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block">Kabupaten:</label>
-                        <input type="text" name="kabupaten" class="w-full p-2 border rounded-lg" required>
+                        <input type="text" name="kabupaten" id="kabupaten" class="w-full p-2 border rounded-lg" required>
                     </div>
                     <div>
                         <label class="block">Deskripsi Alamat:</label>
-                        <textarea name="deskripsi_alamat" class="w-full p-2 border rounded-lg" required></textarea>
+                        <textarea name="deskripsi_alamat" id="deskripsi_alamat" class="w-full p-2 border rounded-lg" required></textarea>
                     </div>
                 </div>
                 <div class="flex justify-end mt-6 space-x-2">
@@ -142,27 +178,67 @@
                 title.textContent = "Tambah Alamat";
                 alamatId.value = '';
                 // Reset form fields
-                // document.getElementById('nama_jalan').value = '';
-                // document.getElementById('kode_post').value = '';
-                // document.getElementById('kecamtan').value = '';
-                // document.getElementById('kelurahan').value = '';
-                // document.getElementById('status_default').value = '';
-                // document.getElementById('kabupaten').value = '';
-                // document.getElementById('deskripsi_alamt').value = '';
             }
             modal.classList.toggle('hidden');
             modal.classList.toggle('flex');
         }
 
-        function editAlamat(id, nama, detail) {
+        function editAlamat(id, nama, deskripsi) {
             toggleModal('edit');
-            document.getElementById('modalForm').action = '/alamat/' + id; // Update route
-            document.getElementById('modalForm').innerHTML += '@method("PUT")'; // Method PUT for update
-            document.getElementById('nama_alamat').value = nama;
-            document.getElementById('detail_alamat').value = detail;
-            document.getElementById('alamatId').value = id;
+            const form = document.getElementById('modalForm');
+            form.action = '/alamatPembeli/update/' + id; // Update route
+            form.innerHTML += '@method("PUT")'; // Method PUT for update
+            
+            // document.getElementById('alamatId').value = id;
+            // document.getElementById('nama_jalan').value = nama;
+            // document.getElementById('deskripsi_alamat').value = deskripsi;
+            // Update other fields as necessary
+        }
+        let alamatUtamaSebelumnya = null;
+
+        function aturSebagaiUtama(id) {
+            // Konfirmasi tindakan
+            if (confirm("Apakah Anda yakin ingin mengatur alamat ini sebagai utama?")) {
+                
+                // Jika sebelumnya ada alamat utama, tampilkan kembali tombolnya
+                if (alamatUtamaSebelumnya !== null) {
+                    const previousButton = document.getElementById('btn-utama-' + alamatUtamaSebelumnya);
+                    if (previousButton) {
+                        previousButton.style.display = 'inline-block';
+                    }
+                }
+
+                // Hilangkan tombol pada alamat yang baru dipilih
+                const currentButton = document.getElementById('btn-utama-' + id);
+                if (currentButton) {
+                    currentButton.style.display = 'none';
+                }
+
+                // Simpan ID alamat yang baru diatur sebagai utama
+                alamatUtamaSebelumnya = id;
+
+                // Optional: Kirim AJAX request ke server untuk update status
+                /*
+                fetch(`/alamatPembeli/setUtama/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: id })
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Alamat berhasil diatur sebagai utama.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+                */
+            }
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 </body>
 
 </html>

@@ -29,7 +29,7 @@
                         <i class="fa-solid fa-clock-rotate-left" ></i>
                         <span>History</span>
                     </div>
-                    <a href="{{ route('pembeli.alamatPembeli') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('pembeli.AlamatPembeli') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Alamat</span>
                     </a>
@@ -57,7 +57,7 @@
                     <img src="{{ asset($pembeli->foto_pembeli) }}" alt="Foto Profil"class="w-full h-full object-cover rounded-full">
                 </div>
                 <div class="font-semibold text-xl mb-2">{{ $pembeli->nama_pembeli }}</div>
-                <button class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-500 w-full mt-4">
+                <button onclick="toggleModal()" class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-500 w-full mt-4">
                     <i class="fas fa-pencil-alt"></i> Edit Profil
                 </button>
             </div>
@@ -108,6 +108,26 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+        <div class="bg-white p-8 rounded-lg w-1/3">
+            <h2 class="text-xl mb-4 font-semibold">Ubah Foto Profil</h2>
+            <form action="{{ route('pembeli.updateProfil', $pembeli->id_pembeli) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="space-y-4">
+                    <div>
+                        <label class="block">Foto Profil:</label>
+                        <input type="file" name="foto_pembeli" class="w-full p-2 border rounded-lg" required>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-6 space-x-2">
+                    <button type="button" onclick="toggleModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Batal</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -165,6 +185,13 @@
             modal.classList.toggle('hidden');
             modal.classList.toggle('flex');
         }
+
+        function toggleModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+
     </script>
 </body>
 

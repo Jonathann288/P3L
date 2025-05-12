@@ -41,4 +41,9 @@ class Pembeli extends Authenticatable
     {
         return $this->password_pembeli;
     }
+
+    public function alamat()
+    {
+        return $this->hasMany(Alamat::class, 'id_pembeli', 'id_pembeli');
+    }
 }

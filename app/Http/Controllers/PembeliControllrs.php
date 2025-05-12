@@ -94,7 +94,24 @@ class PembeliControllrs extends Controller
         return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
     }
 
+    public function updateFoto(Request $request, $id)
+    {
+        $request->validate([
+            'foto_pembeli' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+        ]);
 
+        $pembeli = Pembeli::findOrFail($id);
+
+        if ($request->hasFile('foto_pembeli')) {
+            $imageName = time() . '.' . $request->foto_pembeli->extension();
+            $request->foto_pembeli->move(public_path('uploads'), $imageName);
+            $pembeli->foto_pembeli = 'uploads/' . $imageName;
+        }
+
+        $pembeli->save();
+        
+        return redirect()->route('pembeli.profilPembeli')->with('success', 'Foto profil berhasil diupdate.');
+    }
 
 
 }
