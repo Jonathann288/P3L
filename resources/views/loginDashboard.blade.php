@@ -33,7 +33,7 @@
             </div>
 
             <div class="w-full max-w-md">
-                <h2 class="text-xl font-bold mb-4 text-white">Login</h2>
+                <h2 class="text-xl font-bold mb-4 text-white">Login - Pegawai</h2>
 
                 <form action="{{ route('loginPegawai.post') }}" method="POST" class="space-y-3">
                     @csrf

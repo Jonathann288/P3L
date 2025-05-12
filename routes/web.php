@@ -112,18 +112,24 @@ Route::middleware(['organisasi'])->group(function () {
     })->name('organisasi.donasi-organisasi');
 });
 
+
+//ADMIN
 Route::get('/loginDashboard', [AuthController::class, 'showLoginFormPegawai'])->name('loginDashboard');
-Route::post('/loginDashboard', [AuthController::class, 'loginPegawai'])->name('loginPegawai.post');
+Route::post('/loginPegawai', [PegawaiControllers::class, 'login'])->name('loginPegawai.post');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/dashboard', [PegawaiControllers::class, 'showDashboard'])->name('dashboard');
 
 Route::middleware(['checkjabatan:Admin'])->group(function () {
-    Route::get('/Dashboard', function () {
-        return view('admin.Dashboard');
-    })->name('admin.Dashboard');
+    Route::post('/admin/update-profil', [PegawaiControllers::class, 'updateProfilAdmin'])->name('admin.updateProfil');
+    Route::get('/admin/Dashboard', [PegawaiControllers::class, 'showDashboard'])->name('admin.Dashboard');
     Route::get('/DashboardPegawai', [PegawaiControllers::class, 'showlistPegawai'])->name('admin.DashboardPegawai');
     Route::post('/DashboardPegawai/register', [PegawaiControllers::class, 'registerPegawai'])->name('admin.pegawai.register');
     Route::put('/DashboardPegawai/update/{id}', [PegawaiControllers::class, 'update'])->name('admin.pegawai.update');
+    Route::delete('/DashboardPegawai/delete/{id}', [PegawaiControllers::class, 'destroy'])->name('admin.pegawai.delete');
 });
+
+
 Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::get('/DashboardOwner', function () {
         return view('owner.DashboardOwner');

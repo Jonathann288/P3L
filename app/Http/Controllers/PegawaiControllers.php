@@ -12,6 +12,23 @@ use Illuminate\Support\Facades\Auth;
 class PegawaiControllers extends Controller
 {
 
+    public function index()
+    {
+        $pegawai = Pegawai::all();
+        return response()->json($pegawai);
+    }
+
+    public function showDashboard()
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+
+        if (!$pegawai) {
+            return redirect()->route('admin.Dashboard')->with('error', 'Silakan login terlebih dahulu');
+        }
+
+        return view('admin.Dashboard', compact('pegawai'));
+    }
+
     public function showlistPegawai()
     {
         try {
@@ -19,11 +36,33 @@ class PegawaiControllers extends Controller
             $pegawai = Pegawai::with('jabatan')->get();
             $jabatan = Jabatan::all();
             // Return ke view dengan data pegawai
-            return view('admin.DashboardPegawai', compact('pegawai','jabatan'));
+            return view('admin.DashboardPegawai', compact('pegawai', 'jabatan'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function updateProfilAdmin(Request $request)
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+
+        if (!$pegawai) {
+            return redirect()->route('admin.Dashboard')->with('error', 'Silakan login terlebih dahulu');
+        }
+
+        // Validasi input
+        $validated = $request->validate([
+            'nama_pegawai' => 'required|string|max:255',
+            'nomor_telepon_pegawai' => 'required|string|max:20',
+            'tanggal_lahir_pegawai' => 'required|date',
+        ]);
+
+        // Update data pegawai
+        $pegawai->update($validated);
+
+        return redirect()->route('admin.Dashboard')->with('success', 'Profil berhasil diperbarui');
+    }
+
 
     public function registerPegawai(Request $request)
     {
@@ -64,46 +103,41 @@ class PegawaiControllers extends Controller
 
     public function update(Request $request, $id)
     {
-        // Cari Pegawai berdasarkan ID
-        $pegawai = Pegawai::with('jabatan')->find($id); // Load relasi jabatan
+        $pegawai = Pegawai::find($id);
         if (!$pegawai) {
             return redirect()->back()->with('error', 'Pegawai tidak ditemukan');
         }
 
-        // Validasi data yang diterima
-        $validateData = $request->validate([
+        $validatedData = $request->validate([
             'id_jabatan' => 'required|exists:jabatan,id_jabatan',
             'nama_pegawai' => 'required|string|max:255',
             'tanggal_lahir_pegawai' => 'required|date',
             'nomor_telepon_pegawai' => 'required|string|max:20',
         ]);
 
-        // Update data pegawai
-        $pegawai->id_jabatan = $validateData['id_jabatan'];
-        $pegawai->nama_pegawai = $validateData['nama_pegawai'];
-        $pegawai->tanggal_lahir_pegawai = $validateData['tanggal_lahir_pegawai'];
-        $pegawai->nomor_telepon_pegawai = $validateData['nomor_telepon_pegawai'];
-        $pegawai->save();
+        $pegawai->update($validatedData);
 
-        // Redirect kembali ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', 'Pegawai berhasil diperbarui');
+        return redirect()->route('admin.DashboardPegawai')->with('success', 'Pegawai berhasil diperbarui');
     }
 
 
-    public function index()
+
+
+
+    public function login(Request $request)
     {
-        $pegawai = Pegawai::all();
-        return response()->json($pegawai);
+        $credentials = $request->only('email_pegawai', 'password_pegawai');
+
+        $pegawai = Pegawai::where('email_pegawai', $credentials['email_pegawai'])->first();
+
+        if ($pegawai && Hash::check($credentials['password_pegawai'], $pegawai->password_pegawai)) {
+            Auth::guard('pegawai')->login($pegawai); // Gunakan guard pegawai
+            return redirect()->route('admin.Dashboard');
+        } else {
+            return redirect()->back()->with('error', 'Email atau password salah');
+        }
     }
-    
-    public function showLogin()
-    {
-        $pegawai = Auth::user(); // atau request()->user()
-        return response()->json([
-            'message' => 'Data organisasi login berhasil diambil',
-            'Pegawai' => $pegawai
-        ]);
-    }
+
 
     public function show($id)
     {
@@ -116,13 +150,14 @@ class PegawaiControllers extends Controller
 
     public function destroy($id)
     {
-        $pegawai = Pegawai::find($id);
-        if (!$pegawai) {
-            return response()->json(['message' => 'pegawai tidak ditemukan'], 404);
-        }
+        try {
+            $pegawai = Pegawai::findOrFail($id);
+            $pegawai->delete();
 
-        $pegawai->delete();
-        return response()->json(['message' => 'pegawai berhasil dihapus']);
+            return redirect()->route('admin.DashboardPegawai')->with('success', 'Pegawai berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus pegawai: ' . $e->getMessage());
+        }
     }
 
     // Cari organisasi berdasarkan nama
