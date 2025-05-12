@@ -60,10 +60,6 @@
                     <img src="{{ asset('images/fotoprofil.jpg') }}" alt="ReUseMart" class="w-full h-full object-cover">
                 </div>
                 <div class="font-semibold text-xl mb-2">{{ $organisasi->nama_organisasi }}</div>
-                <button onclick="toggleModal()"
-                    class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-500 w-full mt-4">
-                    <i class="fas fa-pencil-alt"></i> Edit Profil
-                </button>
             </div>
 
             <!-- Info Sections -->

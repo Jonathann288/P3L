@@ -35,7 +35,7 @@ class OrganisasiControllrs extends Controller
             'email_organisasi' => 'required|string|email|max:255|unique:organisasi,email_organisasi',
             'password_organisasi' => 'required|string|min:8',
         ]);
-
+        
 
         // Buat ID otomatis
         $last = DB::table('organisasi')->select('id')->where('id', 'like', 'OR%')->orderByDesc('id')->first();

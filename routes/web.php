@@ -156,7 +156,10 @@ Route::middleware(['organisasi'])->group(function () {
     Route::get('/organisasi/profilOrganisasi', [OrganisasiControllrs::class, 'showOrganisasi'])->name('organisasi.profilOrganisasi');
     Route::post('/organisasi/update-profil', [OrganisasiControllrs::class, 'updateProfil'])->name('organisasi.updateProfil');
     Route::get('/organisasi/requestDonasiOrganisasi', [RequestDonasiControllers::class, 'requestDonasiOrganisasi'])->name('organisasi.requestDonasiOrganisasi');
+    Route::delete('/organisasi/destroy/{id}', [RequestDonasiControllers::class, 'destroy'])->name('organisasi.destroy');
+    Route::put('/request-donasi/update/{id}', [RequestDonasiControllers::class, 'update'])->name('organisasi.request.update');
 });
+
 Route::put('/organisasi/updatePassword', [lupaPasswordOrganisasiControllers::class, 'updatePassword'])->name('organisasi.updatePassword');
 
 Route::post('/diskusi', [DiskusiControllers::class, 'store'])->name('diskusi.store');

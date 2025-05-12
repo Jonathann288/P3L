@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\RequestDonasi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Validator;
 
 class RequestDonasiControllers extends Controller
 {
@@ -92,12 +93,64 @@ class RequestDonasiControllers extends Controller
         return redirect()->back()->with('success', 'Request donasi berhasil ditambahkan.');
     }
 
-    public function requestDonasiOrganisasi()
+    public function requestDonasiOrganisasi(Request $request)
     {
         $organisasi = Auth::guard('organisasi')->user();
-        $requestdonasi = $organisasi->requestDonasi()->latest('id')->first(); // pakai kolom yang valid
+
+        // Ambil query pencarian dari input
+        $search = $request->input('search');
+
+        // Mulai query request donasi milik organisasi
+        $query = $organisasi->requestDonasi()->orderBy('tanggal_request', 'desc');
+
+        // Jika ada keyword pencarian, filter berdasarkan deskripsi
+        if (!empty($search)) {
+            $query->where('deskripsi_request', 'like', '%' . $search . '%');
+        }
+
+        // Ambil hasil
+        $requestdonasi = $query->get();
+
         return view('organisasi.requestDonasiOrganisasi', compact('organisasi', 'requestdonasi'));
     }
 
+    public function destroy($id)
+    {
+        try {
+            $organisasiId = Auth::guard('organisasi')->id();
+
+            // Pastikan hanya request milik organisasi yang sedang login yang bisa dihapus
+            $requestDonasi = RequestDonasi::where('id', $id)
+                ->where('id_organisasi', $organisasiId)
+                ->firstOrFail();
+
+            $requestDonasi->delete();
+
+            return redirect()->back()->with('success', 'Request donasi berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus request: ' . $e->getMessage());
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'deskripsi_request' => 'required|string',
+            'tanggal_request' => 'required|date',
+        ]);
+
+        $organisasiId = Auth::guard('organisasi')->id();
+
+        $requestDonasi = RequestDonasi::where('id', $id)
+            ->where('id_organisasi', $organisasiId)
+            ->firstOrFail();
+
+        $requestDonasi->update([
+            'deskripsi_request' => $request->deskripsi_request,
+            'tanggal_request' => $request->tanggal_request,
+        ]);
+
+        return redirect()->back()->with('success', 'Request donasi berhasil diperbarui.');
+    }
 
 }
