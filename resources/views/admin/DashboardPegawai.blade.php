@@ -34,12 +34,12 @@
                         <i class="fas fa-users mr-2"></i> Pegawai
                     </a>
 
+                    <a href="{{ route('admin.DashboardJabatan') }}"
+                        class="block px-4 py-2 rounded text-white hover:bg-blue-600">
+                        <i class="fas fa-briefcase mr-2"></i> Jabatan
+                    </a>
 
 
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-cog"></i>
-                        <span>Jabatan</span>
-                    </div>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Organisasi</span>
@@ -67,6 +67,15 @@
                 Tambah Pegawai
             </button>
         </div>
+        <!-- Search functionality -->
+        <div class="mb-4">
+        <form action="{{ route('admin.DashboardPegawai') }}" method="GET" class="flex items-center bg-white rounded-lg shadow-sm overflow-hidden">
+    <input type="text" name="search" id="searchInput" placeholder="Cari nama pegawai..." class="w-full px-4 py-2 focus:outline-none" value="{{ request('search') }}">
+    <button type="submit" class="bg-blue-500 text-white px-4 py-2 hover:bg-blue-600">
+        <i ></i> Cari
+    </button>
+</form>
+    </div>
 
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <table class="min-w-full bg-white">
@@ -239,6 +248,7 @@
         function closeEditModal() {
             document.getElementById('editModal').classList.add('hidden');
         }
+        //delte
         function openDeleteModal(id) {
             const deleteForm = document.getElementById('deleteForm');
             deleteForm.action = `/DashboardPegawai/delete/${id}`;
@@ -248,6 +258,9 @@
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
         }
+        
+        
+
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>

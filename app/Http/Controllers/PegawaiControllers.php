@@ -29,18 +29,38 @@ class PegawaiControllers extends Controller
         return view('admin.Dashboard', compact('pegawai'));
     }
 
-    public function showlistPegawai()
+    public function showlistPegawai(Request $request)
     {
         try {
-            // Ambil semua data pegawai beserta jabatannya
-            $pegawai = Pegawai::with('jabatan')->get();
+
+            $search = $request->input('search');
+    
+            $query = Pegawai::with('jabatan');
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    // Search in pegawai table
+                    $q->where('nama_pegawai', 'LIKE', '%' . $search . '%')
+                        // Search in related jabatan table using whereHas
+                        ->orWhereHas('jabatan', function ($subQuery) use ($search) {
+                            $subQuery->where('nama_jabatan', 'LIKE', '%' . $search . '%');
+                        });
+                });
+            }
+
+            // Get the filtered pegawai data
+            $pegawai = $query->get();
+
+            // Get all jabatan for dropdown
             $jabatan = Jabatan::all();
-            // Return ke view dengan data pegawai
-            return view('admin.DashboardPegawai', compact('pegawai', 'jabatan'));
+
+            // Return to view with data
+            return view('admin.DashboardPegawai', compact('pegawai', 'jabatan', 'search'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 
     public function updateProfilAdmin(Request $request)
     {
@@ -159,6 +179,8 @@ class PegawaiControllers extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus pegawai: ' . $e->getMessage());
         }
     }
+
+
 
     // Cari organisasi berdasarkan nama
     public function searchByNama(Request $request)
