@@ -30,10 +30,10 @@
                         <i class="fas fa-cog"></i>
                         <span>Jabatan</span>
                     </div>
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('admin.DashboardOrganisasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Organisasi</span>
-                    </div>
+                    </a>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Merchandise</span>
@@ -43,16 +43,19 @@
         </div>
         <!-- Bottom buttons -->
         <div class="space-y-4 mt-auto">
-            <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
-                Keluar
-            </button>
+            <form action="{{ route('logout.pegawai') }}"  method="POST">
+                @csrf
+                <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
+                    Keluar
+                </button>
+            </form>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-semibold text-gray-800">Profil Pembeli</h1>
+            <h1 class="text-3xl font-semibold text-gray-800">Profil {{ $pegawai->nama_pegawai }}</h1>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
@@ -62,9 +65,6 @@
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold text-gray-800">Informasi Pribadi</h2>
-                        <button class="text-blue-600 hover:underline">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
                     </div>
                     <div class="space-y-4">
                         <div class="flex justify-between">

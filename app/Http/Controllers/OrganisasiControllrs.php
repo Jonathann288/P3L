@@ -9,7 +9,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class OrganisasiControllrs extends Controller
-{
+{   
+    public function showlistOrganisasi()
+    {
+        try {
+            $pegawaiLogin = Auth::guard('pegawai')->user();
+            // Ambil semua data pegawai beserta jabatannya
+            $organisasi = Organisasi::all();
+            // Return ke view dengan data pegawai
+            return view('admin.DashboardOrganisasi', compact('organisasi','pegawaiLogin'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
     public function index()
     {
         $organisasi = Organisasi::all();
@@ -35,7 +47,7 @@ class OrganisasiControllrs extends Controller
             'email_organisasi' => 'required|string|email|max:255|unique:organisasi,email_organisasi',
             'password_organisasi' => 'required|string|min:8',
         ]);
-
+        
 
         // Buat ID otomatis
         $last = DB::table('organisasi')->select('id')->where('id', 'like', 'OR%')->orderByDesc('id')->first();
@@ -77,22 +89,37 @@ class OrganisasiControllrs extends Controller
         $organisasi = Organisasi::findOrFail($id);
         $organisasi->update($request->only('nama_organisasi', 'alamat_organisasi', 'nomor_telepon'));
 
-        return redirect()->route('organisasi.index')->with('success', 'Organisasi berhasil diperbarui.');
+        return redirect()->route('admin.DashboardOrganisasi')->with('success', 'Organisasi berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
         $organisasi = Organisasi::findOrFail($id);
         $organisasi->delete();
-        return redirect()->route('organisasi.index')->with('success', 'Organisasi berhasil dihapus.');
+        return redirect()->route('admin.DashboardOrganisasi')->with('success', 'Organisasi berhasil dihapus.');
     }
 
     public function search(Request $request)
     {
         $keyword = $request->input('keyword');
-        $organisasi = Organisasi::where('nama_organisasi', 'LIKE', "%$keyword%")->get();
-        return view('organisasi.index', compact('organisasi'));
+
+        $query = Organisasi::query();
+
+        if ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('nama_organisasi', 'LIKE', "%{$keyword}%");
+                // Kalau mau cari kolom lain, bisa ditambahkan orWhere di sini
+                // ->orWhere('alamat', 'LIKE', "%{$keyword}%")
+            });
+        }
+
+        $organisasi = $query->get();
+
+        $pegawaiLogin = Auth::guard('pegawai')->user();
+
+        return view('admin.DashboardOrganisasi', compact('organisasi','pegawaiLogin'));
     }
+
 
     // public function updateProfil(Request $request)
     // {

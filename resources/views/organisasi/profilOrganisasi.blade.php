@@ -53,14 +53,14 @@
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
-                <!-- Profile Card -->
-                <div class="bg-white p-6 rounded-lg shadow-md text-center">
-                    <div
-                        class="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden">
-                        <img src="{{ asset('images/fotoprofil.jpg') }}" alt="ReUseMart" class="w-full h-full object-cover">
-                    </div>
-                    <div class="font-semibold text-xl mb-2">{{ $organisasi->nama_organisasi }}</div>    
+            <!-- Profile Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div
+                    class="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden">
+                    <img src="{{ asset('images/fotoprofil.jpg') }}" alt="ReUseMart" class="w-full h-full object-cover">
                 </div>
+                <div class="font-semibold text-xl mb-2">{{ $organisasi->nama_organisasi }}</div>
+            </div>
 
             <!-- Info Sections -->
             <div class="col-span-2 space-y-6">

@@ -33,10 +33,9 @@
                             </button>
                             <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
                                 <a href="{{ route('organisasi.profilOrganisasi') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
-                                <form action="{{ route('logout.organisasi') }}" method="POST">
+                                <form action="#" method="POST">
                                     @csrf
-                                    <button type="submit"
-                                        class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
                                 </form>
                             </div>
                         </div>
@@ -77,7 +76,7 @@
                             <p class="mb-4">Tidak menemukan yang Anda cari? Ajukan permintaan barang</p>
                             <button class="bg-orange-500 hover:bg-orange-600 text-white py-2 px-6 rounded-full font-bold"
                                 onclick="window.location.href='{{ route('requestBarang') }}'">
-                                Request Sekarang / sudah login
+                                Request Sekarang
                             </button>
                         </div>
                     </div>

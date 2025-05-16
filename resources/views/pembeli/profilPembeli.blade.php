@@ -25,10 +25,10 @@
                         <img src="{{ asset($pembeli->foto_pembeli) }}" alt="profile" class="w-8 h-8 rounded-full object-cover">
                         <span>{{ $pembeli->nama_pembeli }}</span>
                     </div>
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('pembeli.historyPembeli') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left" ></i>
                         <span>History</span>
-                    </div>
+                    </a>
                     <a href="{{ route('pembeli.AlamatPembeli') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Alamat</span>

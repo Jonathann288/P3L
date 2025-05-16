@@ -22,7 +22,7 @@
                     <a href="{{ route('CustomerService.DashboardCS') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <span  class="text-2xl font-bold">{{ $pegawai->nama_pegawai }}</span>
                     </a>
-                    <a href="{{ route('CustomerService.DashboardPegawai') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('CustomerService.DashboardPenitip') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>Penitip</span>
                     </a>
@@ -31,9 +31,12 @@
         </div>
         <!-- Bottom buttons -->
         <div class="space-y-4 mt-auto">
-            <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
-                Keluar
-            </button>
+            <form action="{{ route('logout.pegawai') }}"  method="POST">
+                @csrf
+                <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
+                    Keluar
+                </button>
+            </form>
         </div>
     </div>
 

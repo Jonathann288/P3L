@@ -20,7 +20,6 @@ class transaksipenjualan extends Model
         'bukti_pembayaran',
         'status_pembayaran',
         'poin',
-        'ongkir',
         'tanggal_kirim',
         'ongkir',
     ];

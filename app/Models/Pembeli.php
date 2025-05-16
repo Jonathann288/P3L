@@ -46,4 +46,8 @@ class Pembeli extends Authenticatable
     {
         return $this->hasMany(Alamat::class, 'id_pembeli', 'id_pembeli');
     }
+    public function transaksiPenjualan()
+    {
+        return $this->hasMany(transaksipenjualan::class, 'id_pembeli', 'id_pembeli');
+    }
 }

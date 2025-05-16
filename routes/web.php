@@ -93,6 +93,8 @@ Route::middleware(['pembeli'])->group(function () {
     // categori dan desripsi barang
     Route::get('/Pembeli/categoryPembeli/{id}', [KategoriBarangControllers::class, 'filterByCategoryPembeli'])->name('pembeli.categoryPembeli');
     Route::get('/Pembeli/barang/{id_barang}', [BarangControllers::class, 'showDetailPembeli'])->name('pembeli.detail_barangPembeli');
+
+    Route::get('/historyPembeli', [PembeliControllrs::class, 'showHistory'])->name('pembeli.historyPembeli');
     //
 
     // logout
@@ -100,7 +102,7 @@ Route::middleware(['pembeli'])->group(function () {
 });
 
 Route::get('/registerOrganisasi', [OrganisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
-Route::post('/registerOrganisasi', [OrganisasiControllrs::class, 'registerOrganisasi'])->name('registerOrganisasi');
+Route::post('/registerOrganisasi', [OrganisasiControllrs::class, 'registerOrganisasi'])->name('registerOrganisasi.store');
 Route::get('/loginOrganisasi', [AuthController::class, 'showLoginOrganisasi'])->name('loginOrganisasi');
 Route::post('/loginOrganisasi', [AuthController::class, 'loginOrganisasi'])->name('loginOrganisasi.post');
 
@@ -124,20 +126,33 @@ Route::post('/loginDashboard', [AuthController::class, 'loginPegawai'])->name('l
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['checkjabatan:Admin'])->group(function () {
+    Route::post('/logout-Admin', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
+
     Route::get('/Dashboard', [PegawaiControllers::class, 'showLoginAdmin'])->name('admin.Dashboard');
     Route::get('/DashboardPegawai', [PegawaiControllers::class, 'showlistPegawai'])->name('admin.DashboardPegawai');
-    // Route::get('/DashboardPegawai', [PegawaiControllers::class, 'showLoginPegawai'])->name('admin.DashboardPegawai');
     Route::post('/DashboardPegawai/register', [PegawaiControllers::class, 'registerPegawai'])->name('admin.pegawai.register');
     Route::put('/DashboardPegawai/update/{id}', [PegawaiControllers::class, 'update'])->name('admin.pegawai.update');
     Route::delete('/DashboardPegawai/delete/{id}', [PegawaiControllers::class, 'destroy'])->name('admin.pegawai.delete');
+    Route::get('/DashboardPegawai/search', [PegawaiControllers::class, 'searchPegawai'])->name('admin.pegawai.search');
+
+
+    Route::get('/DashboardOrganisasi', [OrganisasiControllrs::class, 'showlistOrganisasi'])->name('admin.DashboardOrganisasi');
+    Route::put('/DashboardOrganisasi/update/{id}', [OrganisasiControllrs::class, 'update'])->name('admin.organisasi.update');
+    Route::delete('/DashboardOrganisasi/delete/{id}', [OrganisasiControllrs::class, 'destroy'])->name('admin.organisasi.delete');
+    Route::get('/DashboardOrganisasi/search', [OrganisasiControllrs::class, 'search'])->name('admin.organisasi.search');
 });
 Route::middleware(['checkjabatan:Owner'])->group(function () {
-    Route::get('/DashboardOwner', [PegawaiControllers::class, 'showLogin'])->name('owner.DashboardOwner');
+    Route::get('/DashboardOwner', [PegawaiControllers::class, 'showLoginOwner'])->name('owner.DashboardOwner');
 });
 Route::middleware(['checkjabatan:Customer Service'])->group(function () {
+    Route::post('/logout-CS', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
+
     Route::get('/DashboardCS', [PegawaiControllers::class, 'showLoginCS'])->name('CustomerService.DashboardCS');
-    Route::get('/DashboardPenitip', [PenitipControllrs::class, 'showlistPenitip'])->name('CustomerService.DashboardPegawai');
+    Route::get('/DashboardPenitip', [PenitipControllrs::class, 'showlistPenitip'])->name('CustomerService.DashboardPenitip');
     Route::post('/DashboardPenitip/store', [PenitipControllrs::class, 'registerPenitip'])->name('CustomerService.penitip.register');
+    Route::put('/DashboardPenitip/update/{id}', [PenitipControllrs::class, 'update'])->name('CustomerService.penitip.update');
+    Route::delete('/DashboardPenitip/delete/{id}', [PenitipControllrs::class, 'destroy'])->name('CustomerService.penitip.destroy');
+    Route::get('/DashboardPenitip/search', [PenitipControllrs::class, 'search'])->name('CustomerService.penitip.search');
 });
 Route::middleware(['checkjabatan:Gudang'])->group(function () {
     Route::get('/DashboardGudang', function () {

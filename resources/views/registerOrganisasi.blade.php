@@ -50,7 +50,7 @@
             <div class="w-full max-w-md">
                 <h2 class="text-xl font-bold mb-4 text-white">Sign Up Organisasi</h2>
 
-                <form method="POST" action="{{ route('registerOrganisasi') }}" class="space-y-3">
+                <form method="POST" action="{{ route('registerOrganisasi.store') }}" class="space-y-3">
                     @csrf
 
                     <div>
@@ -59,7 +59,7 @@
                     </div>
 
                     <div>
-                        <input type="alamat" name="alamat_organisasi" class="w-full p-2 rounded-lg"
+                        <input type="text" name="alamat_organisasi" class="w-full p-2 rounded-lg"
                             placeholder="Alamat" required>
                     </div>
 

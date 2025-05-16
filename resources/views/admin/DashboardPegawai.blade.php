@@ -11,10 +11,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.2/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #toast {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        #toast.show {
+            opacity: 1;
+        }
+    </style>
 </head>
-
-
 
 <body class="font-sans bg-gray-100 text-gray-800 grid grid-cols-1 md:grid-cols-[250px_1fr] min-h-screen">
 
@@ -37,10 +45,10 @@
                         <i class="fas fa-cog"></i>
                         <span>Jabatan</span>
                     </div>
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('admin.DashboardOrganisasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Organisasi</span>
-                    </div>
+                    </a>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Merchandise</span>
@@ -48,22 +56,31 @@
                 </div>
             </nav>
         </div>
-        <!-- Bottom buttons -->
-        <div class="space-y-4 mt-auto">
-            <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
-                Keluar
-            </button>
-        </div>
     </div>
 
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
         <div class="mb-4 flex justify-between items-center">
-            <h1 class="text-3xl font-semibold text-gray-800">Daftar Pegawai</h1>
+            <div class="flex items-center gap-4">
+                <h1 class="text-3xl font-semibold text-gray-800">Daftar Pegawai</h1>
+                <form action="{{ route('admin.pegawai.search') }}" method="GET" class="flex items-center gap-2">
+                    <input 
+                        type="text" 
+                        name="keyword" 
+                        placeholder="Cari Pegawai (Nama, Jabatan, Email)..." 
+                        class="p-2 border rounded-lg w-80" 
+                        value="{{ request('keyword') }}"
+                    />
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        Cari
+                    </button>
+                </form>
+            </div>
             <button onclick="openModal()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
                 Tambah Pegawai
             </button>
         </div>
+
 
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <table class="min-w-full bg-white">
@@ -215,9 +232,19 @@
             </form>
         </div>
     </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white"></div>
 
     <!-- Script Modal -->
     <script>
+        @if (session('success'))
+            showToast('{{ session('success') }}', 'success');
+        @endif
+
+        @if (session('error'))
+            showToast('{{ session('error') }}', 'error');
+        @endif
         function openModal() {
             document.getElementById('modal').classList.remove('hidden');
         }
@@ -244,6 +271,32 @@
 
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+
+            // Set warna berdasarkan tipe
+            if (type === 'success') {
+                toast.classList.add('bg-green-500');
+                toast.classList.remove('bg-red-500');
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-500');
+                toast.classList.remove('bg-green-500');
+            }
+
+            // Tampilkan toast dengan animasi
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+
+            // Hilangkan toast setelah 3 detik
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 500);
+            }, 3000);
         }
     </script>
 

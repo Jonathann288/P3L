@@ -54,6 +54,17 @@ class AuthController extends Controller
         }
     }
 
+    public function logoutPegawai()
+    {
+        Auth::guard('pegawai')->logout();
+        
+        // Hapus sesi pembeli jika diperlukan
+        session()->forget('pegawai');
+
+        // Redirect ke halaman login pembeli
+        return redirect()->route('loginDashboard');
+    }
+
     public function showLoginOrganisasi()
     {
         return view('loginOrganisasi');
