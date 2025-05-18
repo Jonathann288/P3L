@@ -11,56 +11,36 @@ class DiskusiControllers extends Controller
 {
     public function store(Request $request)
     {
-        // Validate the incoming request
-        $request->validate([
-            'id_barang' => 'required|exists:barang,id',
-            'pesan' => 'required|string|max:1000',
+        $validated = $request->validate([
+            'id_barang' => ['required', 'integer'],
+            'pesan' => ['required', 'string', 'max:1000']
         ]);
 
-        // Check if user is logged in
-        if (!Auth::guard('pembeli')->check()) {
-            return redirect()->route('loginPembeli')
-                ->with('error', 'Silahkan login terlebih dahulu untuk berdiskusi.');
-        }
+        $diskusi = Diskusi::create([
+            'id_barang' => $validated['id_barang'],
+            'id_pembeli' => Auth::guard('pembeli')->id(),
+            'pesan' => $validated['pesan'],
+            'tanggal_diskusi' => now()
+        ]);
 
-        try {
-            // Create new discussion
-            $diskusi = new Diskusi();
-            $diskusi->id_barang = $request->id_barang;
-            $diskusi->id_pembeli = Auth::guard('pembeli')->id();
-            $diskusi->pesan = $request->pesan;
-            $diskusi->tanggal_diskusi = now();
-            $diskusi->save();
-
-            // Redirect back with success message
-            return redirect()->back()->with('success', 'Diskusi berhasil ditambahkan!');
-        } catch (\Exception $e) {
-            // Log error
-            \Log::error('Error adding discussion: ' . $e->getMessage());
-
-            // Redirect back with error message
-            return response()->json([
-                'nama' => Auth::guard('pembeli')->user()->nama_pembeli,
-                'pesan' => $request->pesan,
-                'tanggal' => now()->translatedFormat('d F Y') // contoh: 11 Mei 2025
-            ]);
-
-
-        }
+        return response()->json(['success' => true]);
     }
 
-    public function show($id_barang)
+
+
+    public function show($id)
     {
-        // Find the product
-        $barang = Barang::with(['diskusi.pembeli', 'diskusi.pegawai'])
-            ->findOrFail($id_barang);
+        // Eager load relationships with proper ordering
+        $barang = Barang::with([
+            'diskusi' => function ($query) {
+                $query->orderBy('tanggal_diskusi', 'asc')
+                    ->with(['pembeli', 'pegawai']);
+            }
+        ])->findOrFail($id);
 
-        // Get discussions sorted by date (newest first)
-        $diskusi = $barang->diskusi()->orderBy('tanggal_diskusi', 'desc')->get();
-
-        return view('diskusi.show', compact('barang', 'diskusi')); // ← INI dia
+        // No need for separate $diskusi query since it's eager loaded
+        return view('detail_barangPembeli', compact('barang'));
     }
-
 
     public function reply(Request $request)
     {

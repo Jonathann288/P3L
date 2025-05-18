@@ -12,6 +12,7 @@ use App\Http\Controllers\BarangControllers;
 use App\Http\Controllers\lupaPasswordOrganisasiControllers;
 use App\Http\Controllers\lupaPasswordPembeliControllers;
 use App\Http\Controllers\RequestDonasiControllers;
+use App\Http\Controllers\DiskusiControllers;
 
 Route::get('/', function () {
     return view('beranda');
@@ -63,6 +64,8 @@ Route::middleware(['penitip'])->group(function () {
 });
 
 
+
+
 Route::get('/registerPembeli', [PembeliControllrs::class, 'showRegisterForm'])->name('registerPembeliForm');
 Route::post('/registerPembeli', [PembeliControllrs::class, 'registerPembeli'])->name('registerPembeli');
 
@@ -95,6 +98,10 @@ Route::middleware(['pembeli'])->group(function () {
     Route::get('/Pembeli/barang/{id_barang}', [BarangControllers::class, 'showDetailPembeli'])->name('pembeli.detail_barangPembeli');
     //
 
+    Route::post('/diskusi/reply', [DiskusiControllers::class, 'reply'])->name('diskusi.reply');
+
+    Route::post('/diskusi', [DiskusiControllers::class, 'store'])->name('diskusi.store');
+
     // logout
     Route::post('/logout-pembeli', [AuthController::class, 'logoutPembeli'])->name('logout.pembeli');
 });
@@ -107,7 +114,7 @@ Route::post('/loginOrganisasi', [AuthController::class, 'loginOrganisasi'])->nam
 Route::post('/logout-organisasi', [AuthController::class, 'logoutOrganisasi'])->name('logoutOrganisasi');
 
 Route::middleware(['organisasi'])->group(function () {
-        Route::get('/donasi-organisasi', function () {
+    Route::get('/donasi-organisasi', function () {
         return view('organisasi.donasi-organisasi');
     })->name('organisasi.donasi-organisasi');
     Route::get('/organisasi/profilOrganisasi', [OrganisasiControllrs::class, 'showOrganisasi'])->name('organisasi.profilOrganisasi');

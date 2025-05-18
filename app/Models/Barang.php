@@ -38,6 +38,16 @@ class Barang extends Model
 
     public function penitip()
     {
-        return $this->belongsTo(penitip::class, 'id'); // Asumsi relasi ke tabel penitip
+        return $this->belongsTo(penitip::class, 'id');
+    }
+
+    public function kategori()
+    {
+        return $this->belongsTo(kategoribarang::class, 'id_kategori');
+    }
+
+    public function diskusi()
+    {
+        return $this->hasMany(Diskusi::class, 'id_barang', 'id_barang');
     }
 }
