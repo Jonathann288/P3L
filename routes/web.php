@@ -97,8 +97,8 @@ Route::middleware(['pembeli'])->group(function () {
     Route::get('/Pembeli/categoryPembeli/{id}', [KategoriBarangControllers::class, 'filterByCategoryPembeli'])->name('pembeli.categoryPembeli');
     Route::get('/Pembeli/barang/{id_barang}', [BarangControllers::class, 'showDetailPembeli'])->name('pembeli.detail_barangPembeli');
     //
-
     Route::post('/diskusi/reply', [DiskusiControllers::class, 'reply'])->name('diskusi.reply');
+    
 
     Route::post('/diskusi', [DiskusiControllers::class, 'store'])->name('diskusi.store');
 

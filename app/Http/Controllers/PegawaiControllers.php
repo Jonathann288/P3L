@@ -8,6 +8,7 @@ use App\Models\Jabatan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Carbon;
 
 class PegawaiControllers extends Controller
 {
@@ -20,7 +21,7 @@ class PegawaiControllers extends Controller
             $pegawai = Pegawai::with('jabatan')->get();
             $jabatan = Jabatan::all();
             // Return ke view dengan data pegawai
-            return view('admin.DashboardPegawai', compact('pegawai','jabatan','pegawaiLogin'));
+            return view('admin.DashboardPegawai', compact('pegawai', 'jabatan', 'pegawaiLogin'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -88,7 +89,7 @@ class PegawaiControllers extends Controller
         $pegawai = Pegawai::all();
         return response()->json($pegawai);
     }
-    
+
     public function showLoginAdmin()
     {
         $pegawai = Auth::guard('pegawai')->user();
@@ -96,7 +97,7 @@ class PegawaiControllers extends Controller
         // Passing data ke view
         return view('admin.dashboard', compact('pegawai'));
     }
-    
+
     public function showLoginPegawai()
     {
         $pegawai = Auth::guard('pegawai')->user();
@@ -140,5 +141,20 @@ class PegawaiControllers extends Controller
         $results = Pegawai::where('nama_pegawai', 'LIKE', '%' . $keyword . '%')->get();
 
         return response()->json($results);
+    }
+
+    public function resetPasswordById($id_pegawai)
+    {
+        $pegawai = Pegawai::findOrFail($id_pegawai);
+
+        if (!$pegawai->tanggal_lahir_pegawai) {
+            return back()->with('error', 'Tanggal lahir pegawai belum diisi.');
+        }
+
+        $tanggal = Carbon::parse($pegawai->tanggal_lahir_pegawai)->format('dmY');
+        $pegawai->password = Hash::make($tanggal);
+        $pegawai->save();
+
+        return back()->with('success', "Password {$pegawai->nama_pegawai} berhasil di-reset ke tanggal lahir (ddmmyyyy).");
     }
 }

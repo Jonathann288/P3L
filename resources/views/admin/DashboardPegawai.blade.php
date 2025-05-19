@@ -84,7 +84,7 @@
                 <tbody>
                     @foreach ($pegawai as $index => $p)
                         <tr class="border-b border-gray-200 hover:bg-gray-100">
-                            <td class="py-3 px-6 text-left">{{ (int)$index + 1 }}</td>
+                            <td class="py-3 px-6 text-left">{{ (int) $index + 1 }}</td>
                             <td class="py-3 px-6 text-left">{{ $p->nama_pegawai }}</td>
                             <td class="py-3 px-6 text-left">{{ $p->jabatan->nama_jabatan }}</td>
                             <td class="py-3 px-6 text-left">{{ $p->email_pegawai }}</td>
@@ -99,7 +99,18 @@
                                     class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
                                     Hapus
                                 </button>
+                                <form action="/DashboardPegawai/resetPassword/{{ $p->id_pegawai }}" method="POST"
+                                    onsubmit="return confirm('Reset password pegawai ini berdasarkan tanggal lahir?');">
+                                    @csrf
+                                    <input type="hidden" name="tanggal_lahir_pegawai"
+                                        value="{{ $p->tanggal_lahir_pegawai }}">
+                                    <button type="submit"
+                                        class="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800">
+                                        Reset Password
+                                    </button>
+                                </form>
                             </td>
+
                         </tr>
                     @endforeach
                 </tbody>

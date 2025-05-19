@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ReuseMart - Detail Barang</title>
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -236,7 +237,7 @@
             <div id="discussion-list">
                 @forelse($barang->diskusi->sortByDesc('tanggal_diskusi') as $item)
                     @if($item->id_pembeli)
-                        <div class="discussion-item">
+                        <div class="discussion-item" data-discussion-id="{{ $item->id_diskusi }}">
                             <div class="flex items-start">
                                 <img src="{{ asset('images/fotoProfil.jpg') }}" alt="{{ $item->pembeli->nama_pembeli }}"
                                     class="discussion-avatar rounded-full object-cover">
@@ -248,6 +249,30 @@
                                             class="text-sm text-gray-900 ml-4">{{ $item->tanggal_diskusi->translatedFormat('d F Y') }}</span>
                                     </div>
                                     <p class="discussion-text text-gray-700">{{ $item->pesan }}</p>
+                                    <!-- Tombol untuk membuka kolom reply -->
+                                    <button type="button" class="text-blue-600 text-sm mt-2 hover:underline"
+                                        onclick="showReplyBox(this, '{{ $item->id_diskusi }}', '{{ $item->pembeli->nama_pembeli }}')">
+                                        Balas
+                                    </button>
+
+                                    <!-- Form reply (disembunyikan awalnya) -->
+                                    <div id="reply-form-{{ $item->id_diskusi }}" class="mt-3 hidden">
+                                        <form action="{{ route('diskusi.reply') }}" method="POST" class="space-y-2">
+                                            @csrf
+                                            <input type="hidden" name="id_diskusi_induk" value="{{ $item->id_diskusi }}">
+                                            <input type="hidden" name="id_barang" value="{{ $barang->id_barang }}">
+                                            <textarea name="pesan" rows="2"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Tulis balasan Anda..." required></textarea>
+                                            <div class="flex justify-end">
+                                                <button type="submit"
+                                                    class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm">
+                                                    Kirim Balasan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -261,6 +286,140 @@
     </main>
 
     <script>
+        // Simpan data user yang login untuk digunakan di JavaScript
+        @if(Auth::guard('pembeli')->check())
+        const loggedInUser = {
+            name: "{{ Auth::guard('pembeli')->user()->nama_pembeli }}",
+            photoUrl: "{{ asset(Auth::guard('pembeli')->user()->foto_pembeli) }}"
+        };
+        @else
+        const loggedInUser = {
+            name: "Guest",
+            photoUrl: "{{ asset('images/fotoProfil.jpg') }}"
+        };
+        @endif
+
+        // Fungsi untuk menampilkan reply box
+        function showReplyBox(button, discussionId, repliedTo) {
+            // Cek apakah sudah ada reply box
+            const existingReplyBox = document.getElementById(`reply-box-${discussionId}`);
+            if (existingReplyBox) {
+                existingReplyBox.remove();
+                return;
+            }
+
+            // Buat elemen reply box
+            const replyBox = document.createElement('div');
+            replyBox.id = `reply-box-${discussionId}`;
+            replyBox.className = 'mt-3 discussion-reply';
+            replyBox.innerHTML = `
+            <div class="flex items-start mt-3">
+                <img src="${loggedInUser.photoUrl}" 
+                     alt="${loggedInUser.name}" class="discussion-avatar rounded-full object-cover">
+                <div class="discussion-content relative">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-gray-900 m-0">${loggedInUser.name}</h3>
+                    </div>
+                    <textarea id="reply-text-${discussionId}" rows="2" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Tulis balasan Anda..."></textarea>
+                    <div class="flex justify-end space-x-2 mt-2">
+                        <button onclick="cancelReply('${discussionId}')" 
+                            class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100">
+                            Batal
+                        </button>
+                        <button onclick="submitReply('${discussionId}', '${repliedTo}')" 
+                            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                            Kirim
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            // Sisipkan reply box setelah tombol
+            button.parentNode.insertBefore(replyBox, button.nextSibling);
+        }
+
+        // Fungsi untuk membatalkan reply
+        function cancelReply(discussionId) {
+            const replyBox = document.getElementById(`reply-box-${discussionId}`);
+            if (replyBox) {
+                replyBox.remove();
+            }
+        }
+
+        // Fungsi untuk mengirim reply
+        function submitReply(discussionId, repliedTo) {
+            const replyText = document.getElementById(`reply-text-${discussionId}`).value.trim();
+            if (!replyText) {
+                alert('Silakan tulis balasan Anda');
+                return;
+            }
+            
+            // Disable the reply button to prevent double submission
+            const replyButton = document.querySelector(`#reply-box-${discussionId} button:last-child`);
+            const originalButtonText = replyButton.textContent;
+            replyButton.disabled = true;
+            replyButton.textContent = 'Mengirim...';
+            
+            // Prepare data for AJAX submission
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '');
+            formData.append('id_diskusi_induk', discussionId);
+            formData.append('id_barang', '{{ $barang->id_barang }}');
+            formData.append('pesan', replyText);
+            
+            // Send AJAX request to store reply
+            fetch('{{ route("diskusi.reply") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Create reply element with data from server
+                    const replyElement = document.createElement('div');
+                    replyElement.className = 'discussion-reply mt-4';
+                    replyElement.innerHTML = `
+                    <div class="flex items-start">
+                        <img src="${loggedInUser.photoUrl}" 
+                             alt="${loggedInUser.name}" class="discussion-avatar rounded-full object-cover">
+                        <div class="discussion-content relative">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-gray-900 m-0">${loggedInUser.name}</h3>
+                                <span class="text-sm text-gray-500">${data.tanggal || 'Baru saja'}</span>
+                            </div>
+                            <p class="discussion-text text-gray-700">${data.pesan}</p>
+                        </div>
+                    </div>
+                    `;
+
+                    // Add reply to the DOM
+                    const discussionItem = document.querySelector(`[data-discussion-id="${discussionId}"]`);
+                    if (discussionItem) {
+                        discussionItem.appendChild(replyElement);
+                    }
+                    
+                    // Close the reply box
+                    cancelReply(discussionId);
+                } else {
+                    alert(data.message || 'Terjadi kesalahan saat mengirim balasan');
+                    replyButton.disabled = false;
+                    replyButton.textContent = originalButtonText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat mengirim balasan');
+                replyButton.disabled = false;
+                replyButton.textContent = originalButtonText;
+            });
+        }
         // Handle form submission with AJAX
         document.getElementById('discussion-form')?.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -291,7 +450,7 @@
                         newDiscussion.className = 'border-b border-gray-200 pb-6 mb-6';
                         newDiscussion.innerHTML = `
                     <div class="flex items-start space-x-4">
-                        <img src="{{ asset(Auth::guard('pembeli')->user()->foto_pembeli) }}" 
+                        <img src="${loggedInUser.photoUrl}" 
                              alt="${data.nama}" class="w-10 h-10 rounded-full object-cover">
                         <div class="flex-1">
                             <div class="flex items-center justify-between">
@@ -354,6 +513,13 @@
                 ratingContainer.appendChild(star);
             }
         });
+
+        function toggleReplyForm(id) {
+            const form = document.getElementById('reply-form-' + id);
+            if (form) {
+                form.classList.toggle('hidden');
+            }
+        }
     </script>
 </body>
 
