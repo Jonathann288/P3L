@@ -28,7 +28,7 @@
                         <span>Profile Owner</span>
                     </a>
                     <a href="{{ route('owner.DashboardDonasi') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        class="flex items-center space-x-4 p-3 bg-gray-700 rounded-lg">
                         <i class="fas fa-gift mr-2"></i>
                         <span>Donasi</span>
                     </a>
@@ -49,8 +49,8 @@
     </div>
 
     <!-- Main Content -->
-<div class="container mx-auto p-8">
-        <h1 class="text-3xl font-bold mb-6">Dashboard Donasi</h1>
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-6">Permintaan Donasi (Pending)</h1>
 
         @if(session('success'))
             <div class="bg-green-100 text-green-800 px-4 py-2 rounded mb-4">
@@ -61,47 +61,39 @@
         <table class="min-w-full bg-white shadow-md rounded mb-6">
             <thead>
                 <tr class="bg-gray-200 text-left">
-                    <th class="py-2 px-4">ID Barang</th>
-                    <th class="py-2 px-4">Nama Penerima</th>
-                    <th class="py-2 px-4">Tanggal Donasi</th>
-                    <th class="py-2 px-4">Status Barang</th>
+                    <th class="py-2 px-4">Nama Organisasi</th>
+                    <th class="py-2 px-4">Deskripsi Request</th>
                     <th class="py-2 px-4">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($donasis as $donasi)
-                <tr class="border-t">
-                    <form action="{{ route('owner.UpdateDonasi', ['id_barang' => $donasi->id_barang, 'id_request' => $donasi->id_request]) }}" method="POST" class="w-full">
-                        @csrf
-                        <td class="py-2 px-4">{{ $donasi->id_barang }}</td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="nama_penerima" value="{{ $donasi->nama_penerima }}"
-                                class="border rounded px-2 py-1 w-full" required>
+                @foreach($requestDonasis as $request)
+                    <tr class="border-t">
+                        <td class="py-2 px-4">{{ $request->organisasi->nama_organisasi ?? '-' }}</td>
+                        <td class="py-2 px-4">{{ $request->deskripsi_request }}</td>
+                        <td class="py-2 px-4 space-x-2">
+                            <form action="{{ route('owner.approveDonasi', $request->id_request) }}" method="POST"
+                                class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600">Donasikan</button>
+                            </form>
+                            <form action="{{ route('owner.rejectDonasi', $request->id_request) }}" method="POST"
+                                class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600">Tolak</button>
+                            </form>
                         </td>
-                        <td class="py-2 px-4">
-                            <input type="date" name="tanggal_donasi"
-                                value="{{ \Carbon\Carbon::parse($donasi->tanggal_donasi)->format('Y-m-d') }}"
-                                class="border rounded px-2 py-1 w-full" required>
-                        </td>
-                        <td class="py-2 px-4">
-                            <input type="text" name="status_barang" value="{{ $donasi->barang->status_barang ?? '' }}"
-                                class="border rounded px-2 py-1 w-full" required>
-                        </td>
-                        <td class="py-2 px-4">
-                            <button type="submit"
-                                class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">Update</button>
-                        </td>
-                    </form>
-                </tr>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-
 </html>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 </body>
 
 </html>

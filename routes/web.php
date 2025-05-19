@@ -139,10 +139,38 @@ Route::middleware(['checkjabatan:Admin'])->group(function () {
 
 //Owner
 Route::middleware(['auth:pegawai'])->group(function () {
+    // Dashboard Owner
     Route::get('/dashboard-owner', [OwnerControllers::class, 'showDashboard'])->name('owner.DashboardOwner');
+
+    // Dashboard Donasi (menampilkan semua donasi)
     Route::get('/dashboard-donasi', [OwnerControllers::class, 'showDonasiDashboard'])->name('owner.DashboardDonasi');
     Route::post('/dashboard-donasi/update/{id_barang}/{id_request}', [OwnerControllers::class, 'updateDonasi'])->name('owner.UpdateDonasi');
+
+    // Dashboard History Donasi (disetujui/ditolak)
     Route::get('/dashboard-history-donasi', [OwnerControllers::class, 'showHistoryDonasi'])->name('owner.DashboardHistoryDonasi');
+
+    // Donasi pending
+    Route::get('/donasi', [OwnerControllers::class, 'showDonasiPending'])->name('donasi.pending');
+
+    // Donasi history (versi requestdonasi, bukan tabel donasi)
+    Route::get('/donasi/history', [OwnerControllers::class, 'showHistoryDonasi'])->name('donasi.history');
+
+    // Update status request donasi
+    Route::put('/donasi/update/{id}', [OwnerControllers::class, 'updateStatus'])->name('donasi.updateStatus');
+
+    // Approve dan Reject Donasi
+    Route::post('/owner/donasi/{id}/approve', [OwnerControllers::class, 'approveDonasi'])->name('owner.approveDonasi');
+    Route::post('/owner/donasi/{id}/reject', [OwnerControllers::class, 'rejectDonasi'])->name('owner.rejectDonasi');
+
+    // Form Edit Donasi
+    Route::get('/dashboard-history-donasi/edit/{id}', [OwnerControllers::class, 'editDonasi'])->name('owner.editDonasi');
+
+    // Edit Donasi
+    Route::get('/dashboard-history-donasi/edit/{id_barang}/{id_request}', [OwnerControllers::class, 'editHistoryDonasi'])->name('owner.editHistoryDonasi');
+
+    // Update Donasi
+    Route::post('/dashboard-history-donasi/update/{id_barang}/{id_request}', [OwnerControllers::class, 'updateHistoryDonasi'])->name('owner.updateHistoryDonasi');
+
 });
 
 

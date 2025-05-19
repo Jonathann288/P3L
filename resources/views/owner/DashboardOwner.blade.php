@@ -21,9 +21,9 @@
         <div>
             <h2 class="text-xl font-semibold mb-8">Owner</h2>
             <nav>
-               <div class="space-y-4">
-                   <a href="{{ route('owner.DashboardOwner') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                <div class="space-y-4">
+                    <a href="{{ route('owner.DashboardOwner') }}"
+                        class="flex items-center space-x-4 p-3 bg-gray-700 rounded-lg">
                         <i class="fas fa-user-circle mr-2"></i>
                         <span>Profile Saya</span>
                     </a>
