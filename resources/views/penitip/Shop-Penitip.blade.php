@@ -153,6 +153,8 @@
     </div>
     
 </div>
+
+<div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white z-50"></div>
 <!-- Script Toggle Menu -->
 <script>
     document.getElementById("menu-toggle").addEventListener("click", function () {
@@ -164,16 +166,53 @@
     });
 
     const toggle = document.getElementById('dropdownToggle');
-        const menu = document.getElementById('dropdownMenu');
-        
-        toggle.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
-        
-        window.addEventListener('click', (e) => {
-            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
+    const menu = document.getElementById('dropdownMenu');
+    
+    toggle.addEventListener('click', () => {
+        menu.classList.toggle('hidden');
+    });
+    
+    window.addEventListener('click', (e) => {
+        if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+            function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+
+        // Set warna berdasarkan tipe
+        if (type === 'success') {
+            toast.classList.add('bg-green-500');
+            toast.classList.remove('bg-red-500');
+        } else if (type === 'error') {
+            toast.classList.add('bg-red-500');
+            toast.classList.remove('bg-green-500');
+        }
+
+        // Tampilkan toast dengan animasi fade-in
+        toast.classList.remove('hidden');
+        toast.classList.add('fade-in');
+
+        // Hilangkan toast setelah 3 detik
+        setTimeout(() => {
+            toast.classList.remove('fade-in');
+            toast.classList.add('fade-out');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 500);
+        }, 3000);
+    }
+
+    // Saat halaman dimuat, cek jika ada session flash
+    document.addEventListener('DOMContentLoaded', function () {
+        @if (session('success'))
+            showToast('{{ session('success') }}', 'success');
+        @endif
+
+            @if (session('error'))
+                showToast('{{ session('error') }}', 'error');
+            @endif
+    });
 </script>
 @endsection

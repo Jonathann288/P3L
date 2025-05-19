@@ -23,7 +23,7 @@
                         <span  class="text-2xl font-bold">{{ $pegawai->nama_pegawai }}</span>
                     </a>
                     <a href="{{ route('CustomerService.DashboardPenitip') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <i class="fas fa-user mr-2"></i>
                         <span>Penitip</span>
                     </a>
                 </div>

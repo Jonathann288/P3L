@@ -14,7 +14,7 @@ class EnsurePenitip
             return $next($request);
         }
     
-        return redirect()->route('loginPenitip')->with('message', 'Anda harus login sebagai Pembeli untuk mengakses halaman ini.');
+        return redirect()->route('login')->with('message', 'Anda harus login sebagai Pembeli untuk mengakses halaman ini.');
     }
 }
 

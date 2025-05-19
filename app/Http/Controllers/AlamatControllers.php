@@ -29,41 +29,45 @@ class AlamatControllers extends Controller
 
     public function store(Request $request)
     {
-        // Validasi input
-        $request->validate([
-            'nama_jalan' => 'required|string|max:255',
-            'kode_pos' => 'required|integer',
-            'kecamatan' => 'required|string|max:255',
-            'kelurahan' => 'required|string|max:255',
-            'status_default' => 'required|string|max:255',
-            'kabupaten' => 'required|string|max:255',
-            'deskripsi_alamat' => 'required|string|max:255',
-        ]);
+        try{
+            // Validasi input
+            $request->validate([
+                'nama_jalan' => 'required|string|max:255',
+                'kode_pos' => 'required|integer',
+                'kecamatan' => 'required|string|max:255',
+                'kelurahan' => 'required|string|max:255',
+                'status_default' => 'required|string|max:255',
+                'kabupaten' => 'required|string|max:255',
+                'deskripsi_alamat' => 'required|string|max:255',
+            ]);
 
-        // Generate ID unik untuk alamat
-        $lastAlamat = DB::table('alamat')
-            ->select('id')
-            ->where('id', 'like', 'ALT%')
-            ->orderByDesc('id')
-            ->first();
+            // Generate ID unik untuk alamat
+            $lastAlamat = DB::table('alamat')
+                ->select('id')
+                ->where('id', 'like', 'ALT%')
+                ->orderByDesc('id')
+                ->first();
 
-        $newNumber = $lastAlamat ? ((int) substr($lastAlamat->id, 3)) + 1 : 1;
-        $newId = 'ALT' . str_pad($newNumber, 2, '0', STR_PAD_LEFT);
+            $newNumber = $lastAlamat ? ((int) substr($lastAlamat->id, 3)) + 1 : 1;
+            $newId = 'ALT' . str_pad($newNumber, 2, '0', STR_PAD_LEFT);
 
-        // Simpan data alamat dengan ID yang sudah digenerate
-        Alamat::create([
-            'id' => $newId, // ID unik untuk alamat
-            'id_pembeli' => Auth::guard('pembeli')->user()->id_pembeli,
-            'nama_jalan' => $request->nama_jalan,
-            'kode_pos' => $request->kode_pos,
-            'kecamatan' => $request->kecamatan,
-            'kelurahan' => $request->kelurahan,
-            'status_default' => $request->status_default,
-            'kabupaten' => $request->kabupaten,
-            'deskripsi_alamat' => $request->deskripsi_alamat,
-        ]);
+            // Simpan data alamat dengan ID yang sudah digenerate
+            Alamat::create([
+                'id' => $newId, // ID unik untuk alamat
+                'id_pembeli' => Auth::guard('pembeli')->user()->id_pembeli,
+                'nama_jalan' => $request->nama_jalan,
+                'kode_pos' => $request->kode_pos,
+                'kecamatan' => $request->kecamatan,
+                'kelurahan' => $request->kelurahan,
+                'status_default' => $request->status_default,
+                'kabupaten' => $request->kabupaten,
+                'deskripsi_alamat' => $request->deskripsi_alamat,
+            ]);
 
-        return redirect()->route('pembeli.AlamatPembeli')->with('success', 'Alamat berhasil ditambahkan.');
+            return redirect()->route('pembeli.AlamatPembeli')->with('success', 'Alamat berhasil ditambahkan.');
+        }catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
 

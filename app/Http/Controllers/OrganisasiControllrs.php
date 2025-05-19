@@ -40,29 +40,34 @@ class OrganisasiControllrs extends Controller
 
     public function registerOrganisasi(Request $request)
     {
-        $request->validate([
-            'nama_organisasi' => 'required|string|max:255',
-            'alamat_organisasi' => 'required|string|max:255',
-            'nomor_telepon' => 'required|string|max:11',
-            'email_organisasi' => 'required|string|email|max:255|unique:organisasi,email_organisasi',
-            'password_organisasi' => 'required|string|min:8',
-        ]);
-        
+        try{
+            $request->validate([
+                'nama_organisasi' => 'required|string|max:255',
+                'alamat_organisasi' => 'required|string|max:255',
+                'nomor_telepon' => 'required|string|max:11',
+                'email_organisasi' => 'required|string|email|max:255|unique:organisasi,email_organisasi',
+                'password_organisasi' => 'required|string|min:8',
+            ]);
+            
 
-        // Buat ID otomatis
-        $last = DB::table('organisasi')->select('id')->where('id', 'like', 'OR%')->orderByDesc('id')->first();
-        $newId = 'OR' . str_pad(($last ? intval(substr($last->id, 2)) + 1 : 1), 3, '0', STR_PAD_LEFT);
+            // Buat ID otomatis
+            $last = DB::table('organisasi')->select('id')->where('id', 'like', 'OR%')->orderByDesc('id')->first();
+            $newId = 'OR' . str_pad(($last ? intval(substr($last->id, 2)) + 1 : 1), 3, '0', STR_PAD_LEFT);
 
-        $organisasi = Organisasi::create([
-            'id' => $newId,
-            'nama_organisasi' => $request->nama_organisasi,
-            'alamat_organisasi' => $request->alamat_organisasi,
-            'nomor_telepon' => $request->nomor_telepon,
-            'email_organisasi' => $request->email_organisasi,
-            'password_organisasi' => Hash::make($request->password_organisasi),
-        ]);
+            $organisasi = Organisasi::create([
+                'id' => $newId,
+                'nama_organisasi' => $request->nama_organisasi,
+                'alamat_organisasi' => $request->alamat_organisasi,
+                'nomor_telepon' => $request->nomor_telepon,
+                'email_organisasi' => $request->email_organisasi,
+                'password_organisasi' => Hash::make($request->password_organisasi),
+            ]);
 
-        return redirect()->route('loginOrganisasi')->with('success', 'Akun berhasil dibuat, silakan login!');
+            return redirect()->route('loginOrganisasi')->with('success', 'Akun berhasil dibuat, silakan login!');
+        }catch (\Exception $e) {
+        // Jika terjadi kesalahan, tampilkan pesan error
+            return redirect()->back()->with('error', 'Gagal menambahkan Organisasi: ' . $e->getMessage());
+        }
     }
 
 
@@ -80,44 +85,58 @@ class OrganisasiControllrs extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'nama_organisasi' => 'required|string|max:255',
-            'alamat_organisasi' => 'required|string|max:255',
-            'nomor_telepon' => 'required|string|max:11',
-        ]);
+        try{
+            $request->validate([
+                'nama_organisasi' => 'required|string|max:255',
+                'alamat_organisasi' => 'required|string|max:255',
+                'nomor_telepon' => 'required|string|max:11',
+            ]);
 
-        $organisasi = Organisasi::findOrFail($id);
-        $organisasi->update($request->only('nama_organisasi', 'alamat_organisasi', 'nomor_telepon'));
+            $organisasi = Organisasi::findOrFail($id);
+            $organisasi->update($request->only('nama_organisasi', 'alamat_organisasi', 'nomor_telepon'));
 
-        return redirect()->route('admin.DashboardOrganisasi')->with('success', 'Organisasi berhasil diperbarui.');
+            return redirect()->route('admin.DashboardOrganisasi')->with('success', 'Organisasi berhasil diperbarui.');
+        }catch (\Exception $e) {
+        // Jika terjadi kesalahan, tampilkan pesan error
+            return redirect()->back()->with('error', 'Gagal memperbaharui Organisasi: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
-    {
-        $organisasi = Organisasi::findOrFail($id);
-        $organisasi->delete();
-        return redirect()->route('admin.DashboardOrganisasi')->with('success', 'Organisasi berhasil dihapus.');
+    {   try{
+            $organisasi = Organisasi::findOrFail($id);
+            $organisasi->delete();
+            return redirect()->route('admin.DashboardOrganisasi')->with('success', 'Organisasi berhasil dihapus.');
+        }catch (\Exception $e) {
+        // Jika terjadi kesalahan, tampilkan pesan error
+            return redirect()->back()->with('error', 'Organisasi tidak dapat dihapus: ' . $e->getMessage());
+        }
     }
 
     public function search(Request $request)
     {
-        $keyword = $request->input('keyword');
+        try{
+            $keyword = $request->input('keyword');
 
-        $query = Organisasi::query();
+            $query = Organisasi::query();
 
-        if ($keyword) {
-            $query->where(function ($q) use ($keyword) {
-                $q->where('nama_organisasi', 'LIKE', "%{$keyword}%");
-                // Kalau mau cari kolom lain, bisa ditambahkan orWhere di sini
-                // ->orWhere('alamat', 'LIKE', "%{$keyword}%")
-            });
+            if ($keyword) {
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('nama_organisasi', 'LIKE', "%{$keyword}%");
+                    // Kalau mau cari kolom lain, bisa ditambahkan orWhere di sini
+                    // ->orWhere('alamat', 'LIKE', "%{$keyword}%")
+                });
+            }
+
+            $organisasi = $query->get();
+
+            $pegawaiLogin = Auth::guard('pegawai')->user();
+
+            return view('admin.DashboardOrganisasi', compact('organisasi','pegawaiLogin'));
+        }catch (\Exception $e) {
+        // Jika terjadi kesalahan, tampilkan pesan error
+            return redirect()->back()->with('error', 'Search Organisasi hanya nama saja ');
         }
-
-        $organisasi = $query->get();
-
-        $pegawaiLogin = Auth::guard('pegawai')->user();
-
-        return view('admin.DashboardOrganisasi', compact('organisasi','pegawaiLogin'));
     }
 
 

@@ -19,22 +19,29 @@
             <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
             <nav>
                 <div class="space-y-4">
-                    <div class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                    <a href="{{ route('owner.DashboardOwner') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <img src="images/fotoprofil.jpg" alt="profile" class="w-8 h-8 rounded-full object-cover">
                         <span>{{ $pegawai->nama_pegawai }}</span>
-                    </div>
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    </a>
+                    <a href="{{ route('owner.DashboardDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                        <span>Daftar Request Donasi</span>
+                    </a>
+                    <a href="{{ route('owner.historyDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>
-                        <span>Request Donasi</span>
-                    </div>
+                        <span>Histroy Request Donasi</span>
+                    </a>
                 </div>
             </nav>
         </div>
         <!-- Bottom buttons -->
         <div class="space-y-4 mt-auto">
-            <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
-                Keluar
-            </button>
+            <form action="{{ route('logout.pegawai') }}"  method="POST">
+                @csrf
+                <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
+                    Keluar
+                </button>
+            </form>
         </div>
     </div>
 
@@ -46,14 +53,11 @@
 
         <div class="grid md:grid-cols-3 gap-8">
             <!-- Info Sections -->
-            <div class="col-span-2 space-y-6">
+            <div class="col-span-5 space-y-6">
                 <!-- Personal Info -->
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold text-gray-800">Informasi Pribadi</h2>
-                        <button class="text-blue-600 hover:underline">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
                     </div>
                     <div class="space-y-4">
                         <div class="flex justify-between">

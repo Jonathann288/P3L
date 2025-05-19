@@ -14,7 +14,7 @@ class AuthController extends Controller
 {
     public function showLoginFormPegawai()
     {
-        return view('loginDashboard');  // Ganti dengan path view login yang sesuai
+        return view('login');  // Ganti dengan path view login yang sesuai
     }
 
     public function loginPegawai(Request $request)
@@ -50,7 +50,7 @@ class AuthController extends Controller
             case 'Kurir':
                 return redirect()->route('kurir.DashboardKurir');
             default:
-                return redirect()->route('loginDashboard')->with('error', 'Jabatan tidak dikenal.');
+                return redirect()->route('login')->with('error', 'Jabatan tidak dikenal.');
         }
     }
 
@@ -62,7 +62,7 @@ class AuthController extends Controller
         session()->forget('pegawai');
 
         // Redirect ke halaman login pembeli
-        return redirect()->route('loginDashboard');
+        return redirect()->route('login');
     }
 
     public function showLoginOrganisasi()
@@ -88,7 +88,7 @@ class AuthController extends Controller
         Auth::guard('organisasi')->login($organisasi);
     
         // Redirect ke halaman setelah login berhasil
-        return redirect()->intended(route('organisasi.donasi-organisasi'));
+        return redirect()->intended(route('organisasi.donasi-organisasi'))->with('success', 'Login berhasil! Selamat datang di Request Donasi ReUseMart'); 
     }
 
     public function logoutOrganisasi()
@@ -99,12 +99,12 @@ class AuthController extends Controller
         session()->forget('organisasi');
 
         // Redirect ke halaman login pembeli
-        return redirect()->route('loginOrganisasi');
+        return redirect()->route('loginOrganisasi')->with('success', 'Berhasil Logout! sampai jumpa dilain waktu');
     }
 
     public function showLoginForm()
     {
-        return view('loginPembeli');  // Tampilkan view loginPembeli.blade.php
+        return view('login');  // Tampilkan view loginPembeli.blade.php
     }
 
     // Proses login
@@ -128,7 +128,7 @@ class AuthController extends Controller
         Auth::guard('pembeli')->login($pembeli);
 
         // Redirect ke halaman setelah login berhasil
-        return redirect()->intended(route('pembeli.Shop-Pembeli'));  // Ganti dengan route tujuan setelah login
+        return redirect()->intended(route('pembeli.Shop-Pembeli'))->with('success', 'Login berhasil! Selamat datang di ReUseMart');  // Ganti dengan route tujuan setelah login
     }
 
     public function logoutPembeli()
@@ -140,13 +140,13 @@ class AuthController extends Controller
         session()->forget('pembeli');
 
         // Redirect ke halaman login pembeli
-        return redirect()->route('loginPembeli');
+        return redirect()->route('login')->with('success', 'Berhasil Logout! sampai jumpa dilain waktu');
     }
 
 
     public function showLoginFormPenitip()
     {
-        return view('loginPenitip');
+        return view('login');
     }
 
     public function loginPenitip(Request $request) 
@@ -166,7 +166,7 @@ class AuthController extends Controller
         Auth::guard('penitip')->login($penitip);
 
         // Redirect ke halaman setelah login berhasil
-        return redirect()->intended(route('penitip.Shop-Penitip'));
+        return redirect()->intended(route('penitip.Shop-Penitip'))->with('success', 'Login berhasil! Selamat datang di ReUseMart Penitip yang kami Hormati');
     }
 
         public function logoutPenitip()
@@ -178,7 +178,7 @@ class AuthController extends Controller
         session()->forget('penitip');
 
         // Redirect ke halaman login pembeli
-        return redirect()->route('loginPenitip');
+        return redirect()->route('login')->with('success', 'Berhasil Logout! sampai jumpa dilain waktu');
     }
 
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\KategoriBarang;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class BarangControllers extends Controller
@@ -15,7 +16,7 @@ class BarangControllers extends Controller
         $kategoris = KategoriBarang::all();
 
         // Ambil semua barang
-        $barang = Barang::all();
+        $barang = Barang::where('status_barang', 'tidak laku')->get();
 
         // List gambar kategori (pastikan urutannya benar)
         $images = [
@@ -35,13 +36,65 @@ class BarangControllers extends Controller
         return view('shop', compact('kategoris', 'barang', 'images'));
     }
 
+    public function showDonasi()
+    {
+        // Ambil semua kategori
+        $kategoris = KategoriBarang::all();
+
+        // Ambil semua barang
+        $barang = Barang::where('status_barang', 'di donasikan')->get();
+
+        // List gambar kategori (pastikan urutannya benar)
+        $images = [
+            asset('images/gadgets.png'),
+            asset('images/shopping.png'),
+            asset('images/electric-appliances.png'),
+            asset('images/stationery.png'),
+            asset('images/hobbies.png'),
+            asset('images/stroller.png'),
+            asset('images/sport-car.png'),
+            asset('images/agriculture.png'),
+            asset('images/workspace.png'),
+            asset('images/cosmetics.png'),
+        ];
+
+        // Kirim data ke view
+        return view('donasi', compact('kategoris', 'barang', 'images'));
+    }
+
+    public function showDonasiOrganisasi()
+    {
+        // Ambil semua kategori
+        $kategoris = KategoriBarang::all();
+
+        // Ambil semua barang
+        $barang = Barang::where('status_barang', 'di donasikan')->get();
+
+        // List gambar kategori (pastikan urutannya benar)
+        $images = [
+            asset('images/gadgets.png'),
+            asset('images/shopping.png'),
+            asset('images/electric-appliances.png'),
+            asset('images/stationery.png'),
+            asset('images/hobbies.png'),
+            asset('images/stroller.png'),
+            asset('images/sport-car.png'),
+            asset('images/agriculture.png'),
+            asset('images/workspace.png'),
+            asset('images/cosmetics.png'),
+        ];
+
+        // Kirim data ke view
+        return view('donasi', compact('kategoris', 'barang', 'images'));
+    }
+
     public function showShopPembeli()
     {
         // Ambil semua kategori
         $kategoris = KategoriBarang::all();
 
         // Ambil semua barang
-        $barang = Barang::all();
+        $barang = Barang::where('status_barang', 'tidak laku')->get();
 
         // List gambar kategori (pastikan urutannya benar)
         $images = [
@@ -67,7 +120,7 @@ class BarangControllers extends Controller
         $kategoris = KategoriBarang::all();
 
         // Ambil semua barang
-        $barang = Barang::all();
+        $barang = Barang::where('status_barang', 'tidak laku')->get();
 
         // List gambar kategori (pastikan urutannya benar)
         $images = [
@@ -90,25 +143,55 @@ class BarangControllers extends Controller
     public function showDetail($id_barang)
     {
         $barang = Barang::findOrFail($id_barang);
+        if ($barang->status_barang !== 'tidak laku') {
+            abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
+        }
         return view('shop.detail_barang', compact('barang'));
     }
+
+    public function showDetailDonasi($id_barang)
+    {
+        $barang = Barang::findOrFail($id_barang);
+        
+        if ($barang->status_barang !== 'di donasikan') {
+            abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
+        }
+        
+        return view('donasi.detail_barang_donasi', compact('barang'));
+    }
+
+    public function showDetailDonasiOranisasi($id_barang)
+    {
+        $barang = Barang::findOrFail($id_barang);
+        if ($barang->status_barang !== 'di donasikan') {
+            abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
+        }
+        return view('oranisasi.detail_barang_donasi', compact('barang'));
+    }
+
     public function showDetailPembeli($id_barang)
     {
+        $pembeli = Auth::guard('pembeli')->user();
         // Eager load kategori, diskusi with relations to pembeli and pegawai
         $barang = Barang::with(['kategori', 'diskusi.pembeli', 'diskusi.pegawai'])
             ->findOrFail($id_barang);
 
+        if ($barang->status_barang !== 'tidak laku') {
+            abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
+        }
+
         // Load diskusi with proper sorting (newest first)
         $barang->setRelation('diskusi', $barang->diskusi->sortByDesc('tanggal_diskusi'));
 
-        return view('pembeli.detail_barangPembeli', compact('barang'));
+        return view('pembeli.detail_barangPembeli', compact('barang','pembeli'));
     }
-
-
 
     public function showDetailPenitip($id_barang)
     {
         $barang = Barang::findOrFail($id_barang);
+        if ($barang->status_barang !== 'tidak laku') {
+            abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
+        }
         return view('penitip.detail_barangPenitip', compact('barang'));
     }
 
@@ -175,4 +258,40 @@ class BarangControllers extends Controller
 
         return response()->json(['message' => 'Barang berhasil dihapus']);
     }
+
+    public function search(Request $request)
+    {
+        {
+            $request->validate([
+                'nama_barang' => 'nullable|string|max:255',
+            ]);
+
+            $namaBarang = $request->nama_barang;
+
+            $query = Barang::query();
+
+            if ($namaBarang) {
+                $query->where('nama_barang', 'LIKE', "%{$namaBarang}%");
+            }
+
+            $barang = $query->get();
+            $kategoris = KategoriBarang::all();
+            $images = [
+                asset('images/gadgets.png'),
+                asset('images/shopping.png'),
+                asset('images/electric-appliances.png'),
+                asset('images/stationery.png'),
+                asset('images/hobbies.png'),
+                asset('images/stroller.png'),
+                asset('images/sport-car.png'),
+                asset('images/agriculture.png'),
+                asset('images/workspace.png'),
+                asset('images/cosmetics.png'),
+            ];
+
+            return view('shop', compact('barang','kategoris','images'));
+        }
+
+    }
+
 }

@@ -54,7 +54,7 @@ class PembeliControllrs extends Controller
             'total_poin' => $request->total_poin ?? 0
         ]);
 
-        return redirect()->route('loginPembeli')->with('success', 'Registrasi berhasil! Silakan login.');
+        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
     public function show()
@@ -84,28 +84,32 @@ class PembeliControllrs extends Controller
     }
 
     public function update(Request $request)
-    {
-        $request->validate([
-            'id_pembeli' => 'required|exists:pembeli,id_pembeli',
-            'nama_pembeli' => 'required|string|max:255',
-            'email_pembeli' => 'required|email',
-            'nomor_telepon_pembeli' => 'required',
-            'tanggal_lahir' => 'required|date',
-        ]);
+    {   
+        try{
+            $request->validate([
+                'id_pembeli' => 'required|exists:pembeli,id_pembeli',
+                'nama_pembeli' => 'required|string|max:255',
+                'email_pembeli' => 'required|email',
+                'nomor_telepon_pembeli' => 'required',
+                'tanggal_lahir' => 'required|date',
+            ]);
 
-        $pembeli = Pembeli::find($request->id_pembeli);
+            $pembeli = Pembeli::find($request->id_pembeli);
 
-        if (!$pembeli) {
-            return redirect()->back()->with('error', 'Data Pembeli tidak ditemukan!');
+            if (!$pembeli) {
+                return redirect()->back()->with('error', 'Data Pembeli tidak ditemukan!');
+            }
+
+            $pembeli->nama_pembeli = $request->nama_pembeli;
+            $pembeli->email_pembeli = $request->email_pembeli;
+            $pembeli->nomor_telepon_pembeli = $request->nomor_telepon_pembeli;
+            $pembeli->tanggal_lahir = $request->tanggal_lahir;
+            $pembeli->save();
+
+            return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
+        }catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        $pembeli->nama_pembeli = $request->nama_pembeli;
-        $pembeli->email_pembeli = $request->email_pembeli;
-        $pembeli->nomor_telepon_pembeli = $request->nomor_telepon_pembeli;
-        $pembeli->tanggal_lahir = $request->tanggal_lahir;
-        $pembeli->save();
-
-        return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
     }
 
     public function updateFoto(Request $request, $id)

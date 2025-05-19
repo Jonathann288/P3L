@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <script src="https://cdn.tailwindcss.com"></script> 
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="font-sans bg-gray-100 text-gray-800 grid grid-cols-1 md:grid-cols-[250px_1fr] min-h-screen">
     
@@ -22,12 +23,12 @@
                 <div class="space-y-4">
                     <a href="{{ route('CustomerService.DashboardCS') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-user mr-2 text-2xl font-bold"></i> {{$pegawaiLogin->nama_pegawai}}
+                        <i class="text-2xl font-bold"></i> {{$pegawaiLogin->nama_pegawai}}
                     </a>
 
                     <a href="{{ route('CustomerService.DashboardPenitip') }}"
                         class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                        <i class="fas fa-users mr-2"></i> Penitip
+                        <i class="fas fa-user mr-2"></i> <span>Penitip</span> 
                     </a>
                 </div>
             </nav>
@@ -101,12 +102,13 @@
                     @csrf
                     <input type="text" name="nama_penitip" placeholder="Nama Penitip" class="w-full p-2 mb-4 border">
                     <input type="text" name="nomor_ktp" placeholder="Nomor KTP" class="w-full p-2 mb-4 border">
-                    <input type="email" name="email_penitip" placeholder="Email Penitip" class="w-full p-2 mb-4 border">
                     <input type="date" name="tanggal_lahir" class="w-full p-2 mb-4 border">
                     <input type="text" name="nomor_telepon_penitip" placeholder="Nomor Telepon" class="w-full p-2 mb-4 border">
+                    <input type="email" name="email_penitip" placeholder="Email Penitip" class="w-full p-2 mb-4 border">
+                    <input type="password" name="password_penitip" placeholder="Password Penitip" class="w-full p-2 mb-4 border">
                     <div class="flex justify-end space-x-2">
                         <button type="button" onclick="closeModalTambah()" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
-                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Simpan</button>
+                        <button type="submit" onclick="return confirmCreate()" class="bg-green-600 text-white px-4 py-2 rounded">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -120,13 +122,11 @@
                     @csrf
                     @method('PUT')
                     <input type="text" id="editNama" name="nama_penitip" class="w-full p-2 mb-4 border">
-                    <input type="text" id="editNomorKTP" name="nomor_ktp" class="w-full p-2 mb-4 border">
-                    <input type="email" id="editEmail" name="email_penitip" class="w-full p-2 mb-4 border">
                     <input type="date" id="editTanggalLahir" name="tanggal_lahir" class="w-full p-2 mb-4 border">
                     <input type="text" id="editTelepon" name="nomor_telepon_penitip" class="w-full p-2 mb-4 border">
                     <div class="flex justify-end space-x-2">
                         <button type="button" onclick="closeModalEdit()" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
-                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Simpan Perubahan</button>
+                        <button type="submit" onclick="return confirmUpdate()" class="bg-green-600 text-white px-4 py-2 rounded">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>
@@ -154,8 +154,62 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white"></div>
+    
     <!-- Script Modal -->
     <script>
+         function confirmCreate() {
+            event.preventDefault(); // Mencegah form submit langsung
+            
+            Swal.fire({
+                title: 'Yakin ingin menyimpan data?',
+                text: "Data penitip akan disimpan ke database.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, simpan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form yang ada di dalam modal
+                    document.querySelector('#modalTambah form').submit();
+                }
+            });
+
+            return false;
+        }
+
+        function confirmUpdate() {
+            event.preventDefault(); // Mencegah form submit langsung
+            
+            Swal.fire({
+                title: 'Yakin ingin menyimpan perubahan?',
+                text: "Data penitip akan di-update di database.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, simpan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form yang ada di dalam modal edit
+                    document.querySelector('#modalEdit form').submit();
+                }
+            });
+
+            return false;
+        }
+
+        @if (session('success'))
+            showToast('{{ session('success') }}', 'success');
+        @endif
+
+        @if (session('error'))
+            showToast('{{ session('error') }}', 'error');
+        @endif
         function openModalTambah() {
             document.getElementById('modalTambah').classList.remove('hidden');
         }
@@ -167,8 +221,6 @@
         function openModalEdit(penitip) {
             document.getElementById('formEdit').action = `/DashboardPenitip/update/${penitip.id_penitip}`;
             document.getElementById('editNama').value = penitip.nama_penitip;
-            document.getElementById('editNomorKTP').value = penitip.nomor_ktp;
-            document.getElementById('editEmail').value = penitip.email_penitip;
             document.getElementById('editTanggalLahir').value = penitip.tanggal_lahir;
             document.getElementById('editTelepon').value = penitip.nomor_telepon_penitip;
             document.getElementById('modalEdit').classList.remove('hidden');
@@ -186,6 +238,31 @@
 
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
+        }
+         function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+
+            // Set warna berdasarkan tipe
+            if (type === 'success') {
+                toast.classList.add('bg-green-500');
+                toast.classList.remove('bg-red-500');
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-500');
+                toast.classList.remove('bg-green-500');
+            }
+
+            // Tampilkan toast dengan animasi
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+
+            // Hilangkan toast setelah 3 detik
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 500);
+            }, 3000);
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>

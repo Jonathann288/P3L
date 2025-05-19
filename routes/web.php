@@ -12,6 +12,8 @@ use App\Http\Controllers\BarangControllers;
 use App\Http\Controllers\lupaPasswordOrganisasiControllers;
 use App\Http\Controllers\lupaPasswordPembeliControllers;
 use App\Http\Controllers\RequestDonasiControllers;
+use App\Http\Controllers\DiskusiControllers;
+use App\Http\Controllers\DonasiControllers;
 
 Route::get('/', function () {
     return view('beranda');
@@ -23,14 +25,15 @@ Route::get('/shop/barang/', function () {
 Route::get('/shop', [BarangControllers::class, 'showShop'])->name('shop');
 Route::get('/shop/category/{id}', [KategoriBarangControllers::class, 'filterByCategory'])->name('shop.category');
 Route::get('/shop/barang/{id_barang}', [BarangControllers::class, 'showDetail'])->name('shop.detail_barang');
+Route::get('/shop/search', [BarangControllers::class, 'search'])->name('barang.search');
+
 
 Route::get('/penitip', function () {
     return view('penitip');
 })->name('penitip');
 
-Route::get('/donasi', function () {
-    return view('donasi');
-})->name('donasi');
+Route::get('/donasi', [BarangControllers::class, 'showDonasi'])->name('donasi');
+Route::get('/donasi/barang/{id_barang}', [BarangControllers::class, 'showDetailDonasi'])->name('donasi.detail_barang_donasi');
 
 Route::get('/requestBarang', function () {
     return view('requestBarang');
@@ -40,8 +43,7 @@ Route::get('/register', function () {
     return view('register');
 })->name('register');
 
-// Menampilkan form login Penitip
-Route::get('login-penitip', [AuthController::class, 'showLoginFormPenitip'])->name('loginPenitip');
+Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 
 // Menangani form login (POST) Penitip
 Route::post('login-penitip', [AuthController::class, 'loginPenitip'])->name('loginPenitip.post');
@@ -69,9 +71,6 @@ Route::post('/registerPembeli', [PembeliControllrs::class, 'registerPembeli'])->
 Route::get('/registerPenitip', [PenitipControllrs::class, 'showRegisterFormPenitip'])->name('registerPenitipForm');
 Route::post('/registerPenitip', [PenitipControllrs::class, 'registerPenitip'])->name('registerPenitip.post');
 
-
-// Menampilkan form login
-Route::get('login-pembeli', [AuthController::class, 'showLoginForm'])->name('loginPembeli');
 // Menangani form login (POST)
 Route::post('login-pembeli', [AuthController::class, 'loginPembeli'])->name('loginPembeli.post');
 Route::middleware(['pembeli'])->group(function () {
@@ -97,6 +96,8 @@ Route::middleware(['pembeli'])->group(function () {
     Route::get('/historyPembeli', [PembeliControllrs::class, 'showHistory'])->name('pembeli.historyPembeli');
     //
 
+    Route::post('/diskusi', [DiskusiControllers::class, 'store'])->name('diskusi.store');
+
     // logout
     Route::post('/logout-pembeli', [AuthController::class, 'logoutPembeli'])->name('logout.pembeli');
 });
@@ -106,7 +107,6 @@ Route::post('/registerOrganisasi', [OrganisasiControllrs::class, 'registerOrgani
 Route::get('/loginOrganisasi', [AuthController::class, 'showLoginOrganisasi'])->name('loginOrganisasi');
 Route::post('/loginOrganisasi', [AuthController::class, 'loginOrganisasi'])->name('loginOrganisasi.post');
 
-Route::post('/logout-organisasi', [AuthController::class, 'logoutOrganisasi'])->name('logoutOrganisasi');
 
 Route::middleware(['organisasi'])->group(function () {
         Route::get('/donasi-organisasi', function () {
@@ -119,9 +119,11 @@ Route::middleware(['organisasi'])->group(function () {
     Route::delete('/organisasi/destroy/{id}', [RequestDonasiControllers::class, 'destroy'])->name('organisasi.destroy');
     Route::post('/logout-organisasi', [AuthController::class, 'logoutOrganisasi'])->name('logout.organisasi');
 
+    Route::get('/request-barang', [RequestDonasiControllers::class, 'create'])->name('requestBarang.create');
+    Route::post('/request-barang', [RequestDonasiControllers::class, 'store'])->name('requestBarang.store');    
+
 });
 
-Route::get('/loginDashboard', [AuthController::class, 'showLoginFormPegawai'])->name('loginDashboard');
 Route::post('/loginDashboard', [AuthController::class, 'loginPegawai'])->name('loginPegawai.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -142,7 +144,18 @@ Route::middleware(['checkjabatan:Admin'])->group(function () {
     Route::get('/DashboardOrganisasi/search', [OrganisasiControllrs::class, 'search'])->name('admin.organisasi.search');
 });
 Route::middleware(['checkjabatan:Owner'])->group(function () {
+    Route::post('/logout-Owner', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
+
     Route::get('/DashboardOwner', [PegawaiControllers::class, 'showLoginOwner'])->name('owner.DashboardOwner');
+    Route::get('/DashboardDonasi', [RequestDonasiControllers::class, 'showlistRequestDonasi'])->name('owner.DashboardDonasi');
+    Route::post('/owner/donasi/submit', [DonasiControllers::class, 'submitDonasi'])->name('owner.donasi.submit');
+    Route::put('/owner/donasi/reject', [DonasiControllers::class, 'rejectDonasi'])->name('owner.donasi.reject');
+
+    Route::get('/DashboardHistoryDonasi/history-donasi', [DonasiControllers::class, 'historyDonasi'])->name('owner.historyDonasi');
+    Route::post('/owner/historyDonasi/update/{id_request}', [DonasiControllers::class, 'updateDonasi'])->name('owner.historyDonasi.update');
+
+
+
 });
 Route::middleware(['checkjabatan:Customer Service'])->group(function () {
     Route::post('/logout-CS', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
@@ -194,7 +207,3 @@ Route::get('/resetPasswordOrganisasi/{token}', [lupaPasswordOrganisasiController
 
 // Menangani form reset password
 Route::post('/resetPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'resetPasswordOrganisasi'])->name('resetPasswordOrganisasi.post');
-
-
-Route::get('/request-barang', [RequestDonasiControllers::class, 'create'])->name('requestBarang.create');
-Route::post('/request-barang', [RequestDonasiControllers::class, 'store'])->name('requestBarang.store');

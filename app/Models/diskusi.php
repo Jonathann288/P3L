@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class diskusi extends Model
+class Diskusi extends Model
 {
     protected $table = 'diskusi';
     protected $primaryKey = 'id_forum_diskusi';
@@ -15,6 +15,8 @@ class diskusi extends Model
         'id_pembeli',
         'pesan',
         'tanggal_diskusi',
+        'id_barang',
+        'parent_id'
     ];
 
     protected $casts = [
@@ -29,5 +31,15 @@ class diskusi extends Model
     public function pembeli()
     {
         return $this->belongsTo(Pembeli::class, 'id_pembeli');
+    }
+
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'id_barang');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Diskusi::class, 'parent_id');
     }
 }

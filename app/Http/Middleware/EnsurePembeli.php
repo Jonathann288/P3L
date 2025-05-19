@@ -14,7 +14,7 @@ class EnsurePembeli
             return $next($request);
         }
     
-        return redirect()->route('loginPembeli')->with('message', 'Anda harus login sebagai Pembeli untuk mengakses halaman ini.');
+        return redirect()->route('login')->with('message', 'Anda harus login sebagai Pembeli untuk mengakses halaman ini.');
     }
 }
 

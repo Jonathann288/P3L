@@ -27,7 +27,6 @@
             <div class="hidden md:flex space-x-6 text-gray-700">
                 <a href="{{ route('beranda') }}" class="hover:underline">Beranda</a>
                 <a href="{{ route('donasi')}}" class="hover:underline">Donasi</a>
-                <a href="{{ route('loginPenitip')}}" class="hover:underline">Login Sebagai Penitip</a>
             </div>
         </div>
 
@@ -47,7 +46,7 @@
                 <!-- Tombol Login & Sign In (Hanya Muncul di Desktop) -->
                 <div class="hidden md:flex space-x-2">
                     <button class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-blue-800 active:bg-blue-900">
-                        <a href="{{ route('loginPembeli') }}">Log In</a>
+                        <a href="{{ route('login') }}">Log In</a>
                     </button>
                     <button class="bg-white text-black px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-gray-200 active:bg-gray-300">
                     <a href="{{ route('registerPembeli') }}">Sign in</a>

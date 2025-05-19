@@ -23,19 +23,19 @@
                         <span class="text-2xl font-bold">{{ $pegawai->nama_pegawai }}</span>
                     </div>
                     <a href="{{ route('admin.DashboardPegawai') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <i class="fas fa-users mr-2"></i>
                         <span>Pegawai</span>
                     </a>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-cog"></i>
+                        <i class="fa-solid fa-handshake"></i>
                         <span>Jabatan</span>
                     </div>
                     <a href="{{ route('admin.DashboardOrganisasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-cog"></i>
+                       <i class="fa-solid fa-sitemap"></i>
                         <span>Organisasi</span>
                     </a>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-cog"></i>
+                        <i class="fa-solid fa-gift"></i>
                         <span>Merchandise</span>
                     </div>
                 </div>

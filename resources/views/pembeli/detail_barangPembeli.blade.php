@@ -27,6 +27,55 @@
             width: 90%;
             overflow: hidden;
         }
+        .discussion-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .discussion-content {
+            margin-left: 3rem;
+            position: relative;
+            width: calc(100% - 3.5rem);
+        }
+
+        .discussion-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .discussion-reply {
+            margin-left: 2rem;
+            padding-left: 1.5rem;
+            border-left: 2px solid #e5e7eb;
+        }
+
+        .discussion-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .discussion-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .discussion-meta h3 {
+            margin: 0;
+        }
+
+        .discussion-meta span {
+            white-space: nowrap;
+        }
+
+        .discussion-text {
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -45,9 +94,9 @@
 
         <div class="bg-blue-600 p-4">
             <div class="container mx-auto flex items-center justify-between flex-wrap">
-                <div class="flex items-center space-x-2">
+                <a href="{{ route('pembeli.Shop-Pembeli') }}" class="flex items-center space-x-2">
                     <img src="{{ asset('images/logo6.png') }}" alt="ReUseMart" class="h-12">
-                </div>
+                </a>
 
                 <div class="hidden md:block flex-grow mx-4">
                     <input type="text" placeholder="Mau cari apa nih kamu?"
@@ -67,12 +116,11 @@
                         <div id="dropdownMenu"
                             class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
                             <a href="{{ route('pembeli.profilPembeli') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
-                            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Transaksi</a>
-                            <form action="#" method="POST">
-                                @csrf
-                                <button type="submit"
-                                    class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
-                            </form>
+                                <form action="{{ route('logout.pembeli') }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                        class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
+                                </form>
                         </div>
                     </div>
                 @else
@@ -100,14 +148,15 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="pb-12 px-4 max-w-6xl mx-auto">
+   <main class="pb-12 px-4 max-w-6xl mx-auto">
         <!-- Product Section -->
         <div class="flex flex-col md:flex-row gap-8 pt-8">
             <!-- Product Images -->
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
-                <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
+                <div class="bg-white-100 rounded-lg h-96 flex items-center justify-center">
                     <!-- Ganti dengan gambar dari database -->
-                    <img src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}" class="max-h-full max-w-full">
+                    <img src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}"
+                        class="max-h-full max-w-full" />
                 </div>
             </div>
 
@@ -115,66 +164,112 @@
             <div class="w-full md:w-1/2">
                 <!-- Nama Barang -->
                 <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ $barang->nama_barang }}</h1>
-                
+
+                <div class="mb-6">
+                    <p class="text-3xl font-bold text-red-600">Rp{{ number_format($barang->harga_barang, 0, ',', '.') }}
+                    </p>
+                    @if($barang->harga_asli)
+                        <div class="flex items-center mt-1">
+                            <p class="text-lg text-gray-500 line-through mr-2">
+                                Rp{{ number_format($barang->harga_asli, 0, ',', '.') }}</p>
+                            @php
+                                $diskon = (($barang->harga_asli - $barang->harga_barang) / $barang->harga_asli) * 100;
+                            @endphp
+                            <span
+                                class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-sm font-medium">-{{ floor($diskon) }}%</span>
+                        </div>
+                    @endif
+                </div>
+
                 <!-- Rating -->
                 <div class="flex items-center mb-4">
-                    <div class="flex items-center">
-                        <div class="rating-stars">
-                            <span>★★★★★</span>
-                            <!-- Hitung persentase rating -->
-                            <span class="filled" >{{ ($barang->rating_barang / 5) * 100 }}%</span>
-                        </div>
-                        <span class="ml-1 text-gray-700">{{ number_format($barang->rating_barang, 1) }}</span>
+                    <div id="rating-stars-container" data-rating="{{ $barang->rating_barang }}">
                     </div>
+                    <span class="ml-2 text-gray-700">{{ number_format($barang->rating_barang, 1) }}</span>
                     <span class="mx-2 text-gray-400">|</span>
                     <span class="text-gray-600">{{ $barang->jumlah_penilaian }} Penilaian</span>
                     <span class="mx-2 text-gray-400">|</span>
                     <span class="text-gray-600">{{ $barang->jumlah_terjual }} Terjual</span>
                 </div>
 
-                <!-- Price -->
-                <div class="mb-6">
-                    <p class="text-3xl font-bold text-red-600">Rp{{ number_format($barang->harga_barang, 0, ',', '.') }}</p>
-                    @if($barang->harga_asli)
-                    <div class="flex items-center mt-1">
-                        <p class="text-lg text-gray-500 line-through mr-2">Rp{{ number_format($barang->harga_asli, 0, ',', '.') }}</p>
-                        @php
-                            $diskon = (($barang->harga_asli - $barang->harga_barang) / $barang->harga_asli) * 100;
-                        @endphp
-                        <span class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-sm font-medium">-{{ floor($diskon) }}%</span>
-                    </div>
-                    @endif
+                <!-- Kotak Deskripsi Produk -->
+                <div class="mt-6 border rounded-lg p-4 bg-gray-50 shadow-sm">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Deskripsi Produk</h2>
+
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
+                        {{ $barang->deskripsi_barang }}
+                    </p>
+
+                    <p class="text-gray-800 font-medium">
+                        Berat Barang: <span class="font-normal">{{ $barang->berat_barang }} gram</span>
+                    </p>
                 </div>
+
+
+
+
             </div>
         </div>
+
+        <div class="mt-12 bg-white p-6 rounded-lg shadow-sm">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Diskusi Produk</h2>
+
+            <!-- Form untuk menambahkan diskusi baru -->
+            @if(Auth::guard('pembeli')->check())
+                <div class="mb-8">
+                    <form action="{{ route('diskusi.store') }}" method="POST" id="discussion-form" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="id_barang" value="{{ $barang->id_barang }}">
+
+                        <div>
+                            <textarea name="pesan" rows="3"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Tulis pertanyaan atau komentar Anda tentang produk ini..." required></textarea>
+                            @error('pesan')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Kirim</button>
+                        </div>
+                    </form>
+                </div>
+
+            @else
+                <!-- ... kode existing untuk non-login ... -->
+            @endif
+
+            <div id="discussion-list">
+                @forelse($barang->diskusi->sortByDesc('tanggal_diskusi') as $item)
+                    @if($item->pembeli)
+                        <div class="discussion-item">
+                            <div class="flex items-start">
+                                <img src="{{ asset($item->pembeli->foto_pembeli) }}" alt="{{ $item->pembeli->nama_pembeli }}"
+                                    class="discussion-avatar rounded-full object-cover">
+
+                                <div class="discussion-content relative">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h3 class="font-semibold text-gray-900 m-0">{{ $item->pembeli->nama_pembeli }}</h3>
+                                        <span
+                                            class="text-sm text-gray-900 ml-4">{{ $item->tanggal_diskusi->translatedFormat('d F Y') }}</span>
+                                    </div>
+                                    <p class="discussion-text text-gray-700">{{ $item->pesan }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @empty
+                    <div class="text-center py-8">
+                        <p class="text-gray-500">Belum ada diskusi untuk produk ini</p>
+                    </div>
+                @endforelse
+            </div>
     </main>
 
     <script>
-        document.getElementById("menu-toggle").addEventListener("click", function () {
-            document.getElementById("mobile-menu").classList.toggle("hidden");
-        });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById("content").style.display = "block";
-        });
-
-        // Quantity controls
-        // const minusBtn = document.querySelector('.fa-minus').parentElement;
-        // const plusBtn = document.querySelector('.fa-plus').parentElement;
-        // const quantityInput = document.querySelector('input[type="text"]');
-
-        // minusBtn.addEventListener('click', function() {
-        //     let value = parseInt(quantityInput.value);
-        //     if (value > 1) {
-        //         quantityInput.value = value - 1;
-        //     }
-        // });
-
-        // plusBtn.addEventListener('click', function() {
-        //     let value = parseInt(quantityInput.value);
-        //     quantityInput.value = value + 1;
-        // });
-        const toggle = document.getElementById('dropdownToggle');
+                const toggle = document.getElementById('dropdownToggle');
         const menu = document.getElementById('dropdownMenu');
 
         toggle.addEventListener('click', () => {
@@ -184,6 +279,106 @@
         window.addEventListener('click', (e) => {
             if (!toggle.contains(e.target) && !menu.contains(e.target)) {
                 menu.classList.add('hidden');
+            }
+        });
+        document.getElementById("menu-toggle").addEventListener("click", function () {
+            document.getElementById("mobile-menu").classList.toggle("hidden");
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("content").style.display = "block";
+        });
+        // Handle form submission with AJAX
+        document.getElementById('discussion-form')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const button = form.querySelector('button[type="submit"]');
+            const originalButtonText = button.textContent;
+
+            // Disable button during submission
+            button.disabled = true;
+            button.textContent = 'Mengirim...';
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Add new discussion to the list
+                        const discussionList = document.getElementById('discussion-list');
+                        const newDiscussion = document.createElement('div');
+                        newDiscussion.className = 'border-b border-gray-200 pb-6 mb-6';
+                        newDiscussion.innerHTML = `
+                    <div class="flex items-start space-x-4">
+                        <img src="{{ asset(Auth::guard('pembeli')->user()->foto_pembeli) }}" 
+                             alt="${data.nama}" class="w-10 h-10 rounded-full object-cover">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-gray-900">${data.nama}</h3>
+                                <span class="text-sm text-gray-500">${data.tanggal}</span>
+                            </div>
+                            <p class="text-gray-700 mt-1">${data.pesan}</p>
+                        </div>
+                    </div>
+                `;
+
+                        // Insert at the top of the list
+                        if (discussionList.firstChild) {
+                            discussionList.insertBefore(newDiscussion, discussionList.firstChild);
+                        } else {
+                            discussionList.appendChild(newDiscussion);
+                        }
+
+                        // Reset form
+                        form.reset();
+                    } else {
+                        alert(data.message || 'Terjadi kesalahan saat mengirim diskusi');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengirim diskusi');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.textContent = originalButtonText;
+                });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const ratingContainer = document.getElementById('rating-stars-container');
+            if (!ratingContainer) return;
+
+            const rating = parseFloat(ratingContainer.dataset.rating) || 0;
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const totalStars = 5;
+
+            for (let i = 0; i < fullStars; i++) {
+                const star = document.createElement('i');
+                star.className = 'fas fa-star text-yellow-400';
+                ratingContainer.appendChild(star);
+            }
+
+            if (halfStar) {
+                const half = document.createElement('i');
+                half.className = 'fas fa-star-half-alt text-yellow-400';
+                ratingContainer.appendChild(half);
+            }
+
+            const emptyStars = totalStars - fullStars - (halfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                const star = document.createElement('i');
+                star.className = 'far fa-star text-yellow-400';
+                ratingContainer.appendChild(star);
             }
         });
     </script>

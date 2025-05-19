@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReuseMart - Detail Barang</title>
+    <title>ReuseMart - Detail Barang Donasi</title>
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,13 +27,23 @@
             width: 90%;
             overflow: hidden;
         }
+        .thumbnail-container {
+            scrollbar-width: thin;
+            scrollbar-color: #3B82F6 #E5E7EB;
+        }
+        .thumbnail-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        .thumbnail-container::-webkit-scrollbar-thumb {
+            background-color: #3B82F6;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navigation -->
     <nav class="w-full">
         <div class="bg-blue-300 text-sm py-2 px-6 flex justify-around items-center">
-            <!-- Ikon Sosial Media & Text -->
+
             <div class="flex items-center space-x-2">
                 <span class="font-semibold">Ikuti kami di</span>
                 <a href="#" class="text-gray-700 hover:text-gray-900">
@@ -53,7 +63,6 @@
                 </a>
             </div>
 
-            <!-- Menu Navigasi -->
             <div class="hidden md:flex space-x-6 text-gray-700">
                 <a href="{{ route('beranda') }}" class="hover:underline">Beranda</a>
                 <a href="{{ route('donasi')}}" class="hover:underline">Donasi</a>
@@ -62,28 +71,26 @@
 
         <div class="bg-blue-600 p-4">
             <div class="container mx-auto flex items-center justify-between flex-wrap">
-                <!-- Logo -->
-                <a href="{{ route('shop') }}" class="flex items-center space-x-2">
-                    <img src="{{ asset('images/logo6.png') }}" alt="ReUseMart" class="h-12">
-                </a>
 
-                <!-- Input Pencarian -->
+                <div class="flex items-center space-x-2">
+                    <img src="{{ asset('images/logo6.png') }}" alt="ReUseMart" class="h-12">
+                </div>
+
                 <div class="hidden md:block flex-grow mx-4">
                     <input type="text" placeholder="Mau cari apa nih kamu?" 
                         class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none">
                 </div>
 
-                <!-- Tombol Login & Sign In (Hanya Muncul di Desktop) -->
+
                 <div class="hidden md:flex space-x-2">
                     <button class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-blue-800 active:bg-blue-900">
-                        <a href="{{ route('login') }}">Log In</a>
+                        <a href="{{ route('loginOrganisasi') }}">Log In</a>
                     </button>
                     <button class="bg-white text-black px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-gray-200 active:bg-gray-300">
-                    <a href="{{ route('registerPembeli') }}">Sign in</a>
+                    <a href="{{ route('registerOrganisasi') }}">Sign in</a>
                     </button>
                 </div>
 
-                <!-- Hamburger Menu (Mobile) -->
                 <div class="md:hidden flex items-center">
                     <button id="menu-toggle" class="text-white focus:outline-none">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -93,9 +100,9 @@
                 </div>
             </div>
 
-            <!-- Menu Mobile (Muncul saat tombol hamburger diklik) -->
+
             <div id="mobile-menu" class="hidden md:hidden mt-4">
-                <!-- Input Pencarian di Mobile -->
+
                 <input type="text" placeholder="Mau cari apa nih kamu?" 
                     class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none mb-2">
                 <button class="bg-blue-700 text-white w-full px-4 py-2 rounded-lg font-bold shadow-md transition-all hover:bg-blue-800 active:bg-blue-900">
@@ -109,61 +116,63 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
+
     <main class="pb-12 px-4 max-w-6xl mx-auto">
-        <!-- Product Section -->
+
         <div class="flex flex-col md:flex-row gap-8 pt-8">
-            <!-- Product Images -->
+
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
-                <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
-                    <!-- Ganti dengan gambar dari database -->
-                    <img src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}" class="max-h-full max-w-full">
-                </div>
-            </div>
 
-            <!-- Product Details -->
-            <div class="w-full md:w-1/2">
-                <!-- Nama Barang -->
-                <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ $barang->nama_barang }}</h1>
+                <div class="bg-gray-100 rounded-lg h-96 mb-4 flex items-center justify-center overflow-hidden relative">
+                    @if(count($barang->foto_barang) > 0)
 
-                <div class="mb-6">
-                    <p class="text-3xl font-bold text-red-600">Rp{{ number_format($barang->harga_barang, 0, ',', '.') }}
-                    </p>
-                    @if($barang->harga_asli)
-                        <div class="flex items-center mt-1">
-                            <p class="text-lg text-gray-500 line-through mr-2">
-                                Rp{{ number_format($barang->harga_asli, 0, ',', '.') }}</p>
-                            @php
-                                $diskon = (($barang->harga_asli - $barang->harga_barang) / $barang->harga_asli) * 100;
-                            @endphp
-                            <span
-                                class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-sm font-medium">-{{ floor($diskon) }}%</span>
+                        <img src="{{ asset($barang->foto_barang[0]) }}" 
+                             alt="{{ $barang->nama_barang }}" 
+                             class="w-full h-full object-cover transition-opacity duration-300" 
+                             id="mainImage">
+                        
+
+                        <div id="imageFallback" class="absolute inset-0 flex items-center justify-center bg-gray-200 hidden">
+                            <span class="text-gray-500">Gambar tidak tersedia</span>
                         </div>
+                    @else
+                        <div class="text-gray-500">Tidak ada gambar tersedia</div>
                     @endif
                 </div>
 
-                <!-- Rating -->
-                <div class="flex items-center mb-4">
-                    <div id="rating-stars-container" data-rating="{{ $barang->rating_barang }}">
+
+                @if(count($barang->foto_barang) > 1)
+                    <div class="flex gap-2 overflow-x-auto py-2 thumbnail-container">
+                        @for($i = 0; $i < count($barang->foto_barang); $i++)
+                            @php $gambar = $barang->foto_barang[$i]; @endphp
+                            <div class="flex-shrink-0 w-20 h-20 cursor-pointer relative group">
+                                @if(isset($gambar) && $gambar !== null && file_exists(public_path($gambar)))
+                                    <img 
+                                        src="{{ asset($gambar) }}" 
+                                        alt="Thumbnail {{ $i + 1 }}"
+                                        class="w-full h-full object-cover border-2 rounded transition-all duration-200
+                                                {{ $i === 0 ? 'border-blue-500' : 'border-transparent hover:border-blue-300' }}"
+                                        onclick="changeMainImage(this)"
+                                    >
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
+                                        Gambar tidak tersedia
+                                    </div>
+                                @endif
+                                <div class="absolute inset-0 bg-white bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded"></div>
+                            </div>
+                        @endfor
                     </div>
-                    <span class="ml-2 text-gray-700">{{ number_format($barang->rating_barang, 1) }}</span>
-                    <span class="mx-2 text-gray-400">|</span>
-                    <span class="text-gray-600">{{ $barang->jumlah_penilaian }} Penilaian</span>
-                    <span class="mx-2 text-gray-400">|</span>
-                    <span class="text-gray-600">{{ $barang->jumlah_terjual }} Terjual</span>
-                </div>
+                @endif
+            </div>
 
-                <!-- Kotak Deskripsi Produk -->
-                <div class="mt-6 border rounded-lg p-4 bg-gray-50 shadow-sm">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Deskripsi Produk</h2>
+            <div class="w-full md:w-1/2">
 
-                    <p class="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
-                        {{ $barang->deskripsi_barang }}
-                    </p>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ $barang->nama_barang }}</h1>
 
-                    <p class="text-gray-800 font-medium">
-                        Berat Barang: <span class="font-normal">{{ $barang->berat_barang }} gram</span>
-                    </p>
+                <div class="mb-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Deskripsi Barang</h2>
+                    <p class="text-gray-600">{{ $barang->deskripsi_barang }}</p>
                 </div>
             </div>
         </div>
@@ -174,26 +183,45 @@
             document.getElementById("mobile-menu").classList.toggle("hidden");
         });
 
-        document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById("content").style.display = "block";
-        });
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     document.getElementById("content").style.display = "block";
+        // });
 
-        // Quantity controls
-        const minusBtn = document.querySelector('.fa-minus').parentElement;
-        const plusBtn = document.querySelector('.fa-plus').parentElement;
-        const quantityInput = document.querySelector('input[type="text"]');
+// Image handling
+        function changeMainImage(thumbElement) {
+            const mainImage = document.getElementById('mainImage');
+            const newSrc = thumbElement.getAttribute('data-src');
+            
+            // Add loading effect
+            mainImage.classList.add('opacity-0');
+            
+            // Preload image
+            const img = new Image();
+            img.src = newSrc;
+            img.onload = function() {
+                mainImage.src = newSrc;
+                mainImage.classList.remove('opacity-0');
+                
+                // Update active thumbnail
+                document.querySelectorAll('.thumbnail-container img').forEach(img => {
+                    img.classList.remove('border-blue-500');
+                    img.classList.add('border-transparent');
+                });
+                thumbElement.classList.add('border-blue-500');
+                thumbElement.classList.remove('border-transparent');
+            };
+            
+            img.onerror = function() {
+                document.getElementById('imageFallback').classList.remove('hidden');
+                mainImage.classList.add('hidden');
+            };
+        }
 
-        minusBtn.addEventListener('click', function() {
-            let value = parseInt(quantityInput.value);
-            if (value > 1) {
-                quantityInput.value = value - 1;
-            }
-        });
-
-        plusBtn.addEventListener('click', function() {
-            let value = parseInt(quantityInput.value);
-            quantityInput.value = value + 1;
+        // Handle error on main image
+        document.getElementById('mainImage')?.addEventListener('error', function() {
+            this.classList.add('hidden');
+            document.getElementById('imageFallback').classList.remove('hidden');
         });
     </script>
 </body>
-</html>
+</html> -->

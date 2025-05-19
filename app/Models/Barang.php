@@ -29,6 +29,7 @@ class Barang extends Model
         'rating_barang' => 'float',
         'berat_barang' => 'float',
         'garansi_barang' => 'datetime',
+        // 'foto_barang' => 'array'
     ];
 
     public function kategoribarang()
@@ -40,4 +41,20 @@ class Barang extends Model
     {
         return $this->belongsTo(penitip::class, 'id'); // Asumsi relasi ke tabel penitip
     }
+
+        public function kategori()
+    {
+        return $this->belongsTo(kategoribarang::class, 'id_kategori');
+    }
+
+        public function diskusi()
+    {
+        return $this->hasMany(Diskusi::class, 'id_barang', 'id_barang');
+    }
+
+    // public function getFotoBarangAttribute($value)
+    // {
+    //     // Membersihkan string dan mengubah ke array
+    //     return $value ? array_map('trim', explode(',', $value)) : [];
+    // }
 }

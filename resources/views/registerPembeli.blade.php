@@ -92,7 +92,7 @@
 
                 <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
                     <p class="text-white font-bold">Akun kamu udah ada?</p>
-                    <a href='{{ route('loginPembeli') }}'
+                    <a href='{{ route('login') }}'
                         class="bg-transparent border border-white text-white px-3 py-1 rounded-md hover:bg-white hover:text-blue-500">Log
                         in</a>
                 </div>

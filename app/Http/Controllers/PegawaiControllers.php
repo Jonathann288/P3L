@@ -153,28 +153,33 @@ class PegawaiControllers extends Controller
 
     // Cari organisasi berdasarkan nama
     public function searchPegawai(Request $request)
-    {
-        $keyword = $request->input('keyword');
+    {   
+        try{
+            $keyword = $request->input('keyword');
 
-        // Mulai query dengan eager loading jabatan
-        $query = Pegawai::with('jabatan');
+            // Mulai query dengan eager loading jabatan
+            $query = Pegawai::with('jabatan');
 
-        if ($keyword) {
-            $query->where(function ($q) use ($keyword) {
-                $q->where('nama_pegawai', 'LIKE', "%{$keyword}%")
-                ->orWhere('email_pegawai', 'LIKE', "%{$keyword}%")
-                ->orWhereHas('jabatan', function ($q2) use ($keyword) {
-                    $q2->where('nama_jabatan', 'LIKE', "%{$keyword}%");
+            if ($keyword) {
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('nama_pegawai', 'LIKE', "%{$keyword}%")
+                    ->orWhere('email_pegawai', 'LIKE', "%{$keyword}%")
+                    ->orWhereHas('jabatan', function ($q2) use ($keyword) {
+                        $q2->where('nama_jabatan', 'LIKE', "%{$keyword}%");
+                    });
                 });
-            });
+            }
+
+            $pegawai = $query->get();
+
+            $pegawaiLogin = Auth::guard('pegawai')->user();
+            $jabatan = Jabatan::all();
+
+            return view('admin.DashboardPegawai', compact('pegawai', 'pegawaiLogin', 'jabatan'));
+        }catch (\Exception $e) {
+        // Jika terjadi kesalahan, tampilkan pesan error
+            return redirect()->back()->with('error', 'Search Pegawai hanya nama, email, dan jabatan saja' );
         }
-
-        $pegawai = $query->get();
-
-        $pegawaiLogin = Auth::guard('pegawai')->user();
-        $jabatan = Jabatan::all();
-
-        return view('admin.DashboardPegawai', compact('pegawai', 'pegawaiLogin', 'jabatan'));
     }
 
 }

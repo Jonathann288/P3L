@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body class="font-sans bg-gray-100 text-gray-800 grid grid-cols-1 md:grid-cols-[250px_1fr] min-h-screen">
@@ -161,13 +163,39 @@
                 </div>
                 <div class="flex justify-end mt-6 space-x-2">
                     <button type="button" onclick="toggleModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Batal</button>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Simpan</button>
+                    <button type="submit" onsubmit="konfirmasi('add', event)" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        function konfirmasi(mode = 'add', e){
+            e.preventDefault(); // Prevent form submission
+
+            let pesan = '';
+            if (mode === 'add') {
+                pesan = 'Apakah Anda yakin ingin menambahkan alamat baru?';
+            } else if (mode === 'edit') {
+                pesan = 'Apakah Anda yakin ingin mengubah alamat?';
+            }
+
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: pesan,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Simpan!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    e.target.submit(); // Submit form
+                }
+            });
+        }
+
+
         function toggleModal(mode = 'add') {
             const modal = document.getElementById('modal');
             const form = document.getElementById('modalForm');
@@ -178,6 +206,8 @@
                 title.textContent = "Tambah Alamat";
                 alamatId.value = '';
                 // Reset form fields
+            } else if (mode === 'edit') { // Store route
+                title.textContent = "Edit Alamat";
             }
             modal.classList.toggle('hidden');
             modal.classList.toggle('flex');
@@ -189,9 +219,9 @@
             form.action = '/alamatPembeli/update/' + id; // Update route
             form.innerHTML += '@method("PUT")'; // Method PUT for update
             
-            // document.getElementById('alamatId').value = id;
-            // document.getElementById('nama_jalan').value = nama;
-            // document.getElementById('deskripsi_alamat').value = deskripsi;
+            document.getElementById('alamatId').value = id;
+            document.getElementById('nama_jalan').value = nama;
+            document.getElementById('deskripsi_alamat').value = deskripsi;
             // Update other fields as necessary
         }
         let alamatUtamaSebelumnya = null;

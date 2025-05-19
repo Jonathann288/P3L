@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\RequestDonasi;
+use App\Models\Barang;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Validator;
@@ -52,45 +53,48 @@ class RequestDonasiControllers extends Controller
     // }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'deskripsi_request' => 'required|string',
-            'tanggal_request' => 'required|date',
-        ]);
+    {   
+        try{
+            $request->validate([
+                'deskripsi_request' => 'required|string',
+            ]);
 
-        $organisasi = auth('organisasi')->user();
+            $organisasi = auth('organisasi')->user();
 
-        if (!$organisasi || !$organisasi->id_organisasi) {
-            return redirect()->back()->withErrors('Organisasi tidak ditemukan.');
-        }
+            if (!$organisasi || !$organisasi->id_organisasi) {
+                return redirect()->back()->withErrors('Organisasi tidak ditemukan.');
+            }
 
-        // Ambil semua ID request donasi milik organisasi ini
-        $ids = RequestDonasi::where('id_organisasi', $organisasi->id_organisasi)
-            ->pluck('id')
-            ->toArray();
+            // Ambil semua ID request donasi milik organisasi ini
+            $ids = RequestDonasi::where('id_organisasi', $organisasi->id_organisasi)
+                ->pluck('id')
+                ->toArray();
 
-        // Hitung ID terbesar
-        $maxNumber = 0;
-        foreach ($ids as $id) {
-            if (preg_match('/^R(\d{1,})$/', $id, $match)) {
-                $num = (int) $match[1];
-                if ($num > $maxNumber) {
-                    $maxNumber = $num;
+            // Hitung ID terbesar
+            $maxNumber = 0;
+            foreach ($ids as $id) {
+                if (preg_match('/^R(\d{1,})$/', $id, $match)) {
+                    $num = (int) $match[1];
+                    if ($num > $maxNumber) {
+                        $maxNumber = $num;
+                    }
                 }
             }
+
+            $generatedId = 'R' . str_pad($maxNumber + 1, 3, '0', STR_PAD_LEFT);
+
+            RequestDonasi::create([
+                'id' => $generatedId,
+                'id_organisasi' => $organisasi->id_organisasi,
+                'deskripsi_request' => $request->deskripsi_request,
+                'tanggal_request' => now(),
+                'status_request' => 'pending',
+            ]);
+
+            return redirect()->back()->with('success', 'Request donasi berhasil ditambahkan.');
+        }catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan menambahkan Request Donasi: ' . $e->getMessage());
         }
-
-        $generatedId = 'R' . str_pad($maxNumber + 1, 3, '0', STR_PAD_LEFT);
-
-        RequestDonasi::create([
-            'id' => $generatedId,
-            'id_organisasi' => $organisasi->id_organisasi,
-            'deskripsi_request' => $request->deskripsi_request,
-            'tanggal_request' => $request->tanggal_request,
-            'status_request' => 'pending',
-        ]);
-
-        return redirect()->back()->with('success', 'Request donasi berhasil ditambahkan.');
     }
 
     public function requestDonasiOrganisasi(Request $request)
@@ -133,24 +137,44 @@ class RequestDonasiControllers extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'deskripsi_request' => 'required|string',
-            'tanggal_request' => 'required|date',
-        ]);
+    {   
+        try{
+            $request->validate([
+                'deskripsi_request' => 'required|string',
+            ]);
 
-        $organisasiId = Auth::guard('organisasi')->id();
+            $organisasiId = Auth::guard('organisasi')->id();
 
-        $requestDonasi = RequestDonasi::where('id', $id)
-            ->where('id_organisasi', $organisasiId)
-            ->firstOrFail();
+            $requestDonasi = RequestDonasi::where('id', $id)
+                ->where('id_organisasi', $organisasiId)
+                ->firstOrFail();
 
-        $requestDonasi->update([
-            'deskripsi_request' => $request->deskripsi_request,
-            'tanggal_request' => $request->tanggal_request,
-        ]);
+            $requestDonasi->update([
+                'deskripsi_request' => $request->deskripsi_request,
+                'tanggal_request' => now(),
+            ]);
 
-        return redirect()->back()->with('success', 'Request donasi berhasil diperbarui.');
+            return redirect()->back()->with('success', 'Request donasi berhasil diperbarui.');
+        }catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal melakukan Update request: ' . $e->getMessage());
+        }
     }
+
+    public function showlistRequestDonasi()
+    {
+        try {
+            $pegawaiLogin = Auth::guard('pegawai')->user();
+            $requestdonasi = requestdonasi::where('status_request', 'pending')->get();
+            
+            // Ambil barang yang statusnya "tersedia" (atau status lain yang diinginkan)
+            $barangs = barang::where('status_barang', 'di donasikan')->get();
+
+            return view('owner.DashboardDonasi', compact('requestdonasi', 'pegawaiLogin', 'barangs'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+
 
 }

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.2/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         #toast {
             opacity: 0;
@@ -34,7 +35,7 @@
                 <div class="space-y-4">
                     <a href="{{ route('admin.Dashboard') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-user mr-2 text-2xl font-bold"></i> {{$pegawaiLogin->nama_pegawai}}
+                        <i class="text-2xl font-bold"></i> {{$pegawaiLogin->nama_pegawai}}
                     </a>
 
                     <a href="{{ route('admin.DashboardPegawai') }}"
@@ -42,15 +43,15 @@
                         <i class="fas fa-users mr-2"></i> Pegawai
                     </a>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-cog"></i>
+                        <i class="fa-solid fa-handshake"></i>
                         <span>Jabatan</span>
                     </div>
                     <a href="{{ route('admin.DashboardOrganisasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-cog"></i>
+                       <i class="fa-solid fa-sitemap"></i>
                         <span>Organisasi</span>
                     </a>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-cog"></i>
+                        <i class="fa-solid fa-gift"></i>
                         <span>Merchandise</span>
                     </div>
                 </div>
@@ -163,7 +164,7 @@
                         class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                         Batal
                     </button>
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <button type="submit" onclick="return confirmCreate()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                         Simpan
                     </button>
                 </div>
@@ -205,7 +206,7 @@
                         class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                         Batal
                     </button>
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <button type="submit" onclick="return confirmUpdate()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                         Simpan Perubahan
                     </button>
                 </div>
@@ -238,6 +239,50 @@
 
     <!-- Script Modal -->
     <script>
+        function confirmCreate() {
+            event.preventDefault(); // Mencegah form submit langsung
+            
+            Swal.fire({
+                title: 'Yakin ingin menyimpan data?',
+                text: "Data pegawai akan disimpan ke database.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, simpan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form yang ada di dalam modal
+                    document.querySelector('#modal form').submit();
+                }
+            });
+
+            return false;
+        }
+
+        function confirmUpdate() {
+            event.preventDefault(); // Mencegah form submit langsung
+            
+            Swal.fire({
+                title: 'Yakin ingin menyimpan perubahan?',
+                text: "Data pegawai akan di-update di database.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, simpan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form yang ada di dalam modal edit
+                    document.querySelector('#editModal form').submit();
+                }
+            });
+
+            return false;
+        }
+
         @if (session('success'))
             showToast('{{ session('success') }}', 'success');
         @endif

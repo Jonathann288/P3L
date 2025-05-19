@@ -27,6 +27,6 @@ class CheckJabatan
         }
 
         // Jika tidak cocok, arahkan ke halaman 403 (Forbidden)
-        return redirect()->route('loginDashboard'); // Atau bisa redirect ke halaman lain sesuai keinginan
+        return redirect()->route('login'); // Atau bisa redirect ke halaman lain sesuai keinginan
     }
 }
