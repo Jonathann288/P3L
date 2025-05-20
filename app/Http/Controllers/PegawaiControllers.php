@@ -18,6 +18,30 @@ class PegawaiControllers extends Controller
         return response()->json($pegawai);
     }
 
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email_pegawai', 'password_pegawai');
+
+        $pegawai = Pegawai::where('email_pegawai', $credentials['email_pegawai'])->first();
+
+        if ($pegawai && Hash::check($credentials['password_pegawai'], $pegawai->password_pegawai)) {
+            Auth::guard('pegawai')->login($pegawai); // Gunakan guard pegawai
+
+            if ($pegawai->id_jabatan == 2) {
+                return redirect()->route('owner.DashboardOwner');
+            } elseif ($pegawai->id_jabatan == 1) {
+                return redirect()->route('admin.Dashboard');
+            } elseif ($pegawai->id_jabatan == 4) {
+                return redirect()->route('gudang.DashboardGudang');
+            } else {
+                return redirect()->back()->with('error', 'Jabatan tidak dikenali');
+            }
+
+        } else {
+            return redirect()->back()->with('error', 'Email atau password salah');
+        }
+    }
+
     public function showDashboard()
     {
         $pegawai = Auth::guard('pegawai')->user();
@@ -34,7 +58,7 @@ class PegawaiControllers extends Controller
         try {
 
             $search = $request->input('search');
-    
+
             $query = Pegawai::with('jabatan');
 
             if ($search) {
@@ -139,32 +163,6 @@ class PegawaiControllers extends Controller
 
         return redirect()->route('admin.DashboardPegawai')->with('success', 'Pegawai berhasil diperbarui');
     }
-
-
-
-
-
-public function login(Request $request)
-{
-    $credentials = $request->only('email_pegawai', 'password_pegawai');
-
-    $pegawai = Pegawai::where('email_pegawai', $credentials['email_pegawai'])->first();
-
-    if ($pegawai && Hash::check($credentials['password_pegawai'], $pegawai->password_pegawai)) {
-        Auth::guard('pegawai')->login($pegawai); // Gunakan guard pegawai
-
-        if ($pegawai->id_jabatan == 2) {
-            return redirect()->route('owner.DashboardOwner');
-        } elseif ($pegawai->id_jabatan == 1) {
-            return redirect()->route('admin.Dashboard');
-        } else {
-            return redirect()->back()->with('error', 'Jabatan tidak dikenali');
-        }
-    } else {
-        return redirect()->back()->with('error', 'Email atau password salah');
-    }
-}
-
 
 
     public function show($id)

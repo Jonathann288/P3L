@@ -13,6 +13,7 @@ use App\Http\Controllers\BarangControllers;
 use App\Http\Controllers\lupaPasswordOrganisasiControllers;
 use App\Http\Controllers\lupaPasswordPembeliControllers;
 use App\Http\Controllers\OwnerControllers;
+use App\Http\Controllers\GudangControllers;
 
 
 Route::get('/', function () {
@@ -29,10 +30,6 @@ Route::get('/shop/barang/{id_barang}', [BarangControllers::class, 'showDetail'])
 Route::get('/penitip', function () {
     return view('penitip');
 })->name('penitip');
-
-Route::get('/donasi', function () {
-    return view('donasi');
-})->name('donasi');
 
 Route::get('/requestBarang', function () {
     return view('requestBarang');
@@ -173,6 +170,17 @@ Route::middleware(['auth:pegawai'])->group(function () {
 
 });
 
+// Gudang
+Route::middleware(['checkjabatan:Gudang'])->group(function () {
+    Route::get('/DashboardGudang', [GudangControllers::class, 'showDashboardGudang'])->name('gudang.DashboardGudang');
+     Route::get('/DashboardGudang', [GudangControllers::class, 'showDashboardGudang'])->name('gudang.DashboardGudang');
+    Route::get('/DashboardTitipanBarang', [GudangControllers::class, 'showTitipanBarang'])->name('gudang.DashboardTitipanBarang');
+    Route::put('/UpdateTitipanBarang/{id}', [GudangControllers::class, 'updateTitipanBarang'])->name('gudang.UpdateTitipanBarang');
+
+});
+
+
+
 
 
 
@@ -181,11 +189,7 @@ Route::middleware(['checkjabatan:Customer Service'])->group(function () {
         return view('customerservice.DashboardCS');
     })->name('CustomerService.DashboardCS');
 });
-Route::middleware(['checkjabatan:Gudang'])->group(function () {
-    Route::get('/DashboardGudang', function () {
-        return view('gudang.DashboardGudang');
-    })->name('gudang.DashboardGudang');
-});
+
 Route::middleware(['checkjabatan:Kurir'])->group(function () {
     Route::get('/DashboardKurir', function () {
         return view('kurir.DashboardKurir');

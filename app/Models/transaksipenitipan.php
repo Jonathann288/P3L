@@ -18,6 +18,7 @@ class transaksipenitipan extends Model
         'tanggal_akhir_penitipan',
         'tanggal_batas_pengambilan',
         'tanggal_pengambilan_barang',
+        'foto_barang',
     ];
 
     protected $casts = [
@@ -25,6 +26,7 @@ class transaksipenitipan extends Model
         'tanggal_akhir_penitipan' => 'datetime',
         'tanggal_batas_pengambilan' => 'datetime',
         'tanggal_pengambilan_barang' => 'datetime',
+        'foto_barang' => 'array',
     ];
 
     public function pegawai()
