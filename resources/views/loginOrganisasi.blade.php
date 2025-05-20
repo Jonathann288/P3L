@@ -85,7 +85,7 @@
                 </form>
 
                 <div class="mt-3 text-center">
-                    <a href="{{ route('LupaPasswordOrg.lupaPasswordOrganisasi') }}"
+                    <a href="{{ route('forgotPassword') }}"
                         class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
                 </div>
 

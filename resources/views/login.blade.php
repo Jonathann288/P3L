@@ -172,7 +172,7 @@
                 </form>
 
                 <div class="mt-3 text-center">
-                    <a href="{{ route('LupaPasswordPembeli.lupaPasswordPembeli') }}"
+                    <a href="{{ route('forgotPassword') }}"
                         class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
                 </div>
 
@@ -252,11 +252,11 @@
             // Update forgot password link
             const forgotLink = document.querySelector('a[href*="LupaPassword"]');
             if (tab === 'pembeli') {
-                forgotLink.href = "{{ route('LupaPasswordPembeli.lupaPasswordPembeli') }}";
+                forgotLink.href = "{{ route('forgotPassword') }}";
             } else if (tab === 'penitip') {
-                forgotLink.href = "#"; // Update with actual route
-            } else if (tab === 'pegawai') {
-                forgotLink.href = "#"; // Update with actual route
+                forgotLink.href = "{{ route('forgotPassword') }}";; // Update with actual route
+            } else if (tab === 'organisasi') {
+                forgotLink.href = "{{ route('forgotPassword') }}";; // Update with actual route
             }
         }
 

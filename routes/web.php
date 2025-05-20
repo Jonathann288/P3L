@@ -100,6 +100,11 @@ Route::middleware(['pembeli'])->group(function () {
 
     // logout
     Route::post('/logout-pembeli', [AuthController::class, 'logoutPembeli'])->name('logout.pembeli');
+
+    Route::get('/pembeli/cart', function () {
+        return view('pembeli.cartPembeli');
+    })->name('pembeli.cart')->middleware('auth:pembeli');
+
 });
 
 Route::get('/registerOrganisasi', [OrganisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
@@ -109,7 +114,7 @@ Route::post('/loginOrganisasi', [AuthController::class, 'loginOrganisasi'])->nam
 
 
 Route::middleware(['organisasi'])->group(function () {
-        Route::get('/donasi-organisasi', function () {
+    Route::get('/donasi-organisasi', function () {
         return view('organisasi.donasi-organisasi');
     })->name('organisasi.donasi-organisasi');
     Route::get('/organisasi/profilOrganisasi', [OrganisasiControllrs::class, 'showOrganisasi'])->name('organisasi.profilOrganisasi');
@@ -120,7 +125,7 @@ Route::middleware(['organisasi'])->group(function () {
     Route::post('/logout-organisasi', [AuthController::class, 'logoutOrganisasi'])->name('logout.organisasi');
 
     Route::get('/request-barang', [RequestDonasiControllers::class, 'create'])->name('requestBarang.create');
-    Route::post('/request-barang', [RequestDonasiControllers::class, 'store'])->name('requestBarang.store');    
+    Route::post('/request-barang', [RequestDonasiControllers::class, 'store'])->name('requestBarang.store');
 
 });
 
@@ -142,6 +147,8 @@ Route::middleware(['checkjabatan:Admin'])->group(function () {
     Route::put('/DashboardOrganisasi/update/{id}', [OrganisasiControllrs::class, 'update'])->name('admin.organisasi.update');
     Route::delete('/DashboardOrganisasi/delete/{id}', [OrganisasiControllrs::class, 'destroy'])->name('admin.organisasi.delete');
     Route::get('/DashboardOrganisasi/search', [OrganisasiControllrs::class, 'search'])->name('admin.organisasi.search');
+
+    Route::put('/DashboardPegawai/reset-password/{id}', [PegawaiControllers::class, 'resetPassword'])->name('admin.pegawai.resetPassword');
 });
 Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::post('/logout-Owner', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
@@ -183,27 +190,32 @@ Route::middleware(['checkjabatan:Hunter'])->group(function () {
     })->name('hunter.DashboardHunter');
 });
 
-Route::get('/resetPasswordOrganisasi', function () {
-    return view('LupaPasswordOrg.resetPasswordOrganisasi');
-})->name('LupaPasswordOrg.resetPasswordOrganisasi');
+// Route::get('/resetPasswordOrganisasi', function () {
+//     return view('LupaPasswordOrg.resetPasswordOrganisasi');
+// })->name('LupaPasswordOrg.resetPasswordOrganisasi');
 
-Route::get('/resetPasswordPembeli', function () {
-    return view('LupaPasswordPembeli.resetPasswordPembeli');
-})->name('LupaPasswordPembeli.resetPasswordPembeli');
-
-
-
-Route::get('/lupaPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'showLinkForm'])->name('LupaPasswordOrg.lupaPasswordOrganisasi');
-Route::post('/lupaPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'lupaPasswordOrganisasiPost'])->name('LupaPasswordOrg.lupaPasswordOrganisasi.post');
-Route::get('/pesanLupaPasswordOrganisasi/{token}', [lupaPasswordOrganisasiControllers::class, 'showLinkForm'])->name('password.forgot.link');
-
-Route::get('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('LupaPasswordPembeli.lupaPasswordPembeli');
-Route::post('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'lupaPasswordPembeliPost'])->name('LupaPasswordPembeli.lupaPasswordPembeli.post');
-Route::get('/pesanLupaPasswordPembeli/{token}', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('password.forgot.link');
-
-// Menampilkan form reset password
-Route::get('/resetPasswordOrganisasi/{token}', [lupaPasswordOrganisasiControllers::class, 'showResetPasswordForm'])->name('resetPasswordOrganisasi');
+// Route::get('/resetPasswordPembeli', function () {
+//     return view('LupaPasswordPembeli.resetPasswordPembeli');
+// })->name('LupaPasswordPembeli.resetPasswordPembeli');
 
 
-// Menangani form reset password
-Route::post('/resetPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'resetPasswordOrganisasi'])->name('resetPasswordOrganisasi.post');
+
+// Route::get('/lupaPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'showLinkForm'])->name('LupaPasswordOrg.lupaPasswordOrganisasi');
+// Route::post('/lupaPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'lupaPasswordOrganisasiPost'])->name('LupaPasswordOrg.lupaPasswordOrganisasi.post');
+// Route::get('/pesanLupaPasswordOrganisasi/{token}', [lupaPasswordOrganisasiControllers::class, 'showLinkForm'])->name('password.forgot.link');
+
+// Route::get('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('LupaPasswordPembeli.lupaPasswordPembeli');
+// Route::post('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'lupaPasswordPembeliPost'])->name('LupaPasswordPembeli.lupaPasswordPembeli.post');
+// Route::get('/pesanLupaPasswordPembeli/{token}', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('password.forgot.link');
+
+// // Menampilkan form reset password
+// Route::get('/resetPasswordOrganisasi/{token}', [lupaPasswordOrganisasiControllers::class, 'showResetPasswordForm'])->name('resetPasswordOrganisasi');
+
+
+// // Menangani form reset password
+// Route::post('/resetPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'resetPasswordOrganisasi'])->name('resetPasswordOrganisasi.post');
+
+Route::get('/forgotPassword', [AuthController::class, 'forgotPassword'])->name('forgotPassword');
+Route::post('/validasiForgotPasswordAct', [AuthController::class, 'validasiForgotPasswordAct'])->name('validasiForgotPasswordAct');
+Route::get('/validasiForgotPassword/{token}', [AuthController::class, 'validasiForgotPassword'])->name('validasiForgotPassword');
+Route::post('/forgotPasswordAct', [AuthController::class, 'forgotPasswordAct'])->name('forgotPasswordAct');

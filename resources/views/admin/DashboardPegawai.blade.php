@@ -19,6 +19,7 @@
             opacity: 0;
             transition: opacity 0.5s;
         }
+
         #toast.show {
             opacity: 1;
         }
@@ -46,8 +47,9 @@
                         <i class="fa-solid fa-handshake"></i>
                         <span>Jabatan</span>
                     </div>
-                    <a href="{{ route('admin.DashboardOrganisasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                       <i class="fa-solid fa-sitemap"></i>
+                    <a href="{{ route('admin.DashboardOrganisasi') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-sitemap"></i>
                         <span>Organisasi</span>
                     </a>
                     <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
@@ -65,13 +67,8 @@
             <div class="flex items-center gap-4">
                 <h1 class="text-3xl font-semibold text-gray-800">Daftar Pegawai</h1>
                 <form action="{{ route('admin.pegawai.search') }}" method="GET" class="flex items-center gap-2">
-                    <input 
-                        type="text" 
-                        name="keyword" 
-                        placeholder="Cari Pegawai (Nama, Jabatan, Email)..." 
-                        class="p-2 border rounded-lg w-80" 
-                        value="{{ request('keyword') }}"
-                    />
+                    <input type="text" name="keyword" placeholder="Cari Pegawai (Nama, Jabatan, Email)..."
+                        class="p-2 border rounded-lg w-80" value="{{ request('keyword') }}" />
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
                         Cari
                     </button>
@@ -102,7 +99,7 @@
                 <tbody>
                     @foreach ($pegawai as $index => $p)
                         <tr class="border-b border-gray-200 hover:bg-gray-100">
-                            <td class="py-3 px-6 text-left">{{ (int)$index + 1 }}</td>
+                            <td class="py-3 px-6 text-left">{{ (int) $index + 1 }}</td>
                             <td class="py-3 px-6 text-left">{{ $p->nama_pegawai }}</td>
                             <td class="py-3 px-6 text-left">{{ $p->jabatan->nama_jabatan }}</td>
                             <td class="py-3 px-6 text-left">{{ $p->email_pegawai }}</td>
@@ -113,9 +110,15 @@
                                     class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600">
                                     Ubah
                                 </button>
+
                                 <button onclick="openDeleteModal({{ $p->id_pegawai }})"
                                     class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
                                     Hapus
+                                </button>
+
+                                <button onclick="confirmResetPassword({{ json_encode($p) }})"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                                    Reset Password
                                 </button>
                             </td>
                         </tr>
@@ -164,7 +167,8 @@
                         class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                         Batal
                     </button>
-                    <button type="submit" onclick="return confirmCreate()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <button type="submit" onclick="return confirmCreate()"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                         Simpan
                     </button>
                 </div>
@@ -206,7 +210,8 @@
                         class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                         Batal
                     </button>
-                    <button type="submit" onclick="return confirmUpdate()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <button type="submit" onclick="return confirmUpdate()"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                         Simpan Perubahan
                     </button>
                 </div>
@@ -233,7 +238,7 @@
             </form>
         </div>
     </div>
-    
+
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white"></div>
 
@@ -241,7 +246,7 @@
     <script>
         function confirmCreate() {
             event.preventDefault(); // Mencegah form submit langsung
-            
+
             Swal.fire({
                 title: 'Yakin ingin menyimpan data?',
                 text: "Data pegawai akan disimpan ke database.",
@@ -263,7 +268,7 @@
 
         function confirmUpdate() {
             event.preventDefault(); // Mencegah form submit langsung
-            
+
             Swal.fire({
                 title: 'Yakin ingin menyimpan perubahan?',
                 text: "Data pegawai akan di-update di database.",
@@ -283,6 +288,45 @@
             return false;
         }
 
+        function confirmResetPassword(pegawai) {
+            Swal.fire({
+                title: 'Reset Password Pegawai?',
+                html: `Password untuk <b>${pegawai.nama_pegawai}</b> akan direset menjadi tanggal lahir mereka (<b>${pegawai.tanggal_lahir_pegawai}</b>)`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Reset Password',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Kirim request reset password
+                    fetch(`/DashboardPegawai/reset-password/${pegawai.id_pegawai}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            _method: 'PUT'
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast('Password berhasil direset ke tanggal lahir', 'success');
+                            } else {
+                                showToast('Gagal mereset password', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            showToast('Terjadi kesalahan', 'error');
+                            console.error('Error:', error);
+                        });
+                }
+            });
+        }
+
         @if (session('success'))
             showToast('{{ session('success') }}', 'success');
         @endif
@@ -290,9 +334,9 @@
         @if (session('error'))
             showToast('{{ session('error') }}', 'error');
         @endif
-        function openModal() {
-            document.getElementById('modal').classList.remove('hidden');
-        }
+            function openModal() {
+                document.getElementById('modal').classList.remove('hidden');
+            }
         function closeModal() {
             document.getElementById('modal').classList.add('hidden');
         }

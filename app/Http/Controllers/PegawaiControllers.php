@@ -21,7 +21,7 @@ class PegawaiControllers extends Controller
             $pegawai = Pegawai::with('jabatan')->get();
             $jabatan = Jabatan::all();
             // Return ke view dengan data pegawai
-            return view('admin.DashboardPegawai', compact('pegawai','jabatan','pegawaiLogin'));
+            return view('admin.DashboardPegawai', compact('pegawai', 'jabatan', 'pegawaiLogin'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -29,7 +29,7 @@ class PegawaiControllers extends Controller
 
     public function registerPegawai(Request $request)
     {
-        try{
+        try {
             // Validasi input
             $request->validate([
                 'id_jabatan' => 'required|exists:jabatan,id_jabatan',
@@ -63,7 +63,7 @@ class PegawaiControllers extends Controller
             // Redirect ke dashboard admin
             return redirect()->route('admin.DashboardPegawai')->with('success', 'Pegawai berhasil ditambahkan!');
         } catch (\Exception $e) {
-        // Jika terjadi kesalahan, tampilkan pesan error
+            // Jika terjadi kesalahan, tampilkan pesan error
             return redirect()->back()->with('error', 'Gagal menambahkan Pegawai: ' . $e->getMessage());
         }
     }
@@ -87,7 +87,7 @@ class PegawaiControllers extends Controller
             $pegawai->update($validatedData);
 
             return redirect()->route('admin.DashboardPegawai')->with('success', 'Pegawai berhasil diperbarui');
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             // Jika terjadi kesalahan, tampilkan pesan error
             return redirect()->back()->with('error', 'Gagal mengubah data Pegawai: ' . $e->getMessage());
         }
@@ -99,7 +99,7 @@ class PegawaiControllers extends Controller
         $pegawai = Pegawai::all();
         return response()->json($pegawai);
     }
-    
+
     public function showLoginAdmin()
     {
         $pegawai = Auth::guard('pegawai')->user();
@@ -107,7 +107,7 @@ class PegawaiControllers extends Controller
         // Passing data ke view
         return view('admin.dashboard', compact('pegawai'));
     }
-    
+
     public function showLoginPegawai()
     {
         $pegawai = Auth::guard('pegawai')->user();
@@ -153,8 +153,8 @@ class PegawaiControllers extends Controller
 
     // Cari organisasi berdasarkan nama
     public function searchPegawai(Request $request)
-    {   
-        try{
+    {
+        try {
             $keyword = $request->input('keyword');
 
             // Mulai query dengan eager loading jabatan
@@ -163,10 +163,10 @@ class PegawaiControllers extends Controller
             if ($keyword) {
                 $query->where(function ($q) use ($keyword) {
                     $q->where('nama_pegawai', 'LIKE', "%{$keyword}%")
-                    ->orWhere('email_pegawai', 'LIKE', "%{$keyword}%")
-                    ->orWhereHas('jabatan', function ($q2) use ($keyword) {
-                        $q2->where('nama_jabatan', 'LIKE', "%{$keyword}%");
-                    });
+                        ->orWhere('email_pegawai', 'LIKE', "%{$keyword}%")
+                        ->orWhereHas('jabatan', function ($q2) use ($keyword) {
+                            $q2->where('nama_jabatan', 'LIKE', "%{$keyword}%");
+                        });
                 });
             }
 
@@ -176,9 +176,30 @@ class PegawaiControllers extends Controller
             $jabatan = Jabatan::all();
 
             return view('admin.DashboardPegawai', compact('pegawai', 'pegawaiLogin', 'jabatan'));
-        }catch (\Exception $e) {
-        // Jika terjadi kesalahan, tampilkan pesan error
-            return redirect()->back()->with('error', 'Search Pegawai hanya nama, email, dan jabatan saja' );
+        } catch (\Exception $e) {
+            // Jika terjadi kesalahan, tampilkan pesan error
+            return redirect()->back()->with('error', 'Search Pegawai hanya nama, email, dan jabatan saja');
+        }
+    }
+
+    public function resetPassword($id)
+    {
+        try {
+            // Find the employee by ID
+            $pegawai = Pegawai::findOrFail($id);
+
+            // Get the birth date and format it as a string (YYYY-MM-DD)
+            $birthDate = $pegawai->tanggal_lahir_pegawai;
+
+            // Update the password to be the hashed birth date
+            $pegawai->password_pegawai = Hash::make($birthDate);
+            $pegawai->save();
+
+            // Return a success response for the AJAX request
+            return response()->json(['success' => true, 'message' => 'Password berhasil direset ke tanggal lahir']);
+        } catch (\Exception $e) {
+            // Return an error response for the AJAX request
+            return response()->json(['success' => false, 'message' => 'Gagal mereset password: ' . $e->getMessage()], 500);
         }
     }
 
