@@ -26,7 +26,7 @@ class transaksipenitipan extends Model
         'tanggal_akhir_penitipan' => 'datetime',
         'tanggal_batas_pengambilan' => 'datetime',
         'tanggal_pengambilan_barang' => 'datetime',
-        'foto_barang' => 'array',
+        'foto_barang' => 'json',
     ];
 
     public function pegawai()
@@ -37,5 +37,20 @@ class transaksipenitipan extends Model
     public function penitip()
     {
         return $this->belongsTo(Penitip::class, 'id_penitip');
+    }
+
+    // Accessor untuk foto_barang - memastikan selalu return array
+    public function getFotoBarangAttribute($value)
+    {
+        if (is_string($value)) {
+            return json_decode($value, true) ?: [];
+        }
+        return is_array($value) ? $value : [];
+    }
+
+    // Mutator untuk foto_barang - memastikan disimpan sebagai JSON
+    public function setFotoBarangAttribute($value)
+    {
+        $this->attributes['foto_barang'] = is_array($value) ? json_encode($value) : $value;
     }
 }

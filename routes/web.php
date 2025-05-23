@@ -173,7 +173,6 @@ Route::middleware(['auth:pegawai'])->group(function () {
 // Gudang
 Route::middleware(['checkjabatan:Gudang'])->group(function () {
     Route::get('/DashboardGudang', [GudangControllers::class, 'showDashboardGudang'])->name('gudang.DashboardGudang');
-     Route::get('/DashboardGudang', [GudangControllers::class, 'showDashboardGudang'])->name('gudang.DashboardGudang');
     Route::get('/DashboardTitipanBarang', [GudangControllers::class, 'showTitipanBarang'])->name('gudang.DashboardTitipanBarang');
     Route::put('/UpdateTitipanBarang/{id}', [GudangControllers::class, 'updateTitipanBarang'])->name('gudang.UpdateTitipanBarang');
 

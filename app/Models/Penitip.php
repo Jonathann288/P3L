@@ -31,19 +31,19 @@ class Penitip extends Authenticatable
     ];
 
     protected $hidden = [
-        'password_pembeli',
+        'password_penitip',
         'remember_token',
     ];
 
     // Untuk auth menggunakan kolom email_pembeli
     public function getEmailForPasswordReset()
     {
-        return $this->email_pembeli;
+        return $this->email_penitip;
     }
 
     // Untuk auth menggunakan kolom password_pembeli
     public function getAuthPassword()
     {
-        return $this->password_pembeli;
+        return $this->password_penitip;
     }
 }
