@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use \App\Models\Pegawai;
-use \App\Models\transaksipenitipan; // Sesuai dengan nama model yang didefinisikan
+use \App\Models\transaksipenitipan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -42,11 +42,11 @@ class GudangControllers extends Controller
             'tanggal_akhir_penitipan' => 'nullable|date',
             'tanggal_batas_pengambilan' => 'nullable|date',
             'tanggal_pengambilan_barang' => 'nullable|date',
-            'foto_barang.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'foto_barang.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
-            // Ambil data transaksi - gunakan nama model yang benar
+            // Ambil data transaksi
             $titipan = transaksipenitipan::findOrFail($id);
 
             // Update data penitip terkait
@@ -63,19 +63,76 @@ class GudangControllers extends Controller
             $titipan->tanggal_batas_pengambilan = $validated['tanggal_batas_pengambilan'];
             $titipan->tanggal_pengambilan_barang = $validated['tanggal_pengambilan_barang'];
 
-            // Jika ada foto baru diupload
+            // Handle foto barang - SELALU hapus foto lama saat ada update
             if ($request->hasFile('foto_barang')) {
+                // Hapus semua foto lama
+                $this->deleteOldPhotos($titipan);
+
+                // Upload foto baru
                 $fotoPaths = [];
                 foreach ($request->file('foto_barang') as $foto) {
-                    $path = $foto->store('foto_barang', 'public');
+                    // Generate unique filename
+                    $filename = time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                    $path = $foto->storeAs('foto_barang', $filename, 'public');
                     $fotoPaths[] = $path;
                 }
+
+                // Set foto_barang sebagai array, akan otomatis di-convert ke JSON oleh mutator
                 $titipan->foto_barang = $fotoPaths;
             }
 
             $titipan->save();
 
             return redirect()->route('gudang.DashboardTitipanBarang')->with('success', 'Data titipan berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+
+    private function deleteOldPhotos($titipan)
+    {
+        $oldFotos = $titipan->foto_barang;
+
+        if (empty($oldFotos)) {
+            return;
+        }
+
+        // Pastikan $oldFotos adalah array
+        if (is_string($oldFotos)) {
+            $oldFotos = json_decode($oldFotos, true);
+        }
+
+        if (!is_array($oldFotos)) {
+            return;
+        }
+
+        // Hapus setiap file foto lama
+        foreach ($oldFotos as $oldFoto) {
+            if (!empty($oldFoto)) {
+                $cleanPath = trim($oldFoto);
+
+                // Cek dan hapus file dari storage
+                if (Storage::disk('public')->exists($cleanPath)) {
+                    Storage::disk('public')->delete($cleanPath);
+                }
+            }
+        }
+    }
+
+    public function deleteTitipanBarang($id)
+    {
+        try {
+            $titipan = transaksipenitipan::findOrFail($id);
+
+            // Hapus foto-foto terkait
+            $this->deleteOldPhotos($titipan);
+
+            // Hapus record dari database
+            $titipan->delete();
+
+            return redirect()->route('gudang.DashboardTitipanBarang')->with('success', 'Data titipan berhasil dihapus.');
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
