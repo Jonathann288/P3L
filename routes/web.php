@@ -14,6 +14,7 @@ use App\Http\Controllers\lupaPasswordPembeliControllers;
 use App\Http\Controllers\RequestDonasiControllers;
 use App\Http\Controllers\DiskusiControllers;
 use App\Http\Controllers\DonasiControllers;
+use App\Http\Controllers\TransaksiPenitipanControllers;
 
 Route::get('/', function () {
     return view('beranda');
@@ -44,6 +45,7 @@ Route::get('/register', function () {
 })->name('register');
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'loginGabungan'])->name('login.proses');
 
 // Menangani form login (POST) Penitip
 Route::post('login-penitip', [AuthController::class, 'loginPenitip'])->name('loginPenitip.post');
@@ -59,6 +61,12 @@ Route::middleware(['penitip'])->group(function () {
     Route::get('/Penitip/categoryPembeli/{id}', [KategoriBarangControllers::class, 'filterByCategoryPenitip'])->name('penitip.categoryPenitip');
     Route::get('/Penitip/barang/{id_barang}', [BarangControllers::class, 'showDetailPenitip'])->name('penitip.detail_barangPenitip');
     //
+
+    // Barang titipan penitip
+    Route::get('/Penitip/barang-titipan', [TransaksiPenitipanControllers::class, 'showBarangTitipan'])->name('penitip.barang-titipan');
+    Route::get('/penitip/barang/search', [TransaksiPenitipanControllers::class, 'search'])->name('penitip.barang.search');
+    Route::post('/barang-titipan/perpanjang/{id}', [TransaksiPenitipanControllers::class, 'perpanjangMasaPenitipan'])->name('penitip.barang.perpanjang');
+
 
     // logout
     Route::post('/logout-penitip', [AuthController::class, 'logoutPenitip'])->name('logout.penitip');

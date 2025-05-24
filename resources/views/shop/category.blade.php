@@ -33,9 +33,9 @@
         <div class="bg-blue-600 p-4">
             <div class="container mx-auto flex items-center justify-between flex-wrap">
                 <!-- Logo -->
-                <div class="flex items-center space-x-2">
+                <a href="{{ route('shop') }}" class="flex items-center space-x-2">
                     <img src="{{ asset('images/logo6.png') }}" alt="ReUseMart" class="h-12">
-                </div>
+                </a>
 
                 <!-- Input Pencarian -->
                 <div class="hidden md:block flex-grow mx-4">
@@ -116,11 +116,11 @@
         <div class="py-2 max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             @foreach ($barang as $item)
                 <div class="group flex w-full max-w-[450px] flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md p-3 h-full">
-                    <a class="relative flex h-36 overflow-hidden rounded-xl" href="#">
+                    <a class="relative flex h-36 overflow-hidden rounded-xl" href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}">
                         <img class="absolute top-0 right-0 h-full w-full object-cover" src="{{ asset($item->foto_barang) }}" alt="product image" />
                     </a>
                     <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
-                        <a href="#">
+                        <a href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}">
                             <h5 class="text-base tracking-tight text-slate-900">{{ $item->nama_barang }}</h5>
                         </a>
                         <div class="mt-1 mb-2 flex items-center justify-between">
@@ -136,7 +136,6 @@
                     </div>
                 </div>
             @endforeach
-            
         </div>
     </div>
     
@@ -151,47 +150,5 @@
         document.getElementById("content").style.display = "block";
     });
 
-    // const products = [
-    //     { name: "Nike Air MX Super 2500 - Red", price: "$449", oldPrice: "$699", img: "https://images.unsplash.com/flagged/photo-1556637640-2c80d3201be8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60?a=b" },
-    //     { name: "Nike Air Zoom - Blue", price: "$399", oldPrice: "$599", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Revolution 5 - Black", price: "$299", oldPrice: "$499", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Pegasus - Green", price: "$359", oldPrice: "$579", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Free Run - White", price: "$289", oldPrice: "$479", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Free Run - White", price: "$289", oldPrice: "$479", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Air MX Super 2500 - Red", price: "$449", oldPrice: "$699", img: "https://images.unsplash.com/flagged/photo-1556637640-2c80d3201be8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60?a=b" },
-    //     { name: "Nike Air Zoom - Blue", price: "$399", oldPrice: "$599", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Revolution 5 - Black", price: "$299", oldPrice: "$499", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Pegasus - Green", price: "$359", oldPrice: "$579", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Free Run - White", price: "$289", oldPrice: "$479", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" },
-    //     { name: "Nike Free Run - White", price: "$289", oldPrice: "$479", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8c25lYWtlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60" }
-    // ];
-
-    // const container = document.getElementById("product-container");
-    // products.forEach(product => {
-    //     const card = `
-    //         <div class="group flex w-full max-w-[450px] flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md p-3 h-full">
-    //             <a class="relative flex h-36 overflow-hidden rounded-xl" href="#">
-    //                 <img class="absolute top-0 right-0 h-full w-full object-cover" src="${product.img}" alt="product image" />
-    //             </a>
-    //             <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
-    //                 <a href="#">
-    //                     <h5 class="text-base tracking-tight text-slate-900">${product.name}</h5>
-    //                 </a>
-    //                 <div class="mt-1 mb-2 flex items-center justify-between">
-    //                     <p>
-    //                         <span class="text-xl font-bold text-slate-900">${product.price}</span>
-    //                         <span class="text-xs text-slate-900 line-through">${product.oldPrice}</span>
-    //                     </p>
-    //                 </div>
-    //                 <div class="mt-auto">
-    //                     <a href="#" class="flex items-center justify-center rounded-md bg-slate-900 px-3 py-1 text-center text-xs font-medium text-white hover:bg-gray-700">
-    //                         Add to cart
-    //                     </a>
-    //                 </div>
-    //             </div>
-    //         </div>
-    //     `;
-    //     container.innerHTML += card;
-    });
 </script>
 @endsection

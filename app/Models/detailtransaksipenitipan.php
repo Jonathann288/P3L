@@ -13,6 +13,8 @@ class detailtransaksipenitipan extends Model
     protected $fillable = [
         'id_transaksi_penitipan',
         'id_barang',
+        'status_perpanjangan',
+
     ];
 
     public function transaksipenitipan()

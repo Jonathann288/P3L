@@ -97,7 +97,7 @@
             <div class="md:flex md:justify-between">
             <div class="mb-6 md:mb-0">
                 <a href="https://flowbite.com/" class="flex items-center">
-                    <img src="images/logo6.png" class="h-22 me-3" alt="FlowBite Logo" />
+                    <img src="{{ asset('images/logo6.png') }}" class="h-22 me-3" alt="FlowBite Logo" />
                 </a>
             </div>
             <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
@@ -152,7 +152,7 @@
                 </span>
                 <div class="flex items-center mt-4 sm:mt-0 sm:gap-2">
                     <h5 class="text-white whitespace-nowrap">Jangan Lupa unduh kami di</h5>
-                    <img src="images/playstore.png" class="h-10" alt="Google Play">
+                    <img src="{{ asset('images/playstore.png') }}" class="h-10" alt="Google Play">
                 </div>
             </div>
         </div>
@@ -165,6 +165,7 @@
                 document.getElementById("content").style.display = "block";
             }, 1000);
         });
+
     </script>
 </body>
 

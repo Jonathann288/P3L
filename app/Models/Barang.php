@@ -52,6 +52,11 @@ class Barang extends Model
         return $this->hasMany(Diskusi::class, 'id_barang', 'id_barang');
     }
 
+    public function detailTransaksiPenitipan()
+    {
+        return $this->hasOne(DetailTransaksiPenitipan::class, 'id_barang');
+    }
+
     // public function getFotoBarangAttribute($value)
     // {
     //     // Membersihkan string dan mengubah ke array

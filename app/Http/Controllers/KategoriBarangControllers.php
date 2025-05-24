@@ -24,7 +24,9 @@ class KategoriBarangControllers extends Controller
             asset('images/cosmetics.png'),
         ];
         $selectedKategori = KategoriBarang::findOrFail($id);
-        $barang = Barang::where('id_kategori', $id)->get();
+        $barang = Barang::where('id_kategori', $id)
+            ->where('status_barang', 'tidak laku')
+            ->get();
         $title = $selectedKategori->nama_kategori;
 
         return view('shop.category', compact('kategoris', 'barang', 'images', 'title', 'selectedKategori'));
@@ -46,7 +48,9 @@ class KategoriBarangControllers extends Controller
             asset('images/cosmetics.png'),
         ];
         $selectedKategori = KategoriBarang::findOrFail($id);
-        $barang = Barang::where('id_kategori', $id)->get();
+        $barang = Barang::where('id_kategori', $id)
+            ->where('status_barang', 'tidak laku')
+            ->get();
         $title = $selectedKategori->nama_kategori;
 
         return view('pembeli.categoryPembeli', compact('kategoris', 'barang', 'images', 'title', 'selectedKategori'));
@@ -67,7 +71,9 @@ class KategoriBarangControllers extends Controller
             asset('images/cosmetics.png'),
         ];
         $selectedKategori = KategoriBarang::findOrFail($id);
-        $barang = Barang::where('id_kategori', $id)->get();
+        $barang = Barang::where('id_kategori', $id)
+            ->where('status_barang', 'tidak laku')
+            ->get();
         $title = $selectedKategori->nama_kategori;
 
         return view('penitip.categoryPenitip', compact('kategoris', 'barang', 'images', 'title', 'selectedKategori'));
