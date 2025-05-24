@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class GudangControllers extends Controller
 {
@@ -282,30 +283,41 @@ class GudangControllers extends Controller
             $status = $request->status;
 
             switch ($status) {
-                case 'diambil':
+                case 'tersedia':
+                    $query->whereNull('tanggal_pengambilan_barang')
+                        ->whereDate('tanggal_penitipan', '<=', now())
+                        ->whereDate('tanggal_akhir_penitipan', '>=', now())
+                        ->whereDoesntHave('detailTransaksi.barang.transaksiPenjualan')
+                        ->whereDoesntHave('detailTransaksi.barang.donasi');
+                    break;
+
+                case 'terjual':
+                    $query->whereHas('detailTransaksi.barang.transaksiPenjualan');
+                    break;
+
+                case 'barang_untuk_donasi':
+                    $query->whereDate('tanggal_akhir_penitipan', '<', now())
+                        ->whereDoesntHave('detailTransaksi.barang.donasi')
+                        ->whereNull('tanggal_pengambilan_barang');
+                    break;
+
+                case 'didonasikan':
+                    $query->whereHas('detailTransaksi.barang.donasi', function ($q) {
+                        $q->whereNotNull('id_request');
+                    });
+                    break;
+
+                case 'siap_diambil_kembali':
+                    // Implementasi ini tergantung apakah Anda punya field seperti `status_pengambilan` atau `konfirmasi_pengambilan`
+                    $query->where('status_pengambilan', 'siap_diambil'); // contoh
+                    break;
+
+                case 'diambil_kembali':
                     $query->whereNotNull('tanggal_pengambilan_barang');
-                    break;
-                case 'terlambat':
-                    $query->whereNull('tanggal_pengambilan_barang')
-                        ->where('tanggal_batas_pengambilan', '<', now());
-                    break;
-                case 'dalam_penitipan':
-                    $query->whereNull('tanggal_pengambilan_barang')
-                        ->where(function ($q) {
-                            $q->whereNull('tanggal_batas_pengambilan')
-                                ->orWhere('tanggal_batas_pengambilan', '>=', now());
-                        });
-                    break;
-                case 'hampir_berakhir':
-                    // Items yang akan berakhir dalam 7 hari
-                    $query->whereNull('tanggal_pengambilan_barang')
-                        ->whereBetween('tanggal_akhir_penitipan', [
-                            now(),
-                            now()->addDays(7)
-                        ]);
                     break;
             }
         }
+
 
         $results = $query->orderBy('tanggal_penitipan', 'desc')->get();
 
@@ -317,14 +329,14 @@ class GudangControllers extends Controller
                 'message' => "Ditemukan {$results->count()} transaksi"
             ]);
         }
-$penitips = Penitip::select('id_penitip', 'nama_penitip', 'email_penitip', 'nomor_ktp')
-                   ->orderBy('nama_penitip')
-                   ->get();
+        $penitips = Penitip::select('id_penitip', 'nama_penitip', 'email_penitip', 'nomor_ktp')
+            ->orderBy('nama_penitip')
+            ->get();
 
         return view('gudang.DashboardTitipanBarang', [
             'titipans' => $results,
             'searchTerm' => $request->search_term,
-             'penitips' => $penitips
+            'penitips' => $penitips
         ]);
     }
 
@@ -450,6 +462,46 @@ $penitips = Penitip::select('id_penitip', 'nama_penitip', 'email_penitip', 'nomo
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function cetakNota($id)
+    {
+        try {
+            // Ambil data transaksi dengan relasi
+            $titipan = transaksipenitipan::with(['penitip', 'pegawai'])->findOrFail($id);
+
+            // Data untuk PDF
+            $data = [
+                'titipan' => $titipan,
+                'tanggal_cetak' => Carbon::now()->format('d F Y H:i:s'),
+                'perusahaan' => [
+                    'nama' => 'Gudang Titipan Barang',
+                    'alamat' => 'Jl. Contoh No. 123, Kota ABC',
+                    'telepon' => '(021) 1234-5678',
+                    'email' => 'info@gudangtitipan.com'
+                ]
+            ];
+
+            // Generate PDF dengan orientasi portrait dan ukuran A4
+            $pdf = PDF::loadView('gudang.CetakNota', $data)
+                ->setPaper('a4', 'portrait')
+                ->setOptions([
+                    'dpi' => 150,
+                    'defaultFont' => 'sans-serif',
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => true
+                ]);
+
+
+            // Nama file
+            $namaFile = 'Nota_Penitipan_' . $titipan->id . '_' . Carbon::now()->format('YmdHis') . '.pdf';
+
+            // Return sebagai download
+            return $pdf->download($namaFile);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mencetak nota: ' . $e->getMessage());
         }
     }
 }

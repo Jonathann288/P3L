@@ -78,7 +78,7 @@
                     @csrf
 
                     <div class="mb-4">
-                       
+
                         <label for="id_penitip" class="block font-semibold mb-2">Pilih Penitip *</label>
                         <select name="id_penitip" id="id_penitip" required class="w-full border p-3 rounded-lg">
                             <option value="">-- Pilih Penitip --</option>
@@ -120,18 +120,21 @@
             <form method="GET" action="{{ route('gudang.SearchTitipan') }}"
                 class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <input type="text" name="search_term" value="{{ request('search_term') }}"
-                    placeholder="Cari berdasarkan semua field..."
+                    placeholder="Cari Penitip, Barang, atau Status..."
                     class="col-span-1 md:col-span-2 border p-3 rounded-lg w-full" />
 
                 <select name="status" class="border p-3 rounded-lg w-full">
                     <option value="">Status</option>
-                    <option value="dalam_penitipan" {{ request('status') == 'dalam_penitipan' ? 'selected' : '' }}>Dalam
-                        Penitipan</option>
-                    <option value="diambil" {{ request('status') == 'diambil' ? 'selected' : '' }}>Sudah Diambil</option>
-                    <option value="terlambat" {{ request('status') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
-                    <option value="hampir_berakhir" {{ request('status') == 'hampir_berakhir' ? 'selected' : '' }}>Hampir
-                        Berakhir</option>
+                    <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                    <option value="terjual" {{ request('status') == 'terjual' ? 'selected' : '' }}>Terjual</option>
+                    <option value="barang_untuk_donasi" {{ request('status') == 'barang_untuk_donasi' ? 'selected' : '' }}>Barang untuk Donasi</option>
+                    <option value="didonasikan" {{ request('status') == 'didonasikan' ? 'selected' : '' }}>Didonasikan
+                    </option>
+                    <option value="siap_diambil_kembali" {{ request('status') == 'siap_diambil_kembali' ? 'selected' : '' }}>Siap Diambil Kembali</option>
+                    <option value="diambil_kembali" {{ request('status') == 'diambil_kembali' ? 'selected' : '' }}>Diambil
+                        Kembali</option>
                 </select>
+
 
                 <button type="submit"
                     class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Cari</button>
@@ -156,36 +159,85 @@
                             Tanggal Titip:
                             {{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('d M Y') : '-' }}
                         </p>
+                        @if($titipan->pegawai)
+                            <p class="text-sm text-gray-500">
+                                Ditambahkan oleh: <strong>{{ $titipan->pegawai->nama_pegawai }}</strong>
+                            </p>
+                        @endif
 
-                        <!-- Status Badge -->
+                        <!-- Status Barang -->
+                        @php
+                            $status = 'Tidak diketahui';
+
+                            $today = \Carbon\Carbon::now();
+                            $isDiambilKembali = $titipan->tanggal_pengambilan_barang != null;
+
+                            $detailItems = $titipan->detailTransaksi ?? collect();
+
+                            $sudahDidonasikan = $detailItems->contains(function ($detail) {
+                                return $detail->barang && $detail->barang->donasi && $detail->barang->donasi->id_request !== null;
+                            });
+
+                            $siapDonasi = !$sudahDidonasikan && $titipan->tanggal_akhir_penitipan && $titipan->tanggal_akhir_penitipan->lt($today);
+
+                            $sudahTerjual = $detailItems->contains(function ($detail) {
+                                return $detail->barang && $detail->barang->transaksiPenjualan && $detail->barang->transaksiPenjualan->count() > 0;
+                            });
+
+                            $dalamRentangPenitipan = $titipan->tanggal_penitipan && $titipan->tanggal_akhir_penitipan &&
+                                $titipan->tanggal_penitipan->lte($today) &&
+                                $titipan->tanggal_akhir_penitipan->gte($today);
+
+                            if ($isDiambilKembali) {
+                                $status = 'Diambil kembali';
+                            } elseif ($sudahDidonasikan) {
+                                $status = 'Didonasikan';
+                            } elseif ($siapDonasi) {
+                                $status = 'Barang untuk donasi';
+                            } elseif ($sudahTerjual) {
+                                $status = 'Terjual';
+                            } elseif ($dalamRentangPenitipan) {
+                                $status = 'Tersedia';
+                            } else {
+                                $status = 'Dalam Penitipan';
+                            }
+
+                            $badgeClass = match ($status) {
+                                'Tersedia' => 'bg-green-100 text-green-800',
+                                'Terjual' => 'bg-blue-100 text-blue-800',
+                                'Barang untuk donasi' => 'bg-yellow-100 text-yellow-800',
+                                'Didonasikan' => 'bg-purple-100 text-purple-800',
+                                'Barang siap diambil kembali' => 'bg-indigo-100 text-indigo-800',
+                                'Diambil kembali' => 'bg-gray-300 text-gray-700',
+                                default => 'bg-red-100 text-red-800',
+                            };
+                        @endphp
+
                         <div class="mt-2">
-                            @if($titipan->tanggal_pengambilan_barang)
-                                <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                    Sudah Diambil
-                                </span>
-                            @elseif($titipan->tanggal_batas_pengambilan && $titipan->tanggal_batas_pengambilan < now())
-                                <span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
-                                    Terlambat
-                                </span>
-                            @else
-                                <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                                    Dalam Penitipan
-                                </span>
-                            @endif
+                            <span class="inline-block {{ $badgeClass }} text-xs px-2 py-1 rounded-full">
+                                {{ $status }}
+                            </span>
                         </div>
 
                         <!-- Edit Button -->
                         <button @click="openModal({{ $titipan->id_transaksi_penitipan }}, {
-                                            nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
-                                            email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
-                                            tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
-                                            tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
-                                            tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
-                                            tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
-                                        })"
+                                                            nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
+                                                            email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
+                                                            tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
+                                                            tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
+                                                            tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
+                                                            tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
+                                                        })"
                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mt-3 transition-colors">
                             <i class="fas fa-edit mr-1"></i> Edit
                         </button>
+                        <!--cetakNota -->
+                        <a href="{{ route('gudang.CetakNota', $titipan->id_transaksi_penitipan) }}"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded mt-3 ml-2 inline-block transition-colors"
+                            target="_blank">
+                            <i class="fas fa-print mr-1"></i> Cetak Nota
+                        </a>
+
 
                         <!-- Detail Toggle -->
                         <div x-data="{ open: false }" class="mt-4">
@@ -514,7 +566,7 @@
             }
         });
 
-        
+
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>

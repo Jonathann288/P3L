@@ -171,7 +171,6 @@ Route::middleware(['auth:pegawai'])->group(function () {
 });
 
 // Gudang
-
 Route::middleware(['checkjabatan:Gudang'])->group(function () {
     // Dashboard
     Route::get('/DashboardGudang', [GudangControllers::class, 'showDashboardGudang'])->name('gudang.DashboardGudang');
@@ -190,6 +189,10 @@ Route::middleware(['checkjabatan:Gudang'])->group(function () {
     
     // API Endpoints
     Route::get('/api/getDurasiPenitipan', [GudangControllers::class, 'getDurasiPenitipan'])->name('gudang.getDurasiPenitipan');
+
+    //Cetak nota skuy
+    Route::get('/cetak-nota/{id}', [GudangControllers::class, 'cetakNota'])->name('gudang.CetakNota');
+
 });
 
 
