@@ -58,6 +58,92 @@
         @endif
 
         <h1 class="text-3xl font-bold mb-6">Daftar Titipan Barang</h1>
+        <div class="flex justify-end mb-4">
+            <button @click="showCreateModal = true"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                + Tambah Titipan Barang
+            </button>
+        </div>
+
+        <!-- Modal Tambah Titipan Barang -->
+        <div x-show="showCreateModal" x-transition
+            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+            style="display: none;">
+            <div class="bg-white rounded-lg w-full max-w-xl overflow-y-auto max-h-[90vh] p-6"
+                @click.away="showCreateModal = false">
+
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Tambah Titipan Barang</h2>
+
+                <form action="{{ route('gudang.StoreTitipanBarang') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+
+                    <div class="mb-4">
+                       
+                        <label for="id_penitip" class="block font-semibold mb-2">Pilih Penitip *</label>
+                        <select name="id_penitip" id="id_penitip" required class="w-full border p-3 rounded-lg">
+                            <option value="">-- Pilih Penitip --</option>
+                            @foreach($penitips ?? [] as $penitip)
+                                @if(is_object($penitip) && isset($penitip->id_penitip, $penitip->nama_penitip, $penitip->email_penitip))
+                                    <option value="{{ $penitip->id_penitip }}">
+                                        {{ $penitip->nama_penitip }} ({{ $penitip->email_penitip }})
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    <div class="mb-4">
+                        <label for="tanggal_penitipan" class="block font-semibold mb-2">Tanggal Titip *</label>
+                        <input type="date" name="tanggal_penitipan" id="tanggal_penitipan" required
+                            class="w-full border p-3 rounded-lg" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="foto_barang" class="block font-semibold mb-2">Foto Barang</label>
+                        <input type="file" name="foto_barang[]" multiple accept="image/*"
+                            class="w-full border p-3 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                        <p class="text-sm text-gray-500 mt-1">Format: JPG, PNG, GIF. Max 2MB per file.</p>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" @click="showCreateModal = false"
+                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">Batal</button>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <form method="GET" action="{{ route('gudang.SearchTitipan') }}"
+                class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input type="text" name="search_term" value="{{ request('search_term') }}"
+                    placeholder="Cari berdasarkan semua field..."
+                    class="col-span-1 md:col-span-2 border p-3 rounded-lg w-full" />
+
+                <select name="status" class="border p-3 rounded-lg w-full">
+                    <option value="">Status</option>
+                    <option value="dalam_penitipan" {{ request('status') == 'dalam_penitipan' ? 'selected' : '' }}>Dalam
+                        Penitipan</option>
+                    <option value="diambil" {{ request('status') == 'diambil' ? 'selected' : '' }}>Sudah Diambil</option>
+                    <option value="terlambat" {{ request('status') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
+                    <option value="hampir_berakhir" {{ request('status') == 'hampir_berakhir' ? 'selected' : '' }}>Hampir
+                        Berakhir</option>
+                </select>
+
+                <button type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Cari</button>
+            </form>
+        </div>
+
+        <!-- Tampilkan hasil pencarian jika ada -->
+        @if(request('search_term'))
+            <div class="mb-4 text-gray-600">
+                Menampilkan hasil untuk: <strong>{{ request('search_term') }}</strong>
+            </div>
+        @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($titipans as $titipan)
@@ -90,13 +176,13 @@
 
                         <!-- Edit Button -->
                         <button @click="openModal({{ $titipan->id_transaksi_penitipan }}, {
-                                    nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
-                                    email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
-                                    tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
-                                    tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
-                                    tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
-                                    tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
-                                })"
+                                            nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
+                                            email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
+                                            tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
+                                            tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
+                                            tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
+                                            tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
+                                        })"
                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mt-3 transition-colors">
                             <i class="fas fa-edit mr-1"></i> Edit
                         </button>
@@ -339,6 +425,7 @@
         function titipanHandler() {
             return {
                 showModal: false,
+                showCreateModal: false,
                 currentId: null,
                 formData: {
                     nama_penitip: '',
@@ -426,6 +513,8 @@
                 closeImageModal();
             }
         });
+
+        
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>

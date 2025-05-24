@@ -171,11 +171,25 @@ Route::middleware(['auth:pegawai'])->group(function () {
 });
 
 // Gudang
-Route::middleware(['checkjabatan:Gudang'])->group(function () {
-    Route::get('/DashboardGudang', [GudangControllers::class, 'showDashboardGudang'])->name('gudang.DashboardGudang');
-    Route::get('/DashboardTitipanBarang', [GudangControllers::class, 'showTitipanBarang'])->name('gudang.DashboardTitipanBarang');
-    Route::put('/UpdateTitipanBarang/{id}', [GudangControllers::class, 'updateTitipanBarang'])->name('gudang.UpdateTitipanBarang');
 
+Route::middleware(['checkjabatan:Gudang'])->group(function () {
+    // Dashboard
+    Route::get('/DashboardGudang', [GudangControllers::class, 'showDashboardGudang'])->name('gudang.DashboardGudang');
+    
+    // Titipan Barang - View dan Search
+    Route::get('/DashboardTitipanBarang', [GudangControllers::class, 'showTitipanBarang'])->name('gudang.DashboardTitipanBarang');
+    Route::get('/SearchTitipan', [GudangControllers::class, 'searchTitipan'])->name('gudang.SearchTitipan');
+    
+    // Tambah Transaksi Baru
+    Route::get('/CreateTitipanBarang', [GudangControllers::class, 'createTitipanBarang'])->name('gudang.CreateTitipanBarang');
+    Route::post('/StoreTitipanBarang', [GudangControllers::class, 'storeTitipanBarang'])->name('gudang.StoreTitipanBarang');
+    
+    // Update dan Delete
+    Route::put('/UpdateTitipanBarang/{id}', [GudangControllers::class, 'updateTitipanBarang'])->name('gudang.UpdateTitipanBarang');
+    Route::delete('/DeleteTitipanBarang/{id}', [GudangControllers::class, 'deleteTitipanBarang'])->name('gudang.DeleteTitipanBarang');
+    
+    // API Endpoints
+    Route::get('/api/getDurasiPenitipan', [GudangControllers::class, 'getDurasiPenitipan'])->name('gudang.getDurasiPenitipan');
 });
 
 
