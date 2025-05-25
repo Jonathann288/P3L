@@ -4,75 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReUseMart - Login</title>
+    <title>ReUseMart - Sign Up</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-    <style>
-        /* Efek blur untuk background */
-        .background-blur {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            /* Layer semi-transparan */
-            backdrop-filter: blur(10px);
-            /* Efek blur */
-            z-index: -1;
-            /* Menempatkan di belakang konten */
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s forwards;
-        }
-
-        .fade-out {
-            animation: fadeOut 0.5s forwards;
-        }
-        
-        .login-tabs {
-            display: flex;
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid rgba(255,255,255,0.2);
-        }
-        
-        .login-tab {
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            color: white;
-            font-weight: 500;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-        }
-        
-        .login-tab.active {
-            border-bottom-color: white;
-            font-weight: 600;
-        }
-        
-        .login-tab:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-    </style>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-
-    <div class="background-blur"></div>
     <a href="{{ route('shop') }}"
         class="absolute top-4 left-4 bg-white text-blue-600 p-2 rounded-full shadow-md hover:bg-gray-200 flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,77 +33,18 @@
             </div>
 
             <div class="w-full max-w-md">
-                <!-- Login Tabs -->
-                <div class="login-tabs">
-                    <div class="login-tab active" onclick="switchTab('pembeli')">Pembeli</div>
-                    <div class="login-tab" onclick="switchTab('penitip')">Penitip</div>
-                    <div class="login-tab" onclick="switchTab('pegawai')">Pegawai</div>
-                </div>
-                
-                <h2 class="text-xl font-bold mb-4 text-white">Login Pembeli</h2>
-                @if (session('status'))
-                    <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative"
-                        role="alert">
-                        <span class="block sm:inline">{{ session('status') }}</span>
-                    </div>
-                @endif
+                <h2 class="text-xl font-bold mb-4 text-white">Login</h2>
 
-                <!-- Pembeli Login Form -->
-                <form method="POST" action="{{ route('loginPembeli.post') }}" class="space-y-3" id="pembeliForm">
-                    @csrf
-                    @if ($errors->has('email_pembeli'))
-                        <div class="mb-4 text-red-700 bg-red-100 p-3 rounded-lg text-sm">
-                            {{ $errors->first('email_pembeli') }}
-                        </div>
-                    @endif
-                    <div>
-                        <input type="email" name="email_pembeli" id="email_pembeli" class="w-full p-2 rounded-lg"
-                            placeholder="Email" required value="{{ old('email_pembeli') }}">
-                    </div>
-
-                    <div>
-                        <input type="password" name="password_pembeli" id="password_pembeli"
-                            class="w-full p-2 rounded-lg" placeholder="Password" required>
-                    </div>
-
-                    <div>
-                        <button type="submit"
-                            class="w-full bg-blue-500 text-white p-2 rounded-md font-medium hover:bg-blue-600">Log
-                            In</button>
-                    </div>
-                </form>
-
-                <!-- Penitip Login Form (Hidden by default) -->
-                <form method="POST" action="{{ route('loginPenitip.post') }}" class="space-y-3 hidden" id="penitipForm">
+                <form method="POST" action="{{ route('login.proses') }}" class="space-y-3">
                     @csrf
                     <div>
-                        <input type="email" name="email_penitip" id="email_penitip" class="w-full p-2 rounded-lg"
-                            placeholder="Email" required>
+                        <input type="email" name="email" id="email" class="w-full p-2 rounded-lg" placeholder="Email"
+                            required>
                     </div>
 
                     <div>
-                        <input type="password" name="password_penitip" id="password_penitip"
-                            class="w-full p-2 rounded-lg" placeholder="Password" required>
-                    </div>
-
-                    <div>
-                        <button type="submit"
-                            class="w-full bg-blue-500 text-white p-2 rounded-md font-medium hover:bg-blue-600">Log
-                            In</button>
-                    </div>
-                </form>
-
-                <!-- Pegawai Login Form (Hidden by default) -->
-                <form method="POST" action="{{ route('loginPegawai.post') }}" class="space-y-3 hidden" id="pegawaiForm">
-                    @csrf
-                    <div>
-                        <input type="email" name="email_pegawai" id="email_pegawai" class="w-full p-2 rounded-lg"
-                            placeholder="Email" required>
-                    </div>
-
-                    <div>
-                        <input type="password" name="password_pegawai" id="password_pegawai"
-                            class="w-full p-2 rounded-lg" placeholder="Password" required>
+                        <input type="password" name="password" id="password" class="w-full p-2 rounded-lg"
+                            placeholder="Password" required>
                     </div>
 
                     <div>
@@ -172,15 +55,8 @@
                 </form>
 
                 <div class="mt-3 text-center">
-                    <a href="{{ route('forgotPassword') }}"
-                        class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
-                </div>
-
-                <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
-                    <p class="text-white font-bold">Baru di ReUseMart? </p>
-                    <a href='{{ route('registerPembeli') }}'
-                        class="bg-transparent border border-white text-white px-3 py-1 rounded-md hover:bg-white hover:text-blue-500">Sign
-                        up</a>
+                    <a href="{{ route('forgotPassword') }}" class="text-black hover:underline text-sm font-bold">Lupa
+                        Password ?</a>
                 </div>
             </div>
         </div>
@@ -198,9 +74,7 @@
             </div>
         </div>
     </div>
-
     <div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white z-50"></div>
-
     <script>
         // Fungsi untuk menampilkan Toast
         function showToast(message, type = 'success') {
@@ -228,36 +102,6 @@
                     toast.classList.add('hidden');
                 }, 500);
             }, 3000);
-        }
-
-        // Fungsi untuk switch tab login
-        function switchTab(tab) {
-            // Update active tab
-            document.querySelectorAll('.login-tab').forEach(t => {
-                t.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Update title
-            document.querySelector('h2.text-xl').textContent = `Login ${tab.charAt(0).toUpperCase() + tab.slice(1)}`;
-            
-            // Hide all forms
-            document.getElementById('pembeliForm').classList.add('hidden');
-            document.getElementById('penitipForm').classList.add('hidden');
-            document.getElementById('pegawaiForm').classList.add('hidden');
-            
-            // Show selected form
-            document.getElementById(`${tab}Form`).classList.remove('hidden');
-            
-            // Update forgot password link
-            const forgotLink = document.querySelector('a[href*="LupaPassword"]');
-            if (tab === 'pembeli') {
-                forgotLink.href = "{{ route('forgotPassword') }}";
-            } else if (tab === 'penitip') {
-                forgotLink.href = "{{ route('forgotPassword') }}";; // Update with actual route
-            } else if (tab === 'organisasi') {
-                forgotLink.href = "{{ route('forgotPassword') }}";; // Update with actual route
-            }
         }
 
         // Saat halaman dimuat, cek jika ada session flash

@@ -34,7 +34,7 @@ class lupaPasswordOrganisasiControllers extends Controller
             "created_at" => now(),
             "updated_at" => now(),
         ]);
-
+        
         // Kirim email dengan token
         Mail::send("LupaPasswordOrg.PesanLupaPasswordOrganisasi", ["token" => $token], function ($message) use ($request) {
             $message->to($request->email_organisasi);

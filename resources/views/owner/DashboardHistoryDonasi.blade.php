@@ -27,7 +27,7 @@
                     </a>
                     <a href="{{ route('owner.DashboardDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
-                        <span>Daftar Request Donasi</span>
+                        <span>Donasi</span>
                     </a>
                     <a href = "{{route('owner.historyDonasi')}}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>

@@ -42,14 +42,19 @@ class Barang extends Model
         return $this->belongsTo(penitip::class, 'id'); // Asumsi relasi ke tabel penitip
     }
 
-        public function kategori()
+    public function kategori()
     {
         return $this->belongsTo(kategoribarang::class, 'id_kategori');
     }
 
-        public function diskusi()
+    public function diskusi()
     {
         return $this->hasMany(Diskusi::class, 'id_barang', 'id_barang');
+    }
+
+    public function detailTransaksiPenitipan()
+    {
+        return $this->hasOne(DetailTransaksiPenitipan::class, 'id_barang');
     }
 
     // public function getFotoBarangAttribute($value)

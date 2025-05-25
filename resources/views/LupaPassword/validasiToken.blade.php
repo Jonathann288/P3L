@@ -10,7 +10,7 @@
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 class="text-2xl font-bold mb-4 text-center">Reset Password Organisasi</h2>
+        <h2 class="text-2xl font-bold mb-4 text-center">Reset Password</h2>
 
         <form action="{{ route('validasiForgotPasswordAct') }}" method="POST">
             @csrf

@@ -15,9 +15,9 @@
 
         <div class="bg-blue-600 p-4">
             <div class="container mx-auto flex items-center justify-between flex-wrap">
-                <div class="flex items-center space-x-2">
+                <a href="{{ route('penitip.Shop-Penitip') }}" class="flex items-center space-x-2">
                     <img src="{{ asset('images/logo6.png') }}" alt="ReUseMart" class="h-12">
-                </div>
+                </a>
 
                 <div class="hidden md:block flex-grow mx-4">
                     <input type="text" placeholder="Mau cari apa nih kamu?" 

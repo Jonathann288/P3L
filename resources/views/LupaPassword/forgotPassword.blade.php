@@ -68,7 +68,7 @@
                     <!-- Left Side (Form) -->
                     <div class="col-md-6 form-section">
                         <div class="text-center mb-4">
-                            <h4 class="mt-3">Reset Password Organisasi</h4>
+                            <h4 class="mt-3">Reset Password</h4>
                             <p class="text-muted">Masukkan email Anda untuk menerima link reset kata sandi.</p>
                         </div>
 

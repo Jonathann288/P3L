@@ -129,7 +129,7 @@
                             </p>
                         </div>
                         <div class="mt-auto">
-                            <a href="#" class="flex items-center justify-center rounded-md bg-slate-900 px-3 py-1 text-center text-xs font-medium text-white hover:bg-gray-700">
+                            <a href="{{ route('login') }}" class="flex items-center justify-center rounded-md bg-slate-900 px-3 py-1 text-center text-xs font-medium text-white hover:bg-gray-700">
                                 Add to cart
                             </a>
                         </div>

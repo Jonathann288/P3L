@@ -14,6 +14,10 @@ use App\Http\Controllers\lupaPasswordPembeliControllers;
 use App\Http\Controllers\RequestDonasiControllers;
 use App\Http\Controllers\DiskusiControllers;
 use App\Http\Controllers\DonasiControllers;
+use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\TransaksiPenitipanControllers;
+use App\Http\Controllers\TransaksiPenjualanControllers;
+
 
 Route::get('/', function () {
     return view('beranda');
@@ -44,6 +48,7 @@ Route::get('/register', function () {
 })->name('register');
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'loginGabungan'])->name('login.proses');
 
 // Menangani form login (POST) Penitip
 Route::post('login-penitip', [AuthController::class, 'loginPenitip'])->name('loginPenitip.post');
@@ -59,6 +64,10 @@ Route::middleware(['penitip'])->group(function () {
     Route::get('/Penitip/categoryPembeli/{id}', [KategoriBarangControllers::class, 'filterByCategoryPenitip'])->name('penitip.categoryPenitip');
     Route::get('/Penitip/barang/{id_barang}', [BarangControllers::class, 'showDetailPenitip'])->name('penitip.detail_barangPenitip');
     //
+
+    Route::get('/Penitip/barang-titipan', [TransaksiPenitipanControllers::class, 'showBarangTitipan'])->name('penitip.barang-titipan');
+    Route::get('/penitip/barang/search', [TransaksiPenitipanControllers::class, 'search'])->name('penitip.barang.search');
+    Route::post('/barang-titipan/perpanjang/{id}', [TransaksiPenitipanControllers::class, 'perpanjangMasaPenitipan'])->name('penitip.barang.perpanjang');
 
     // logout
     Route::post('/logout-penitip', [AuthController::class, 'logoutPenitip'])->name('logout.penitip');
@@ -101,10 +110,21 @@ Route::middleware(['pembeli'])->group(function () {
     // logout
     Route::post('/logout-pembeli', [AuthController::class, 'logoutPembeli'])->name('logout.pembeli');
 
-    Route::get('/pembeli/cart', function () {
-        return view('pembeli.cartPembeli');
-    })->name('pembeli.cart')->middleware('auth:pembeli');
 
+    Route::get('/keranjang/{id_barang}', [TransaksiPenjualanControllers::class, 'index'])->name('keranjang.index');
+    Route::get('/keranjang/search', [TransaksiPenjualanControllers::class, 'searchCart'])->name('pembeli.searchCartPembeli');
+    Route::post('/tambah-keranjang/{id}', [TransaksiPenjualanControllers::class, 'tambahKeranjang'])->name('keranjang.tambah');
+    Route::delete('/keranjang/{id}', [TransaksiPenjualanControllers::class, 'hapusKeranjang'])->name('keranjang.hapus');
+    Route::post('/keranjang/hapus-terpilih', [TransaksiPenjualanControllers::class, 'hapusTerpilih'])->name('keranjang.hapusTerpilih');
+    Route::delete('/keranjang/hapus-banyak', [TransaksiPenjualanControllers::class, 'hapusBanyak'])->name('pembeli.hapus-banyak');
+
+
+    Route::get('/pembeli/cart', [TransaksiPenjualanControllers::class, 'tampilKeranjang'])->name('pembeli.cart');
+    Route::get('/pembeli/checkout/{id_barang}', [TransaksiPenjualanControllers::class, 'checkOutPembeli'])->name('pembeli.checkOutPembeli');
+
+
+Route::post('/checkout/proses', [TransaksiPenjualanControllers::class, 'proses'])->name('checkout.proses');
+    Route::get('/checkout', [TransaksiPenjualanControllers::class, 'checkout'])->name('checkout');
 });
 
 Route::get('/registerOrganisasi', [OrganisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');

@@ -137,30 +137,36 @@
                             </a>
 
                             <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
-                                <!-- 2. Link pada Judul Produk -->
+                                <!-- Link pada Judul Produk -->
                                 <a href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}">
-                                    <!-- Tambahkan route di sini -->
                                     <h5 class="text-base tracking-tight text-slate-900 hover:text-blue-600">
                                         {{ $item->nama_barang }}
                                     </h5>
                                 </a>
 
-                                <div class="mt-1 mb-2 flex items-center justify-between">
-                                    <p>
-                                        <span class="text-xl font-bold text-slate-900">
-                                            Rp {{ number_format($item->harga_barang, 0, ',', '.') }}
-                                        </span>
+                                <div class="mt-1 mb-4 flex items-center justify-between">
+                                    <p class="text-xl font-bold text-slate-900">
+                                        Rp {{ number_format($item->harga_barang, 0, ',', '.') }}
                                     </p>
                                 </div>
 
-                                <!-- Tombol "Add to Cart" (opsional) -->
-                                <div class="mt-auto">
-                                    <button
-                                        class="w-full rounded-md bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-gray-700">
+                                <form action="{{ route('keranjang.tambah', $item->id_barang) }}" method="POST"
+                                    class="mt-auto flex flex-col space-y-2">
+                                    @csrf
+
+                                    <button type="submit"
+                                        class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-3 text-center min-h-[44px]">
                                         Add to cart
                                     </button>
-                                </div>
+
+                                    <a href="{{ route('pembeli.checkOutPembeli', $item->id_barang) }}"
+                                        class="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-semibold rounded-lg text-sm px-5 py-3 text-center min-h-[44px]">
+                                        Beli
+                                    </a>
+                                </form>
+
                             </div>
+
                         </div>
                     @endforeach
                 </div>
@@ -224,9 +230,10 @@
                     showToast('{{ session('success') }}', 'success');
                 @endif
 
+
                 @if (session('error'))
                     showToast('{{ session('error') }}', 'error');
                 @endif
-                });
+                                                                                    });
         </script>
 @endsection

@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pembeli;
+use App\Models\Barang;
+use App\Models\Keranjang;
 use App\Models\TransaksiPenjualan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
 class PembeliControllrs extends Controller
 {
     public function showRegisterForm()
@@ -77,15 +78,15 @@ class PembeliControllrs extends Controller
             $pembeli = Auth::guard('pembeli')->user();
             $transaksiPenjualan = $pembeli->transaksiPenjualan ?? collect();
             // Return view dengan data pembeli
-            return view('pembeli.historyPembeli', compact('pembeli','transaksiPenjualan'));
+            return view('pembeli.historyPembeli', compact('pembeli', 'transaksiPenjualan'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
     public function update(Request $request)
-    {   
-        try{
+    {
+        try {
             $request->validate([
                 'id_pembeli' => 'required|exists:pembeli,id_pembeli',
                 'nama_pembeli' => 'required|string|max:255',
@@ -107,7 +108,7 @@ class PembeliControllrs extends Controller
             $pembeli->save();
 
             return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
@@ -127,7 +128,7 @@ class PembeliControllrs extends Controller
         }
 
         $pembeli->save();
-        
+
         return redirect()->route('pembeli.profilPembeli')->with('success', 'Foto profil berhasil diupdate.');
     }
 

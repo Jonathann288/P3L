@@ -8,7 +8,8 @@
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -23,15 +24,18 @@
             <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
             <nav>
                 <div class="space-y-4">
-                    <a href="{{ route('pembeli.profilPembeli') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <img src="{{ asset($pembeli->foto_pembeli) }}" alt="profile" class="w-8 h-8 rounded-full object-cover">
+                    <a href="{{ route('pembeli.profilPembeli') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <img src="{{ asset($pembeli->foto_pembeli) }}" alt="profile"
+                            class="w-8 h-8 rounded-full object-cover">
                         <span>{{ $pembeli->nama_pembeli }}</span>
                     </a>
-                    <div class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('pembeli.historyPembeli') }}" class="flex items-center space-x-4 p-3 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>History</span>
-                    </div>
-                    <a href="{{ route('pembeli.AlamatPembeli') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                    </a>
+                    <a href="{{ route('pembeli.AlamatPembeli') }}"
+                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Alamat</span>
                     </a>
@@ -52,18 +56,20 @@
             <div class="flex justify-between items-center mb-4">
                 <!-- Search Bar -->
                 <form action="{{ route('pembeli.alamat.search') }}" method="GET" class="flex items-center gap-2">
-                    <input type="text" name="nama_jalan" placeholder="Cari Nama Jalan..." 
-                        class="w-full p-2 border rounded-lg" 
-                        value="{{ request('nama_jalan') }}">
-                    
+                    <input type="text" name="nama_jalan" placeholder="Cari Nama Jalan..."
+                        class="w-full p-2 border rounded-lg" value="{{ request('nama_jalan') }}">
+
                     <select name="status_default" class="w-full p-2 border rounded-lg">
                         <option value="" disabled selected>Status Alamat</option>
-                        <option value="Rumah {{ request('status_default') == 'Rumah' ? 'selected' : '' }}">Rumah</option>
+                        <option value="Rumah {{ request('status_default') == 'Rumah' ? 'selected' : '' }}">Rumah
+                        </option>
                         <option value="Toko {{ request('status_default') == 'Toko' ? 'selected' : '' }}">Toko</option>
-                        <option value="Gudang {{ request('status_default') == 'Gudang' ? 'selected' : '' }}">Gudang</option>
-                        <option value="Apartemen {{ request('status_default') == 'Apartemen' ? 'selected' : '' }}">Apartemen</option>
+                        <option value="Gudang {{ request('status_default') == 'Gudang' ? 'selected' : '' }}">Gudang
+                        </option>
+                        <option value="Apartemen {{ request('status_default') == 'Apartemen' ? 'selected' : '' }}">
+                            Apartemen</option>
                     </select>
-                    
+
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
                         Cari
                     </button>
@@ -87,8 +93,11 @@
                                     <div class="text-sm text-gray-500">(+62) {{ $pembeli->nomor_telepon_pembeli }}</div>
                                 </div>
                                 <div class="flex space-x-2">
-                                    <div class="text-blue-500 cursor-pointer hover:underline" onclick="editAlamat('{{ $item->id }}', '{{ $item->nama_jalan }}', '{{ $item->deskripsi_alamat }}')">Ubah</div>
-                                    <form action="{{ route('pembeli.alamat.delete', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus alamat ini?');">
+                                    <div class="text-blue-500 cursor-pointer hover:underline"
+                                        onclick="editAlamat('{{ $item->id }}', '{{ $item->nama_jalan }}', '{{ $item->deskripsi_alamat }}')">
+                                        Ubah</div>
+                                    <form action="{{ route('pembeli.alamat.delete', $item->id) }}" method="POST"
+                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus alamat ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-500 hover:underline">Hapus</button>
@@ -97,15 +106,14 @@
                             </div>
                             <div class="mt-2 text-gray-700">
                                 {{ $item->nama_jalan }}, {{ $item->kelurahan }}, {{ $item->kecamatan }},
-                                {{ $item->kabupaten }},  {{ $item->kode_pos }}
+                                {{ $item->kabupaten }}, {{ $item->kode_pos }}
                             </div>
                             <div class="mt-2 text-sm text-gray-500">
                                 {{ $item->status_default}}
                             </div>
                             <div class="flex space-x-2 mt-4">
-                                <button id="btn-utama-{{ $item->id }}" 
-                                        onclick="aturSebagaiUtama('{{ $item->id }}')" 
-                                        class="border border-gray-300 px-2 py-1 rounded hover:bg-gray-100">
+                                <button id="btn-utama-{{ $item->id }}" onclick="aturSebagaiUtama('{{ $item->id }}')"
+                                    class="border border-gray-300 px-2 py-1 rounded hover:bg-gray-100">
                                     Atur sebagai utama
                                 </button>
                             </div>
@@ -128,23 +136,27 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block">Nama Jalan:</label>
-                        <input type="text" name="nama_jalan" id="nama_jalan" class="w-full p-2 border rounded-lg" required>
+                        <input type="text" name="nama_jalan" id="nama_jalan" class="w-full p-2 border rounded-lg"
+                            required>
                     </div>
                     <div>
                         <label class="block">Kode Pos:</label>
-                        <input type="number" name="kode_pos" id="kode_pos" class="w-full p-2 border rounded-lg" required>
+                        <input type="number" name="kode_pos" id="kode_pos" class="w-full p-2 border rounded-lg"
+                            required>
                     </div>
                     <div>
                         <label class="block">Kecamatan:</label>
-                        <input type="text" name="kecamatan" id="kecamatan" class="w-full p-2 border rounded-lg" required>
+                        <input type="text" name="kecamatan" id="kecamatan" class="w-full p-2 border rounded-lg"
+                            required>
                     </div>
                     <div>
                         <label class="block">Kelurahan:</label>
-                        <input type="text" name="kelurahan" id="kelurahan" class="w-full p-2 border rounded-lg" required>
+                        <input type="text" name="kelurahan" id="kelurahan" class="w-full p-2 border rounded-lg"
+                            required>
                     </div>
                     <div>
                         <label class="block">Status Alamat:</label>
-                        <select name="status_default" id="status_default" class="w-full p-2 border rounded-lg" required >
+                        <select name="status_default" id="status_default" class="w-full p-2 border rounded-lg" required>
                             <option value="" disabled selected>Pilih alamat sebagai</option>
                             <option value="Rumah">Rumah</option>
                             <option value="Toko">Toko</option>
@@ -154,23 +166,27 @@
                     </div>
                     <div>
                         <label class="block">Kabupaten:</label>
-                        <input type="text" name="kabupaten" id="kabupaten" class="w-full p-2 border rounded-lg" required>
+                        <input type="text" name="kabupaten" id="kabupaten" class="w-full p-2 border rounded-lg"
+                            required>
                     </div>
                     <div>
                         <label class="block">Deskripsi Alamat:</label>
-                        <textarea name="deskripsi_alamat" id="deskripsi_alamat" class="w-full p-2 border rounded-lg" required></textarea>
+                        <textarea name="deskripsi_alamat" id="deskripsi_alamat" class="w-full p-2 border rounded-lg"
+                            required></textarea>
                     </div>
                 </div>
                 <div class="flex justify-end mt-6 space-x-2">
-                    <button type="button" onclick="toggleModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Batal</button>
-                    <button type="submit" onsubmit="konfirmasi('add', event)" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Simpan</button>
+                    <button type="button" onclick="toggleModal()"
+                        class="bg-gray-500 text-white px-4 py-2 rounded-lg">Batal</button>
+                    <button type="submit" onsubmit="konfirmasi('add', event)"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        function konfirmasi(mode = 'add', e){
+        function konfirmasi(mode = 'add', e) {
             e.preventDefault(); // Prevent form submission
 
             let pesan = '';
@@ -218,7 +234,7 @@
             const form = document.getElementById('modalForm');
             form.action = '/alamatPembeli/update/' + id; // Update route
             form.innerHTML += '@method("PUT")'; // Method PUT for update
-            
+
             document.getElementById('alamatId').value = id;
             document.getElementById('nama_jalan').value = nama;
             document.getElementById('deskripsi_alamat').value = deskripsi;
@@ -229,7 +245,7 @@
         function aturSebagaiUtama(id) {
             // Konfirmasi tindakan
             if (confirm("Apakah Anda yakin ingin mengatur alamat ini sebagai utama?")) {
-                
+
                 // Jika sebelumnya ada alamat utama, tampilkan kembali tombolnya
                 if (alamatUtamaSebelumnya !== null) {
                     const previousButton = document.getElementById('btn-utama-' + alamatUtamaSebelumnya);
@@ -253,17 +269,17 @@
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ id: id })
-                }).then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Alamat berhasil diatur sebagai utama.');
-                    }
-                }).catch(error => {
-                    console.error('Error:', error);
-                });
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: id })
+        }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Alamat berhasil diatur sebagai utama.');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+            });
                 */
             }
         }

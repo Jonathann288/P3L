@@ -44,10 +44,17 @@ class Pembeli extends Authenticatable
 
     public function alamat()
     {
-        return $this->hasMany(Alamat::class, 'id_pembeli', 'id_pembeli');
+        return $this->hasMany(Alamat::class, 'id_pembeli'); // sesuaikan foreign key
     }
     public function transaksiPenjualan()
     {
-        return $this->hasMany(transaksipenjualan::class, 'id_pembeli', 'id_pembeli');
+        return $this->hasMany(transaksipenjualan::class, 'pembeli_id', 'pembeli_id');
     }
+
+
+    public function keranjang()
+    {
+        return $this->hasMany(Keranjang::class, 'pembeli_id');
+    }
+
 }

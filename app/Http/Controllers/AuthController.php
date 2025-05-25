@@ -19,6 +19,56 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+
+    public function loginGabungan(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        // Coba login sebagai Pegawai
+        $pegawai = Pegawai::with('jabatan')->where('email_pegawai', $request->email)->first();
+        if ($pegawai && Hash::check($request->password, $pegawai->password_pegawai)) {
+            Auth::guard('pegawai')->login($pegawai);
+
+            switch ($pegawai->jabatan->nama_jabatan) {
+                case 'Admin':
+                    return redirect()->route('admin.Dashboard');
+                case 'Customer Service':
+                    return redirect()->route('CustomerService.DashboardCS');
+                case 'Owner':
+                    return redirect()->route('owner.DashboardOwner');
+                case 'Gudang':
+                    return redirect()->route('gudang.DashboardGudang');
+                case 'Hunter':
+                    return redirect()->route('hunter.DashboardHunter');
+                case 'Kurir':
+                    return redirect()->route('kurir.DashboardKurir');
+                default:
+                    return redirect()->route('login')->with('error', 'Jabatan tidak dikenal.');
+            }
+        }
+
+        // Coba login sebagai Pembeli
+        $pembeli = Pembeli::where('email_pembeli', $request->email)->first();
+        if ($pembeli && Hash::check($request->password, $pembeli->password_pembeli)) {
+            Auth::guard('pembeli')->login($pembeli);
+            return redirect()->intended(route('pembeli.Shop-Pembeli'))->with('success', 'Login berhasil! Selamat datang di ReUseMart');
+        }
+
+        // Coba login sebagai Penitip
+        $penitip = Penitip::where('email_penitip', $request->email)->first();
+        if ($penitip && Hash::check($request->password, $penitip->password_penitip)) {
+            Auth::guard('penitip')->login($penitip);
+            return redirect()->intended(route('penitip.Shop-Penitip'))->with('success', 'Login berhasil! Selamat datang di ReUseMart Penitip yang kami hormati');
+        }
+
+        // Jika semua gagal
+        return back()->withErrors(['email' => 'Email atau password salah']);
+    }
+
+
     public function showLoginFormPegawai()
     {
         return view('login');  // Ganti dengan path view login yang sesuai
