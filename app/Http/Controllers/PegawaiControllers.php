@@ -129,7 +129,16 @@ class PegawaiControllers extends Controller
         // Passing data ke view
         return view('CustomerService.DashboardCS', compact('pegawai'));
     }
+    // COPY INI
+    public function showLoginGudang()
+    {
+        $pegawai = Auth::guard('pegawai')->user();
 
+        // Passing data ke view
+        return view('gudang.DashboardGudang', compact('pegawai'));
+    }
+    // SAMPE INI 
+    
     public function show($id)
     {
         $pegawai = Pegawai::find($id);

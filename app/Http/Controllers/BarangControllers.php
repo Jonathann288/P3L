@@ -61,7 +61,7 @@ class BarangControllers extends Controller
         // Kirim data ke view
         return view('donasi', compact('kategoris', 'barang', 'images'));
     }
-
+    // copy ini
     public function showDonasiOrganisasi()
     {
         // Ambil semua kategori
@@ -85,8 +85,9 @@ class BarangControllers extends Controller
         ];
 
         // Kirim data ke view
-        return view('donasi', compact('kategoris', 'barang', 'images'));
+        return view('organisasi.donasi-organisasi', compact('kategoris', 'barang', 'images'));
     }
+    // sampe ini
 
     public function showShopPembeli()
     {
@@ -139,14 +140,16 @@ class BarangControllers extends Controller
         // Kirim data ke view
         return view('penitip.Shop-Penitip', compact('kategoris', 'barang', 'images'));
     }
-
+    
+    // COPY INI
     public function showDetail($id_barang)
     {
         $barang = Barang::findOrFail($id_barang);
         if ($barang->status_barang !== 'tidak laku') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
-        return view('shop.detail_barang', compact('barang'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('shop.detail_barang', compact('barang','isElektronik'));
     }
 
     public function showDetailDonasi($id_barang)
@@ -156,8 +159,8 @@ class BarangControllers extends Controller
         if ($barang->status_barang !== 'di donasikan') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
-        
-        return view('donasi.detail_barang_donasi', compact('barang'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('donasi.detail_barang_donasi', compact('barang','isElektronik'));
     }
 
     public function showDetailDonasiOranisasi($id_barang)
@@ -166,7 +169,8 @@ class BarangControllers extends Controller
         if ($barang->status_barang !== 'di donasikan') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
-        return view('oranisasi.detail_barang_donasi', compact('barang'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('organisasi.detail_barang_donasi', compact('barang','isElektronik'));
     }
 
     public function showDetailPembeli($id_barang)
@@ -182,8 +186,8 @@ class BarangControllers extends Controller
 
         // Load diskusi with proper sorting (newest first)
         $barang->setRelation('diskusi', $barang->diskusi->sortByDesc('tanggal_diskusi'));
-
-        return view('pembeli.detail_barangPembeli', compact('barang','pembeli'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('pembeli.detail_barangPembeli', compact('barang','pembeli','isElektronik'));
     }
 
     public function showDetailPenitip($id_barang)
@@ -192,8 +196,10 @@ class BarangControllers extends Controller
         if ($barang->status_barang !== 'tidak laku') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
-        return view('penitip.detail_barangPenitip', compact('barang'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('penitip.detail_barangPenitip', compact('barang','isElektronik'));
     }
+    // SAMPE INI
 
     // Simpan barang baru
     public function store(Request $request)

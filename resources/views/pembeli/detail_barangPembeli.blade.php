@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -153,14 +154,44 @@
         <!-- Product Section -->
         <div class="flex flex-col md:flex-row gap-8 pt-8">
             <!-- Product Images -->
+             <!-- COPY INI SAMPE BATES KOMMEN KU-->
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
-                <div class="bg-white-100 rounded-lg h-96 flex items-center justify-center">
-                    <!-- Ganti dengan gambar dari database -->
-                    <img src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}"
-                        class="max-h-full max-w-full" />
+                <!-- Gambar Utama Besar -->
+                <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center mb-4">
+                    <img id="main-image" src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}" class="max-h-full max-w-full object-contain">
+                </div>
+
+                <!-- Thumbnail Gambar Kecil -->
+                <div class="flex gap-2 overflow-x-auto py-2">
+                    <!-- Thumbnail 1 (aktif) -->
+                    <div class="flex-shrink-0">
+                        <img src="{{ asset($barang->foto_barang) }}" alt="Thumbnail 1" 
+                            class="w-20 h-20 object-cover rounded border-2 border-blue-500 cursor-pointer"
+                            onclick="changeMainImage(this)">
+                    </div>
+                    
+                    <!-- Thumbnail 2 -->
+                    <div class="flex-shrink-0">
+                        <img src="{{ asset($barang->foto_barang2) }}" alt="Thumbnail 2" 
+                            class="w-20 h-20 object-cover rounded border border-gray-300 cursor-pointer hover:border-blue-300"
+                            onclick="changeMainImage(this)">
+                    </div>
+                    
+                    <!-- Thumbnail 3 -->
+                    <div class="flex-shrink-0">
+                        <img src="{{ asset($barang->foto_barang3) }}" alt="Thumbnail 3" 
+                            class="w-20 h-20 object-cover rounded border border-gray-300 cursor-pointer hover:border-blue-300"
+                            onclick="changeMainImage(this)">
+                    </div>
+                    <!-- Thumbnail 4 -->
+                    <div class="flex-shrink-0">
+                        <img src="{{ asset($barang->foto_barang4) }}" alt="Thumbnail 4" 
+                            class="w-20 h-20 object-cover rounded border border-gray-300 cursor-pointer hover:border-blue-300"
+                            onclick="changeMainImage(this)">
+                    </div>
                 </div>
             </div>
-
+            <!-- INI -->
             <!-- Product Details -->
             <div class="w-full md:w-1/2">
                 <!-- Nama Barang -->
@@ -194,6 +225,7 @@
                 </div>
 
                 <!-- Kotak Deskripsi Produk -->
+                 <!-- INI JUGA COPY -->
                 <div class="mt-6 border rounded-lg p-4 bg-gray-50 shadow-sm">
                     <h2 class="text-lg font-semibold text-gray-900 mb-3">Deskripsi Produk</h2>
 
@@ -204,11 +236,16 @@
                     <p class="text-gray-800 font-medium">
                         Berat Barang: <span class="font-normal">{{ $barang->berat_barang }} gram</span>
                     </p>
+                    @if($isElektronik)
+                        <p class="text-gray-800 font-medium mt-2">
+                            Garansi Hingga: 
+                            <span class="font-normal">
+                                {{ \Carbon\Carbon::parse($barang->tanggal_garansi)->translatedFormat('d F Y') }}
+                            </span>
+                        </p>
+                    @endif
                 </div>
-
-
-
-
+                <!--SAMPE INI -->
             </div>
         </div>
 
@@ -382,6 +419,19 @@
                 ratingContainer.appendChild(star);
             }
         });
+                function changeMainImage(thumbnail) {
+            const mainImage = document.getElementById('main-image');
+            mainImage.src = thumbnail.src;
+            
+            // Update border thumbnail yang aktif
+            document.querySelectorAll('.thumbnail-container img').forEach(img => {
+                img.classList.remove('border-2', 'border-blue-500');
+                img.classList.add('border', 'border-gray-300');
+            });
+            
+            thumbnail.classList.remove('border', 'border-gray-300');
+            thumbnail.classList.add('border-2', 'border-blue-500');
+        }
     </script>
 </body>
 </html>

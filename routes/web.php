@@ -122,9 +122,10 @@ Route::post('/loginOrganisasi', [AuthController::class, 'loginOrganisasi'])->nam
 
 
 Route::middleware(['organisasi'])->group(function () {
-    Route::get('/donasi-organisasi', function () {
-        return view('organisasi.donasi-organisasi');
-    })->name('organisasi.donasi-organisasi');
+    // COPY INI
+    Route::get('/donasi-organisasi',  [BarangControllers::class, 'showDonasiOrganisasi'])->name('organisasi.donasi-organisasi');
+    Route::get('/donasi-organisasi//barang/{id_barang}',  [BarangControllers::class, 'showDetailDonasiOranisasi'])->name('organisasi.detail_barang_donasi');
+    //SAMPE INI
     Route::get('/organisasi/profilOrganisasi', [OrganisasiControllrs::class, 'showOrganisasi'])->name('organisasi.profilOrganisasi');
     Route::post('/organisasi/update-profil', [OrganisasiControllrs::class, 'updateProfil'])->name('organisasi.updateProfil');
     Route::get('/organisasi/requestDonasiOrganisasi', [RequestDonasiControllers::class, 'requestDonasiOrganisasi'])->name('organisasi.requestDonasiOrganisasi');
@@ -183,9 +184,10 @@ Route::middleware(['checkjabatan:Customer Service'])->group(function () {
     Route::get('/DashboardPenitip/search', [PenitipControllrs::class, 'search'])->name('CustomerService.penitip.search');
 });
 Route::middleware(['checkjabatan:Gudang'])->group(function () {
-    Route::get('/DashboardGudang', function () {
-        return view('gudang.DashboardGudang');
-    })->name('gudang.DashboardGudang');
+    // COPY INI 
+    Route::get('/DashboardGudang', [PegawaiControllers::class, 'showLoginGudang'])->name('gudang.DashboardGudang');
+    Route::get('/DashboardTitipanBarang', [TransaksiPenitipanControllers::class, 'showTitipanBarang'])->name('gudang.DashboardTitipanBarang');
+    // SAMPE INI 
 });
 Route::middleware(['checkjabatan:Kurir'])->group(function () {
     Route::get('/DashboardKurir', function () {
