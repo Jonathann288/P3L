@@ -193,6 +193,11 @@ Route::middleware(['checkjabatan:Gudang'])->group(function () {
     //Cetak nota skuy
     Route::get('/cetak-nota/{id}', [GudangControllers::class, 'cetakNota'])->name('gudang.CetakNota');
 
+      // Daftar Barang Management
+    Route::get('/DaftarBarang', [BarangControllers::class, 'showDaftarBarang'])->name('gudang.DaftarBarang');
+    Route::get('/DetailBarang/{id_barang}', [BarangControllers::class, 'showDetailBarangGudang'])->name('gudang.DetailBarang');
+    Route::get('/EditBarang/{id_barang}', [BarangControllers::class, 'showEditBarang'])->name('gudang.EditBarang');
+    Route::put('/UpdateBarang/{id_barang}', [BarangControllers::class, 'updateBarangGudang'])->name('gudang.UpdateBarang');
 });
 
 

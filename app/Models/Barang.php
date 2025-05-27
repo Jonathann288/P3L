@@ -11,7 +11,7 @@ class Barang extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id',
+        'id', 
         'id_kategori',
         'nama_barang',
         'foto_barang',
@@ -25,19 +25,45 @@ class Barang extends Model
     ];
 
     protected $casts = [
-        'harga_barang' => 'float',
-        'rating_barang' => 'float',
-        'berat_barang' => 'float',
+        'harga_barang' => 'decimal:2',
+        'rating_barang' => 'decimal:2',
+        'berat_barang' => 'decimal:2',
         'garansi_barang' => 'datetime',
     ];
 
     public function kategoribarang()
     {
-        return $this->belongsTo(kategoribarang::class, 'id_kategori');
+        return $this->belongsTo(KategoriBarang::class, 'id_kategori', 'id_kategori');
     }
 
-    public function penitip()
+    public function detailTransaksiPenitipan()
     {
-        return $this->belongsTo(penitip::class, 'id'); // Asumsi relasi ke tabel penitip
+        return $this->hasMany(DetailTransaksiPenitipan::class, 'id_barang', 'id_barang');
+    }
+
+
+    public function pegawai()
+    {
+        return $this->hasManyThrough(
+            Pegawai::class,
+            DetailTransaksiPenitipan::class,
+            'id_barang', 
+            'id_pegawai', 
+            'id_barang', 
+            'id_transaksi_penitipan' 
+        )->join('transaksipenitipan', 'detail_transaksi_penitipan.id_transaksi_penitipan', '=', 'transaksipenitipan.id_transaksi_penitipan');
+    }
+
+    // Alternatif: Relasi untuk mendapatkan transaksi penitipan
+    public function transaksiPenitipan()
+    {
+        return $this->hasManyThrough(
+            TransaksiPenitipan::class,
+            DetailTransaksiPenitipan::class,
+            'id_barang', 
+            'id_transaksi_penitipan', 
+            'id_barang',
+            'id_transaksi_penitipan' 
+        );
     }
 }

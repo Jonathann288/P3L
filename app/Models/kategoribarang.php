@@ -10,4 +10,9 @@ class kategoribarang extends Model
     protected $primaryKey = 'id_kategori';
     public $timestamps = false;
     protected $fillable = ['nama_kategori', 'nama_sub_kategori'];
+
+    public function barang()
+    {
+        return $this->hasMany(Barang::class, 'id_kategori', 'id_kategori');
+    }
 }

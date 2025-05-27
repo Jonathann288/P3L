@@ -34,6 +34,11 @@
                         <i class="fas fa-dolly mr-2"></i>
                         <span>Tambah Titip Barang</span>
                     </a>
+                     <a href="{{ route('gudang.DaftarBarang') }}"
+                        class="flex items-center space-x-4 p-3 bg-gray-700 rounded-lg">
+                        <i class="fas fa-boxes mr-2"></i>
+                        <span>Daftar Barang</span>
+                    </a>
                 </div>
             </nav>
         </div>
@@ -41,6 +46,16 @@
             <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">Keluar</button>
         </div>
     </div>
+
+    @if($errors->any())
+        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
@@ -74,47 +89,216 @@
 
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Tambah Titipan Barang</h2>
 
+                {{-- Error Validation --}}
+                @if($errors->any())
+                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                        <ul class="list-disc list-inside">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <form action="{{ route('gudang.StoreTitipanBarang') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
+                    {{-- Penitip --}}
                     <div class="mb-4">
-
-                        <label for="id_penitip" class="block font-semibold mb-2">Pilih Penitip *</label>
-                        <select name="id_penitip" id="id_penitip" required class="w-full border p-3 rounded-lg">
+                        <label for="id_penitip" class="block font-semibold mb-2">Pilih Penitip <span
+                                class="text-red-500">*</span></label>
+                        <select name="id_penitip" id="id_penitip" required
+                            class="w-full border p-3 rounded-lg @error('id_penitip') border-red-500 @enderror">
                             <option value="">-- Pilih Penitip --</option>
                             @foreach($penitips ?? [] as $penitip)
-                                @if(is_object($penitip) && isset($penitip->id_penitip, $penitip->nama_penitip, $penitip->email_penitip))
-                                    <option value="{{ $penitip->id_penitip }}">
-                                        {{ $penitip->nama_penitip }} ({{ $penitip->email_penitip }})
+                                @if(is_object($penitip))
+                                    <option value="{{ $penitip->id_penitip }}" {{ old('id_penitip') == $penitip->id_penitip ? 'selected' : '' }}>
+                                        {{ $penitip->nama_penitip }}
                                     </option>
                                 @endif
                             @endforeach
+
+
                         </select>
+                        @error('id_penitip') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
-
+                    {{-- Kategori Barang --}}
                     <div class="mb-4">
-                        <label for="tanggal_penitipan" class="block font-semibold mb-2">Tanggal Titip *</label>
+                        <label for="id_kategori" class="block font-semibold mb-2">Kategori Barang <span
+                                class="text-red-500">*</span></label>
+                        <select name="id_kategori" id="id_kategori" required
+                            class="w-full border p-3 rounded-lg @error('id_kategori') border-red-500 @enderror">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($kategoris ?? [] as $kategori)
+                                @if(is_object($kategori))
+                                    <option value="{{ $kategori->id_kategori }}" {{ old('id_kategori') == $kategori->id_kategori ? 'selected' : '' }}>
+                                        {{ $kategori->nama_kategori }}{{ $kategori->nama_sub_kategori ? ' - ' . $kategori->nama_sub_kategori : '' }}
+                                    </option>
+                                @endif
+                            @endforeach
+
+                        </select>
+                        @error('id_kategori') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Tanggal Penitipan --}}
+                    <div class="mb-4">
+                        <label for="tanggal_penitipan" class="block font-semibold mb-2">Tanggal Titip <span
+                                class="text-red-500">*</span></label>
                         <input type="date" name="tanggal_penitipan" id="tanggal_penitipan" required
-                            class="w-full border p-3 rounded-lg" />
+                            value="{{ old('tanggal_penitipan', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}"
+                            class="w-full border p-3 rounded-lg @error('tanggal_penitipan') border-red-500 @enderror" />
+                        @error('tanggal_penitipan') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
+                    {{-- Nama Barang --}}
                     <div class="mb-4">
-                        <label for="foto_barang" class="block font-semibold mb-2">Foto Barang</label>
-                        <input type="file" name="foto_barang[]" multiple accept="image/*"
-                            class="w-full border p-3 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                        <p class="text-sm text-gray-500 mt-1">Format: JPG, PNG, GIF. Max 2MB per file.</p>
+                        <label for="nama_barang" class="block font-semibold mb-2">Nama Barang <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" name="nama_barang" id="nama_barang" required value="{{ old('nama_barang') }}"
+                            placeholder="Masukkan nama barang"
+                            class="w-full border p-3 rounded-lg @error('nama_barang') border-red-500 @enderror" />
+                        @error('nama_barang') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
-                    <div class="mt-6 flex justify-end space-x-3">
+                    {{-- Deskripsi Barang --}}
+                    <div class="mb-4">
+                        <label for="deskripsi_barang" class="block font-semibold mb-2">Deskripsi Barang <span
+                                class="text-red-500">*</span></label>
+                        <textarea name="deskripsi_barang" id="deskripsi_barang" rows="3" required
+                            class="w-full border p-3 rounded-lg @error('deskripsi_barang') border-red-500 @enderror">{{ old('deskripsi_barang') }}</textarea>
+                        @error('deskripsi_barang') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Harga Barang --}}
+                    <div class="mb-4">
+                        <label for="harga_barang" class="block font-semibold mb-2">Harga Barang (Rp) <span
+                                class="text-red-500">*</span></label>
+                        <input type="number" name="harga_barang" id="harga_barang" required step="1" min="1"
+                            value="{{ old('harga_barang') }}"
+                            class="w-full border p-3 rounded-lg @error('harga_barang') border-red-500 @enderror" />
+                        @error('harga_barang') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Berat Barang --}}
+                    <div class="mb-4">
+                        <label for="berat_barang" class="block font-semibold mb-2">Berat Barang (Gram(g)) <span
+                                class="text-red-500">*</span></label>
+                        <input type="number" name="berat_barang" id="berat_barang" required step="0.01" min="0.1"
+                            value="{{ old('berat_barang') }}"
+                            class="w-full border p-3 rounded-lg @error('berat_barang') border-red-500 @enderror" />
+                        @error('berat_barang') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Status Barang --}}
+                    <div class="mb-4">
+                        <label for="status_barang" class="block font-semibold mb-2">Status Barang <span
+                                class="text-red-500">*</span></label>
+                        <select name="status_barang" id="status_barang" required
+                            class="w-full border p-3 rounded-lg @error('status_barang') border-red-500 @enderror">
+                            <option value="">-- Pilih Status --</option>
+                            <option value="tersedia" {{ old('status_barang') == 'tersedia' ? 'selected' : '' }}>Tersedia
+                            </option>
+                            <option value="pending" {{ old('status_barang') == 'pending' ? 'selected' : '' }}>Pending
+                            </option>
+                        </select>
+                        @error('status_barang') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <!-- SECTION GARANSI BARANG - BARU -->
+                    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-3">Pengaturan Garansi Barang</h3>
+
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-2">Apakah barang memiliki garansi? <span
+                                    class="text-red-500">*</span></label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="has_garansi" value="tidak" checked class="mr-2"
+                                        onchange="toggleGaransi()">
+                                    <span>Tidak ada garansi</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="has_garansi" value="ya" class="mr-2"
+                                        onchange="toggleGaransi()">
+                                    <span>Ya, ada garansi</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Input garansi yang tersembunyi, akan muncul jika dipilih "Ya" -->
+                        <div id="garansi-section" class="hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="garansi_type" class="block font-semibold mb-2">Jenis Garansi</label>
+                                    <select name="garansi_type" id="garansi_type" class="w-full border p-3 rounded-lg">
+                                        <option value="1_tahun">1 Tahun (Default)</option>
+                                        <option value="6_bulan">6 Bulan</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="garansi_barang" class="block font-semibold mb-2">Tanggal Berakhir
+                                        Garansi</label>
+                                    <input type="date" name="garansi_barang" id="garansi_barang"
+                                        class="w-full border p-3 rounded-lg" readonly />
+                                    <small class="text-gray-600">Otomatis dihitung berdasarkan tanggal penitipan</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Fixed Foto Barang Section --}}
+                    <div class="mb-4">
+                        <label for="foto_barang" class="block font-semibold mb-2">
+                            Foto Barang <span class="text-red-500">*</span>
+                            <small class="text-gray-500 font-normal">(1-5 foto, maks 2MB per foto)</small>
+                        </label>
+
+                        <input type="file" name="foto_barang[]" id="foto_barang" required multiple
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                            class="w-full border p-3 rounded-lg @error('foto_barang') border-red-500 @enderror @error('foto_barang.*') border-red-500 @enderror"
+                            onchange="previewImages(this)" />
+
+                        <!-- File validation info -->
+                        <div class="text-sm text-gray-600 mt-1">
+                            Format yang didukung: JPEG, PNG, JPG, GIF, WEBP. Maksimal 5 foto.
+                        </div>
+
+                        @error('foto_barang')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                        @error('foto_barang.*')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+
+                        <!-- Image Preview -->
+                        <div id="image-preview" class="grid grid-cols-3 gap-2 mt-3" style="display: none;"></div>
+                    </div>
+
+                    {{-- Submit Buttons --}}
+                    <div class="flex justify-end mt-6">
                         <button type="button" @click="showCreateModal = false"
-                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">Batal</button>
-                        <button type="submit"
-                            class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg">Simpan</button>
+                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded mr-2">
+                            Batal
+                        </button>
+                        <button type="submit" id="submitBtn"
+                            class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded disabled:opacity-50">
+                            Simpan
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
+
+
 
         <div class="bg-white p-6 rounded-lg shadow mb-6">
             <form method="GET" action="{{ route('gudang.SearchTitipan') }}"
@@ -221,13 +405,13 @@
 
                         <!-- Edit Button -->
                         <button @click="openModal({{ $titipan->id_transaksi_penitipan }}, {
-                                                            nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
-                                                            email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
-                                                            tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
-                                                            tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
-                                                            tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
-                                                            tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
-                                                        })"
+                                                                                    nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
+                                                                                    email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
+                                                                                    tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
+                                                                                    tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
+                                                                                    tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
+                                                                                    tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
+                                                                                })"
                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mt-3 transition-colors">
                             <i class="fas fa-edit mr-1"></i> Edit
                         </button>
@@ -275,14 +459,13 @@
                                 </div>
 
 
-                                <!-- Foto Barang Section -  -->
+                                <!-- Foto Barang Section -->
                                 <div class="mt-4">
                                     <strong class="text-gray-700 block mb-2">Foto Barang:</strong>
 
                                     @php
                                         $fotoBarang = $titipan->foto_barang;
 
-                                        // Pastikan fotoBarang adalah array
                                         if (empty($fotoBarang)) {
                                             $fotoBarang = [];
                                         } elseif (is_string($fotoBarang)) {
@@ -292,19 +475,16 @@
                                             $fotoBarang = [];
                                         }
 
-                                        // Filter empty values
-                                        $fotoBarang = array_filter($fotoBarang, function ($foto) {
-                                            return !empty($foto);
-                                        });
+                                        $fotoBarang = array_filter($fotoBarang, fn($foto) => !empty($foto));
                                     @endphp
 
-                                    @if(!empty($fotoBarang) && count($fotoBarang) > 0)
+                                    @if(!empty($fotoBarang))
                                         <div class="grid grid-cols-2 gap-2">
                                             @foreach($fotoBarang as $index => $foto)
                                                 @php
-                                                    // Bersihkan path foto dari karakter aneh
                                                     $cleanFoto = trim($foto);
                                                     $fullPath = asset('storage/' . $cleanFoto);
+                                                    $altText = $titipan->penitip?->nama_penitip ?? 'Foto Barang';
                                                 @endphp
 
                                                 <div class="text-center">
@@ -313,7 +493,7 @@
                                                             class="w-full h-24 object-cover rounded border hover:shadow-lg transition-shadow cursor-pointer"
                                                             loading="lazy"
                                                             onerror="this.onerror=null; this.classList.add('opacity-50'); this.nextElementSibling.style.display='block'; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zNSA2NUw1MCA0NUw2NSA2NUgzNVoiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iNDAiIGN5PSIzNSIgcj0iNSIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4=';"
-                                                            onclick="openImageModal('{{ $fullPath }}', '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : 'Foto Barang' }} - {{ $index + 1 }}')">
+                                                            onclick="openImageModal('{{ $fullPath }}', '{{ $altText }} - {{ $index + 1 }}')">
 
                                                         <!-- Overlay for hover effect -->
                                                         <div
@@ -323,19 +503,18 @@
                                                         </div>
                                                     </div>
 
-                                                    <!-- Error message (hidden by default) -->
+                                                    <!-- Error message -->
                                                     <div class="text-xs text-red-500 mt-1" style="display: none;">
                                                         Gagal memuat foto
                                                     </div>
 
-                                                    <!-- File info -->
+                                                    <!-- File name -->
                                                     <div class="text-xs text-gray-400 mt-1 truncate" title="{{ $cleanFoto }}">
                                                         {{ basename($cleanFoto) }}
                                                     </div>
                                                 </div>
                                             @endforeach
                                         </div>
-
                                     @else
                                         <div class="text-center py-4">
                                             <div
@@ -346,6 +525,7 @@
                                         </div>
                                     @endif
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -516,6 +696,65 @@
             }
         }
 
+        // Toggle garansi section visibility
+        function toggleGaransi() {
+            const hasGaransi = document.querySelector('input[name="has_garansi"]:checked').value;
+            const garansiSection = document.getElementById('garansi-section');
+
+            if (hasGaransi === 'ya') {
+                garansiSection.classList.remove('hidden');
+                updateGaransiDate(); // Update tanggal garansi
+            } else {
+                garansiSection.classList.add('hidden');
+                document.getElementById('garansi_barang').value = '';
+            }
+        }
+
+        // Update garansi date based on tanggal_penitipan and garansi_type
+        function updateGaransiDate() {
+            const tanggalPenitipan = document.getElementById('tanggal_penitipan').value;
+            const garansiType = document.getElementById('garansi_type').value;
+            const hasGaransi = document.querySelector('input[name="has_garansi"]:checked').value;
+
+            if (!tanggalPenitipan || hasGaransi === 'tidak') {
+                return;
+            }
+
+            const tanggalMulai = new Date(tanggalPenitipan);
+            let tanggalAkhir = new Date(tanggalMulai);
+
+            switch (garansiType) {
+                case '6_bulan':
+                    tanggalAkhir.setMonth(tanggalAkhir.getMonth() + 6);
+                    break;
+                case '1_tahun':
+                    tanggalAkhir.setFullYear(tanggalAkhir.getFullYear() + 1);
+                    break;
+                case 'custom':
+                    // Untuk custom, user bisa edit manual
+                    document.getElementById('garansi_barang').readOnly = false;
+                    return;
+                default:
+                    tanggalAkhir.setFullYear(tanggalAkhir.getFullYear() + 1);
+            }
+
+            // Format tanggal untuk input date (YYYY-MM-DD)
+            const formattedDate = tanggalAkhir.toISOString().split('T')[0];
+            document.getElementById('garansi_barang').value = formattedDate;
+            document.getElementById('garansi_barang').readOnly = true;
+        }
+
+        // Event listener untuk garansi type change
+        document.addEventListener('DOMContentLoaded', function () {
+            const garansiTypeSelect = document.getElementById('garansi_type');
+            garansiTypeSelect.addEventListener('change', updateGaransiDate);
+
+            // Set default tanggal penitipan ke hari ini
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggal_penitipan').value = today;
+        });
+
+
         // Image preview function
         function previewImages(input) {
             const preview = document.getElementById('image-preview');
@@ -558,6 +797,81 @@
             document.getElementById('imageModal').style.display = 'none';
             document.body.style.overflow = 'auto';
         }
+
+        function previewImages(input) {
+            const preview = document.getElementById('image-preview');
+            const submitBtn = document.getElementById('submitBtn');
+            preview.innerHTML = '';
+
+            if (input.files && input.files.length > 0) {
+                // Check file count
+                if (input.files.length > 5) {
+                    alert('Maksimal 5 foto yang dapat diupload');
+                    input.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+
+                preview.style.display = 'grid';
+                let validFiles = 0;
+
+                Array.from(input.files).forEach((file, index) => {
+                    // File type validation
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert(`File ${file.name} bukan format gambar yang didukung`);
+                        return;
+                    }
+
+                    // File size validation (2MB)
+                    if (file.size > 2048 * 1024) {
+                        alert(`File ${file.name} terlalu besar. Maksimal 2MB`);
+                        return;
+                    }
+
+                    validFiles++;
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const div = document.createElement('div');
+                        div.className = 'relative border rounded p-2';
+                        div.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}" 
+                        class="w-full h-20 object-cover rounded border">
+                    <div class="text-xs text-gray-600 mt-1 truncate">${file.name}</div>
+                    <div class="text-xs text-gray-400">${(file.size / 1024).toFixed(1)} KB</div>
+                    <div class="text-xs text-green-600">✓ Valid</div>
+                `;
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                // If no valid files, clear input
+                if (validFiles === 0) {
+                    input.value = '';
+                    preview.style.display = 'none';
+                }
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        // Form submission validation
+        document.getElementById('titipanForm').addEventListener('submit', function (e) {
+            const fileInput = document.getElementById('foto_barang');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                e.preventDefault();
+                alert('Silakan pilih minimal 1 foto barang');
+                return false;
+            }
+
+            // Disable submit button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Menyimpan...';
+        });
 
         // Close modal on escape key
         document.addEventListener('keydown', function (e) {

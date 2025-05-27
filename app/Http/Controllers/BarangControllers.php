@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Barang;
 use App\Models\KategoriBarang;
+use App\Models\Pegawai;
 use Illuminate\Http\Request;
 
 class BarangControllers extends Controller
@@ -102,7 +102,7 @@ class BarangControllers extends Controller
         $barang = Barang::findOrFail($id_barang);
         return view('penitip.detail_barangPenitip', compact('barang'));
     }
-    
+
     // Simpan barang baru
     public function store(Request $request)
     {
@@ -165,5 +165,90 @@ class BarangControllers extends Controller
         $barang->delete();
 
         return response()->json(['message' => 'Barang berhasil dihapus']);
+    }
+
+    // Tampilkan daftar barang untuk gudang
+
+    public function showDaftarBarang()
+    {
+        // Ambil semua barang dengan relasi kategori dan informasi pegawai
+        $barang = Barang::with(['kategoribarang'])->get();
+
+        // Untuk setiap barang, cari pegawai yang bertanggung jawab melalui transaksi penitipan
+        $barang = $barang->map(function ($item) {
+            // Cari transaksi penitipan terbaru untuk barang ini
+            $transaksi = \App\Models\TransaksiPenitipan::whereHas('detailTransaksi', function ($query) use ($item) {
+                $query->where('id_barang', $item->id_barang);
+            })->with('pegawai')->latest('tanggal_penitipan')->first();
+
+            $item->pegawai_penanggungjawab = $transaksi ? $transaksi->pegawai : null;
+
+            return $item;
+        });
+
+        $pegawai = auth()->user()->pegawai ?? null;
+
+
+        // Ambil semua kategori untuk modal edit
+        $kategoris = \App\Models\KategoriBarang::all();
+
+        return view('gudang.DaftarBarang', compact('barang', 'pegawai', 'kategoris'));
+    }
+
+    // Tampilkan detail barang untuk gudang
+    public function showDetailBarangGudang($id_barang)
+    {
+        $barang = Barang::with(['kategoribarang'])->findOrFail($id_barang);
+
+        $pegawai = auth()->user()->pegawai ?? null;
+        if (!$pegawai) {
+            $pegawai = (object) [
+                'nama_pegawai' => 'Admin Gudang',
+                'email_pegawai' => 'admin@gudang.com',
+                'nomor_telepon_pegawai' => '08123456789'
+            ];
+        }
+
+        return view('gudang.DetailBarang', compact('barang', 'pegawai'));
+    }
+
+    // Tampilkan form edit barang
+    public function showEditBarang($id_barang)
+    {
+        $barang = Barang::findOrFail($id_barang);
+        $kategoris = KategoriBarang::all();
+
+        $pegawai = auth()->user()->pegawai ?? null;
+        if (!$pegawai) {
+            $pegawai = (object) [
+                'nama_pegawai' => 'Admin Gudang',
+                'email_pegawai' => 'admin@gudang.com',
+                'nomor_telepon_pegawai' => '08123456789'
+            ];
+        }
+
+        return view('gudang.EditBarang', compact('barang', 'kategoris', 'pegawai'));
+    }
+
+    // Update barang dari form gudang
+    public function updateBarangGudang(Request $request, $id_barang)
+    {
+        $request->validate([
+            'id_kategori' => 'required|integer',
+            'nama_barang' => 'required|string|max:255',
+            'harga_barang' => 'required|numeric',
+            'deskripsi_barang' => 'nullable|string',
+            'foto_barang' => 'nullable|string',
+            'status_barang' => 'nullable|string',
+            'rating_barang' => 'nullable|numeric|between:0,5',
+            'berat_barang' => 'nullable|numeric',
+            'garansi_barang' => 'nullable|date',
+            'masa_penitipan' => 'nullable|integer',
+        ]);
+
+        $barang = Barang::findOrFail($id_barang);
+        $barang->update($request->all());
+
+        return redirect()->route('gudang.DaftarBarang')->with('success', 'Barang berhasil diperbarui');
     }
 }

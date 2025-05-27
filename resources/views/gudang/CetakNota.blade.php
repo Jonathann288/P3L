@@ -278,6 +278,41 @@
                     <td>{{ $titipan->pegawai->nama_pegawai ?? 'Nama Pegawai' }}</td>
                     <td><span class="status-badge">Verified</span></td>
                 </tr>
+                @php
+                    $barang = $titipan->detailTransaksi->first()->barang ?? null;
+                    $penanggungJawab = $barang->detailTransaksiPenitipan->first()->transaksiPenitipan->pegawai ?? null;
+                @endphp
+
+                <tr>
+                    <td>Info Barang</td>
+                    <td>{{ $titipan->tanggal_penitipan->format('d/m/Y') }}</td>
+                    <td>
+                        @if($barang)
+                            Nama: {{ $barang->nama_barang }}<br>
+                            Kategori: {{ $barang->kategoribarang->nama_kategori ?? '-' }}<br>
+                            Berat: {{ $barang->berat_barang }} kg<br>
+                            Harga: Rp {{ number_format($barang->harga_barang, 0, ',', '.') }}
+                        @else
+                            Tidak ada data barang
+                        @endif
+                    </td>
+                    <td><span class="status-badge">Verified</span></td>
+                </tr>
+
+                <tr>
+                    <td>Penanggung Jawab</td>
+                    <td>{{ $titipan->tanggal_penitipan->format('d/m/Y') }}</td>
+                    <td>
+                        @if($penanggungJawab)
+                            {{ $penanggungJawab->nama_pegawai }}<br>
+                            Telepon: {{ $penanggungJawab->nomor_telepon_pegawai }}
+                        @else
+                            Tidak diketahui
+                        @endif
+                    </td>
+                    <td><span class="status-badge">Verified</span></td>
+                </tr>
+
             </tbody>
         </table>
 

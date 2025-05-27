@@ -29,28 +29,31 @@ class transaksipenitipan extends Model
         'foto_barang' => 'array',
     ];
 
-    public function pegawai()
+   public function pegawai()
     {
-        return $this->belongsTo(Pegawai::class, 'id_pegawai');
+        return $this->belongsTo(Pegawai::class, 'id_pegawai', 'id_pegawai');
     }
 
     public function penitip()
     {
-        return $this->belongsTo(Penitip::class, 'id_penitip');
+        return $this->belongsTo(Penitip::class, 'id_penitip', 'id_penitip');
     }
 
+    public function detailTransaksi()
+    {
+        return $this->hasMany(DetailTransaksiPenitipan::class, 'id_transaksi_penitipan', 'id_transaksi_penitipan');
+    }
 
+    // Accessor untuk foto_barang
     public function getFotoBarangAttribute($value)
     {
         if (empty($value)) {
             return [];
         }
 
-
         if (is_array($value)) {
             return $value;
         }
-
 
         if (is_string($value)) {
             $decoded = json_decode($value, true);
@@ -60,13 +63,12 @@ class transaksipenitipan extends Model
         return [];
     }
 
-    // Mutator untuk foto_barang - memastikan disimpan sebagai JSON
+    // Mutator untuk foto_barang
     public function setFotoBarangAttribute($value)
     {
         if (is_array($value)) {
             $this->attributes['foto_barang'] = json_encode($value);
         } elseif (is_string($value)) {
-            // Jika sudah JSON string, simpan langsung
             $this->attributes['foto_barang'] = $value;
         } else {
             $this->attributes['foto_barang'] = json_encode([]);
