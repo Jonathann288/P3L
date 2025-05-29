@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Pembeli;
 use App\Models\TransaksiPenjualan;
+use App\Models\DetailTransaksiPenitipan;
+use App\Models\Barang;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -73,11 +75,14 @@ class PembeliControllrs extends Controller
     public function showHistory()
     {
         try {
-            // Ambil data pembeli yang sedang login
             $pembeli = Auth::guard('pembeli')->user();
-            $transaksiPenjualan = $pembeli->transaksiPenjualan ?? collect();
-            // Return view dengan data pembeli
-            return view('pembeli.historyPembeli', compact('pembeli','transaksiPenjualan'));
+
+            // Ambil transaksi dan eager load detail + barang
+            $transaksiPenjualan = $pembeli->transaksiPenjualan()
+                ->with(['detailTransaksiPenjualan.barang'])
+                ->get();
+
+            return view('pembeli.historyPembeli', compact('pembeli', 'transaksiPenjualan'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }

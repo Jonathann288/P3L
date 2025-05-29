@@ -100,7 +100,7 @@
                         >
                             <img 
                                 class="absolute top-0 right-0 h-full w-full object-cover" 
-                                src="{{ $item->foto_barang }}" 
+                                src="{{ asset($item->foto_barang[0] ?? 'default.jpg') }}" 
                                 alt="{{ $item->nama_barang }}"
                             >
                         </a>

@@ -132,8 +132,11 @@
                                 href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}" <!-- Tambahkan route di
                                 sini -->
                                 >
-                                <img class="absolute top-0 right-0 h-full w-full object-cover" src="{{ $item->foto_barang }}"
-                                    alt="{{ $item->nama_barang }}">
+                                <img 
+                                    class="absolute top-0 right-0 h-full w-full object-cover" 
+                                    src="{{ asset($item->foto_barang[0] ?? 'default.jpg') }}" 
+                                    alt="{{ $item->nama_barang }}"
+                                >
                             </a>
 
                             <div class="flex flex-col flex-grow mt-2 px-2 pb-2">

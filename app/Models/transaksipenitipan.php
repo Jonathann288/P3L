@@ -36,4 +36,10 @@ class transaksipenitipan extends Model
     {
         return $this->belongsTo(Penitip::class, 'id_penitip');
     }
+
+    public function detailtransaksipenitipan()
+    {
+        return $this->hasMany(DetailTransaksiPenitipan::class, 'id_transaksi_penitipan');
+    }
+
 }

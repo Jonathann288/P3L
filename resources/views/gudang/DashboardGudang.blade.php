@@ -23,9 +23,15 @@
                     <a href="{{ route('gudang.DashboardGudang') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <span  class="text-2xl font-bold">{{ $pegawai->nama_pegawai }}</span>
                     </a>
-                   <a href="{{ route('gudang.DashboardTitipanBarang') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fa-solid fa-box-archive"></i>
-                        <span>Titipan Barang</span>
+                    <a href="{{ route('gudang.DashboardTitipanBarang') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-dolly mr-2"></i>
+                        <span>Tambah Titip Barang</span>
+                    </a>
+                     <a href="{{ route('gudang.DaftarBarang') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-boxes mr-2"></i>
+                        <span>Daftar Barang</span>
                     </a>
                 </div>
             </nav>

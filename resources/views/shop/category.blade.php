@@ -117,7 +117,11 @@
             @foreach ($barang as $item)
                 <div class="group flex w-full max-w-[450px] flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md p-3 h-full">
                     <a class="relative flex h-36 overflow-hidden rounded-xl" href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}">
-                        <img class="absolute top-0 right-0 h-full w-full object-cover" src="{{ asset($item->foto_barang) }}" alt="product image" />
+                                                <img 
+                            class="absolute top-0 right-0 h-full w-full object-cover" 
+                            src="{{ asset($item->foto_barang[0] ?? 'default.jpg') }}" 
+                            alt="{{ $item->nama_barang }}"
+                        >
                     </a>
                     <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
                         <a href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}">

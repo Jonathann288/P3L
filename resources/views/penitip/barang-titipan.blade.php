@@ -120,20 +120,26 @@
                     &times;
                 </button>
 
-                <div class="flex flex-col md:flex-row items-center md:items-start gap-4">
-                    <img id="modalFoto" src="" alt="Foto Barang" class="w-40 h-40 object-cover rounded-md shadow">
-                    <div class="flex-1">
+                <!-- Struktur kolom menjadi vertikal -->
+                <div class="flex flex-col items-center gap-4">
+                    <!-- Container foto -->
+                    <div id="modalFotoContainer" class="flex gap-2 overflow-x-auto max-w-full justify-center"></div>
+
+                    <!-- Info nama, harga, status di bawah foto -->
+                    <div class="text-center">
                         <h2 id="modalNama" class="text-xl font-semibold mb-2"></h2>
                         <p><strong>Harga:</strong> Rp <span id="modalHarga"></span></p>
                         <p><strong>Status:</strong> <span id="modalStatus" class="inline-block px-2 py-1 rounded text-white text-sm"></span></p>
                     </div>
                 </div>
+
                 <div class="mt-4">
                     <p class="font-semibold">Deskripsi:</p>
                     <p id="modalDeskripsi" class="whitespace-pre-line mt-1 text-gray-700"></p>
                 </div>
             </div>
         </div>
+
     </div>
 
     <div
@@ -154,37 +160,47 @@
                 harga: "{{ number_format($item->barang->harga_barang, 0, ',', '.') }}",
                 deskripsi: "{{ addslashes($item->barang->deskripsi_barang) }}",
                 status: "{{ $item->barang->status_barang }}",
-                foto: "{{ asset($item->barang->foto_barang) }}"
+                foto: {!! json_encode(array_map(fn($f) => asset($f), $item->barang->foto_barang)) !!}
+
             };
         @endforeach
         function showDetail(id) {
-            const barang = barangData[id];
+    const barang = barangData[id];
+    if (barang) {
+        const fotoContainer = document.getElementById('modalFotoContainer');
+        fotoContainer.innerHTML = ''; // reset dulu
 
-            if (barang) {
-                document.getElementById('modalNama').textContent = barang.nama_barang;
-                // document.getElementById('modalKategori').textContent = barang.kategori;
-                document.getElementById('modalHarga').textContent = barang.harga;
-                document.getElementById('modalDeskripsi').textContent = barang.deskripsi;
-                document.getElementById('modalFoto').src = barang.foto;
+        // Misal barang.foto adalah array foto, loop dan buat img element
+        barang.foto.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = barang.nama_barang;
+            img.className = 'w-40 h-40 object-cover rounded-md shadow';
+            fotoContainer.appendChild(img);
+        });
 
-                const statusElem = document.getElementById('modalStatus');
-                statusElem.textContent = barang.status;
+        document.getElementById('modalNama').textContent = barang.nama_barang;
+        document.getElementById('modalHarga').textContent = barang.harga;
+        document.getElementById('modalDeskripsi').textContent = barang.deskripsi;
 
-                // Tambahkan warna latar tergantung status
-                statusElem.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-blue-500','bg-red-500');
-                if (barang.status === 'Laku' || barang.status === 'di donasikan') {
-                    statusElem.classList.add('bg-green-500');
-                } else if (barang.status === 'Diproses') {
-                    statusElem.classList.add('bg-yellow-500');
-                } else if (barang.status === 'tidak laku'){
-                    statusElem.classList.add('bg-blue-500');
-                }else{
-                    statusElem.classList.add('bg-red-500');
-                }
+        const statusElem = document.getElementById('modalStatus');
+        statusElem.textContent = barang.status;
+        statusElem.className = 'inline-block px-2 py-1 rounded text-white text-sm';
 
-                document.getElementById('detailModal').classList.remove('hidden');
-            }
+        if (barang.status === 'Laku' || barang.status === 'di donasikan') {
+            statusElem.classList.add('bg-green-500');
+        } else if (barang.status === 'Diproses') {
+            statusElem.classList.add('bg-yellow-500');
+        } else if (barang.status === 'tidak laku') {
+            statusElem.classList.add('bg-blue-500');
+        } else {
+            statusElem.classList.add('bg-red-500');
         }
+
+        document.getElementById('detailModal').classList.remove('hidden');
+    }
+}
+
 
         function closeDetail() {
                 document.getElementById('detailModal').classList.add('hidden');

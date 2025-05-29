@@ -115,42 +115,33 @@
         <!-- Product Section -->
         <div class="flex flex-col md:flex-row gap-8 pt-8">
             <!-- Product Images Section -->
+            @php
+                $fotos = $barang->foto_barang;
+                $mainImage = $fotos[0] ?? null; // Ambil gambar pertama sebagai default
+            @endphp
+
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
                 <!-- Gambar Utama Besar -->
                 <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center mb-4">
-                    <img id="main-image" src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}" class="max-h-full max-w-full object-contain">
+                    @if ($mainImage)
+                        <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama" class="max-h-full max-w-full object-contain">
+                    @else
+                        <span class="text-gray-400">Tidak ada gambar</span>
+                    @endif
                 </div>
 
                 <!-- Thumbnail Gambar Kecil -->
                 <div class="flex gap-2 overflow-x-auto py-2">
-                    <!-- Thumbnail 1 (aktif) -->
-                    <div class="flex-shrink-0">
-                        <img src="{{ asset($barang->foto_barang) }}" alt="Thumbnail 1" 
-                            class="w-20 h-20 object-cover rounded border-2 border-blue-500 cursor-pointer"
-                            onclick="changeMainImage(this)">
-                    </div>
-                    
-                    <!-- Thumbnail 2 -->
-                    <div class="flex-shrink-0">
-                        <img src="{{ asset($barang->foto_barang2) }}" alt="Thumbnail 2" 
-                            class="w-20 h-20 object-cover rounded border border-gray-300 cursor-pointer hover:border-blue-300"
-                            onclick="changeMainImage(this)">
-                    </div>
-                    
-                    <!-- Thumbnail 3 -->
-                    <div class="flex-shrink-0">
-                        <img src="{{ asset($barang->foto_barang3) }}" alt="Thumbnail 3" 
-                            class="w-20 h-20 object-cover rounded border border-gray-300 cursor-pointer hover:border-blue-300"
-                            onclick="changeMainImage(this)">
-                    </div>
-                    <!-- Thumbnail 4 -->
-                    <div class="flex-shrink-0">
-                        <img src="{{ asset($barang->foto_barang4) }}" alt="Thumbnail 4" 
-                            class="w-20 h-20 object-cover rounded border border-gray-300 cursor-pointer hover:border-blue-300"
-                            onclick="changeMainImage(this)">
-                    </div>
+                    @foreach ($fotos as $index => $foto)
+                        <div class="flex-shrink-0">
+                            <img src="{{ asset($foto) }}" alt="Thumbnail {{ $index + 1 }}" 
+                                class="w-20 h-20 object-cover rounded border {{ $index === 0 ? 'border-blue-500' : 'border-gray-300 hover:border-blue-300' }} cursor-pointer"
+                                onclick="changeMainImage(this)">
+                        </div>
+                    @endforeach
                 </div>
             </div>
+
             <!-- Product Details -->
             <div class="w-full md:w-1/2">
                 <!-- Nama Barang -->
@@ -233,19 +224,19 @@
             quantityInput.value = value + 1;
         });
 
-        function changeMainImage(thumbnail) {
+        function changeMainImage(element) {
             const mainImage = document.getElementById('main-image');
-            mainImage.src = thumbnail.src;
-            
-            // Update border thumbnail yang aktif
-            document.querySelectorAll('.thumbnail-container img').forEach(img => {
-                img.classList.remove('border-2', 'border-blue-500');
-                img.classList.add('border', 'border-gray-300');
+            mainImage.src = element.src;
+
+            // Optional: atur border aktif
+            document.querySelectorAll('.flex-shrink-0 img').forEach(img => {
+                img.classList.remove('border-blue-500');
+                img.classList.add('border-gray-300');
             });
-            
-            thumbnail.classList.remove('border', 'border-gray-300');
-            thumbnail.classList.add('border-2', 'border-blue-500');
+            element.classList.remove('border-gray-300');
+            element.classList.add('border-blue-500');
         }
+
     </script>
 </body>
 </html>

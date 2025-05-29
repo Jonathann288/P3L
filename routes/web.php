@@ -186,7 +186,29 @@ Route::middleware(['checkjabatan:Customer Service'])->group(function () {
 Route::middleware(['checkjabatan:Gudang'])->group(function () {
     // COPY INI 
     Route::get('/DashboardGudang', [PegawaiControllers::class, 'showLoginGudang'])->name('gudang.DashboardGudang');
+    
     Route::get('/DashboardTitipanBarang', [TransaksiPenitipanControllers::class, 'showTitipanBarang'])->name('gudang.DashboardTitipanBarang');
+    Route::get('/SearchTitipan', [TransaksiPenitipanControllers::class, 'searchTitipan'])->name('gudang.SearchTitipan');
+    
+    // Tambah Transaksi Baru
+    Route::get('/CreateTitipanBarang', [TransaksiPenitipanControllers::class, 'createTitipanBarang'])->name('gudang.CreateTitipanBarang');
+    Route::post('/StoreTitipanBarang', [TransaksiPenitipanControllers::class, 'storeTitipanBarang'])->name('gudang.StoreTitipanBarang');
+    
+    // Update dan Delete
+    Route::put('/UpdateTitipanBarang/{id}', [TransaksiPenitipanControllers::class, 'updateTitipanBarang'])->name('gudang.UpdateTitipanBarang');
+    Route::delete('/DeleteTitipanBarang/{id}', [TransaksiPenitipanControllers::class, 'deleteTitipanBarang'])->name('gudang.DeleteTitipanBarang');
+    
+    // API Endpoints
+    Route::get('/api/getDurasiPenitipan', [TransaksiPenitipanControllers::class, 'getDurasiPenitipan'])->name('gudang.getDurasiPenitipan');
+
+    //Cetak nota skuy
+    Route::get('/cetak-nota/{id}', [TransaksiPenitipanControllers::class, 'cetakNota'])->name('gudang.CetakNota');
+
+      // Daftar Barang Management
+    Route::get('/DaftarBarang', [BarangControllers::class, 'showDaftarBarang'])->name('gudang.DaftarBarang');
+    Route::get('/DetailBarang/{id_barang}', [BarangControllers::class, 'showDetailBarangGudang'])->name('gudang.DetailBarang');
+    Route::get('/EditBarang/{id_barang}', [BarangControllers::class, 'showEditBarang'])->name('gudang.EditBarang');
+    Route::put('/UpdateBarang/{id_barang}', [BarangControllers::class, 'updateBarangGudang'])->name('gudang.UpdateBarang');
     // SAMPE INI 
 });
 Route::middleware(['checkjabatan:Kurir'])->group(function () {

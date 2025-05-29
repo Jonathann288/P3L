@@ -29,7 +29,7 @@ class Barang extends Model
         'rating_barang' => 'float',
         'berat_barang' => 'float',
         'garansi_barang' => 'datetime',
-        // 'foto_barang' => 'array'
+        'foto_barang' => 'array'
     ];
 
     public function kategoribarang()
@@ -57,9 +57,59 @@ class Barang extends Model
         return $this->hasOne(DetailTransaksiPenitipan::class, 'id_barang');
     }
 
-    // public function getFotoBarangAttribute($value)
-    // {
-    //     // Membersihkan string dan mengubah ke array
-    //     return $value ? array_map('trim', explode(',', $value)) : [];
-    // }
+// Accessor untuk foto_barang
+    public function getFotoBarangAttribute($value)
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
+    }
+
+    // Mutator untuk foto_barang
+    public function setFotoBarangAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['foto_barang'] = json_encode($value);
+        } elseif (is_string($value)) {
+            $this->attributes['foto_barang'] = $value;
+        } else {
+            $this->attributes['foto_barang'] = json_encode([]);
+        }
+    }
+
+        public function pegawai()
+    {
+        return $this->hasManyThrough(
+            Pegawai::class,
+            DetailTransaksiPenitipan::class,
+            'id_barang', 
+            'id_pegawai', 
+            'id_barang', 
+            'id_transaksi_penitipan' 
+        )->join('transaksipenitipan', 'detail_transaksi_penitipan.id_transaksi_penitipan', '=', 'transaksipenitipan.id_transaksi_penitipan');
+    }
+
+    // Alternatif: Relasi untuk mendapatkan transaksi penitipan
+    public function transaksiPenitipan()
+    {
+        return $this->hasManyThrough(
+            TransaksiPenitipan::class,
+            DetailTransaksiPenitipan::class,
+            'id_barang', 
+            'id_transaksi_penitipan', 
+            'id_barang',
+            'id_transaksi_penitipan' 
+        );
+    }
 }
