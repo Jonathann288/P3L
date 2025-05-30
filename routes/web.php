@@ -66,6 +66,9 @@ Route::middleware(['penitip'])->group(function () {
     Route::get('/Penitip/barang-titipan', [TransaksiPenitipanControllers::class, 'showBarangTitipan'])->name('penitip.barang-titipan');
     Route::get('/penitip/barang/search', [TransaksiPenitipanControllers::class, 'search'])->name('penitip.barang.search');
     Route::post('/barang-titipan/perpanjang/{id}', [TransaksiPenitipanControllers::class, 'perpanjangMasaPenitipan'])->name('penitip.barang.perpanjang');
+    // COPY INI 
+    Route::post('/penitipan/atur-pengambilan/{id}', [TransaksiPenitipanControllers::class, 'aturTanggalPengambilan'])->name('penitipan.aturPengambilan');
+    // SAMPE INI
 
 
     // logout
@@ -209,7 +212,11 @@ Route::middleware(['checkjabatan:Gudang'])->group(function () {
     Route::get('/DetailBarang/{id_barang}', [BarangControllers::class, 'showDetailBarangGudang'])->name('gudang.DetailBarang');
     Route::get('/EditBarang/{id_barang}', [BarangControllers::class, 'showEditBarang'])->name('gudang.EditBarang');
     Route::put('/UpdateBarang/{id_barang}', [BarangControllers::class, 'updateBarangGudang'])->name('gudang.UpdateBarang');
-    // SAMPE INI 
+    
+    Route::get('/Dashboard-catatan-pengambilan', [TransaksiPenitipanControllers::class, 'showCatatanPengambilanBarang'])->name('gudang.DasboardCatatanPengembalianBarang');
+    Route::post('/gudang/konfirmasi-pengambilan/{id}', [TransaksiPenitipanControllers::class, 'konfirmasiPengambilan'])->name('gudang.konfirmasiPengambilan');
+    // SAMPE INI
+
 });
 Route::middleware(['checkjabatan:Kurir'])->group(function () {
     Route::get('/DashboardKurir', function () {

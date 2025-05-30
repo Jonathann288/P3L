@@ -300,7 +300,7 @@ class BarangControllers extends Controller
 
     }
 
-    // IKI DHA PUNYA MU LEK PENGEN NGECEK
+    // COPY INI
      public function showDaftarBarang()
     {
         // Ambil semua barang dengan relasi kategori dan informasi pegawai

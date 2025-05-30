@@ -72,7 +72,7 @@
                             <h2 class="text-2xl font-bold mb-2">Request Barang</h2>
                             <p class="mb-4">Tidak menemukan yang Anda cari? Ajukan permintaan barang</p>
                             <button class="bg-orange-500 hover:bg-orange-600 text-white py-2 px-6 rounded-full font-bold"
-                                onclick="window.location.href='{{ route('loginOrganisasi') }}'">
+                                onclick="window.location.href='{{ route('requestBarang') }}'">
                                 Request Sekarang
                             </button>
                         </div>

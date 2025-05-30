@@ -1,5 +1,5 @@
 <?php
-// COPY SEMUA
+// COPY SEMUANYA 
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -86,10 +86,74 @@ class TransaksiPenitipanControllers extends Controller
         return redirect()->back()->with('success', 'Masa penitipan berhasil diperpanjang 30 hari.');
     } 
 
+    public function aturTanggalPengambilan($id)
+    {
+        $detail = detailtransaksipenitipan::with('transaksipenitipan', 'barang')->findOrFail($id);
+
+        $tanggalSekarang = Carbon::now();
+        $tanggalBatasPengambilan = $tanggalSekarang->copy()->addDays(7);
+
+        // Update tanggal pengambilan & batas pengambilan
+        $detail->transaksipenitipan->update([
+            'tanggal_pengambilan_barang' => $tanggalSekarang,
+            'tanggal_batas_pengambilan' => $tanggalBatasPengambilan,
+        ]);
+
+        // Update status barang
+        if ($detail->barang) {
+            $detail->barang->update([
+                'status_barang' => 'Barang akan diambil kembali',
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Tanggal pengambilan dan batas pengambilan berhasil diperbarui, status barang juga diperbarui.');
+    }
+
+    public function showCatatanPengambilanBarang()
+    {   
+        $pegawaiLogin = Auth::guard('pegawai')->user();
+        $detailBarang = DetailTransaksiPenitipan::with(['barang', 'transaksipenitipan.penitip'])
+            ->whereHas('transaksipenitipan', function ($query) {
+                $query->whereNotNull('tanggal_pengambilan_barang');
+            })
+            ->whereHas('barang', function ($query) {
+                $query->where('status_barang', 'Barang akan diambil kembali')
+                    ->orWhere('status_barang', 'Sudah diambil');
+            })
+            ->get();
+
+        return view('gudang.DasboardCatatanPengembalianBarang', compact('detailBarang','pegawaiLogin'));
+    }
+
+    public function konfirmasiPengambilan($id)
+    {
+        $detail = DetailTransaksiPenitipan::with(['barang', 'transaksipenitipan'])->findOrFail($id);
+
+        // Update status barang menjadi 'Sudah diambil'
+        if ($detail->barang) {
+            $detail->barang->update([
+                'status_barang' => 'Sudah diambil',
+            ]);
+        }
+
+        // Update tanggal akhir penitipan menjadi hari ini dan kosongkan batas pengambilan
+        if ($detail->transaksipenitipan) {
+            $detail->transaksipenitipan->update([
+                'tanggal_akhir_penitipan' => now(),
+                'tanggal_batas_pengambilan' => null,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Barang berhasil dikonfirmasi telah diambil.');
+    }
+
+
+
 
     // PUNYA MU SOKO KENE DHA LEK PENGEN NGECEK SENG ATAS DEWE PUNYA KU BEDA FUNGSI KARO PUNYA MU
     public function showTitipanBarang(Request $request)
-    {
+    {   
+        $pegawaiLogin = Auth::guard('pegawai')->user();
         $query = TransaksiPenitipan::with('penitip', 'pegawai');  // Gunakan nama class yang benar
 
         // Handle search
@@ -142,7 +206,7 @@ class TransaksiPenitipanControllers extends Controller
 
             
 
-        return view('gudang.DashboardTitipanBarang', compact('titipans', 'penitips', 'kategoris'));
+        return view('gudang.DashboardTitipanBarang', compact('titipans', 'penitips', 'kategoris','pegawaiLogin'));
     }
 
     public function storeTitipanBarang(Request $request)
@@ -229,8 +293,6 @@ class TransaksiPenitipanControllers extends Controller
             // Calculate dates
             $tanggalPenitipan = Carbon::parse($validated['tanggal_penitipan']);
             $tanggalAkhirPenitipan = $tanggalPenitipan->copy()->addDays(30);
-            $tanggalBatasPengambilan = $tanggalAkhirPenitipan->copy()->addDays(7);
-
 
             // Calculate garansi_barang
             $garansiBarang = null;
@@ -289,7 +351,7 @@ class TransaksiPenitipanControllers extends Controller
             $titipan->id_penitip = $validated['id_penitip'];
             $titipan->tanggal_penitipan = $tanggalPenitipan;
             $titipan->tanggal_akhir_penitipan = $tanggalAkhirPenitipan;
-            $titipan->tanggal_batas_pengambilan = $tanggalBatasPengambilan;
+            $titipan->tanggal_batas_pengambilan = null;
             $titipan->tanggal_pengambilan_barang = null;
 
             if (!$titipan->save()) {
@@ -441,14 +503,11 @@ class TransaksiPenitipanControllers extends Controller
     {
         $tanggalMasuk = Carbon::parse($tanggalMasukGudang);
         $tanggalAkhir = $tanggalMasuk->copy()->addDays(30);
-        $tanggalBatasPengambilan = $tanggalAkhir->copy()->addDays(7);
 
         return [
             'tanggal_penitipan' => $tanggalMasuk,
             'tanggal_akhir_penitipan' => $tanggalAkhir,
-            'tanggal_batas_pengambilan' => $tanggalBatasPengambilan,
             'durasi_hari' => 30,
-            'grace_period_hari' => 7
         ];
     }
 
@@ -471,7 +530,6 @@ class TransaksiPenitipanControllers extends Controller
                 'data' => [
                     'tanggal_penitipan' => $durasi['tanggal_penitipan']->format('Y-m-d'),
                     'tanggal_akhir_penitipan' => $durasi['tanggal_akhir_penitipan']->format('Y-m-d'),
-                    'tanggal_batas_pengambilan' => $durasi['tanggal_batas_pengambilan']->format('Y-m-d'),
                     'durasi_hari' => $durasi['durasi_hari'],
                     'grace_period_hari' => $durasi['grace_period_hari'],
                     'info' => "Masa penitipan: {$durasi['durasi_hari']} hari + {$durasi['grace_period_hari']} hari grace period"
@@ -603,8 +661,6 @@ class TransaksiPenitipanControllers extends Controller
             'email_penitip' => 'required|email|max:255',
             'tanggal_penitipan' => 'required|date',
             'tanggal_akhir_penitipan' => 'nullable|date',
-            'tanggal_batas_pengambilan' => 'nullable|date',
-            'tanggal_pengambilan_barang' => 'nullable|date',
             'foto_barang.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'auto_calculate' => 'nullable|boolean'
         ]);
@@ -635,15 +691,11 @@ class TransaksiPenitipanControllers extends Controller
 
                 $titipan->tanggal_penitipan = $durasi['tanggal_penitipan'];
                 $titipan->tanggal_akhir_penitipan = $durasi['tanggal_akhir_penitipan'];
-                $titipan->tanggal_batas_pengambilan = $durasi['tanggal_batas_pengambilan'];
             } else {
                 // Manual input
                 $titipan->tanggal_penitipan = $validated['tanggal_penitipan'] ?? $titipan->tanggal_penitipan;
                 $titipan->tanggal_akhir_penitipan = $validated['tanggal_akhir_penitipan'];
-                $titipan->tanggal_batas_pengambilan = $validated['tanggal_batas_pengambilan'];
             }
-
-            $titipan->tanggal_pengambilan_barang = $validated['tanggal_pengambilan_barang'];
 
             // Handle foto barang - SELALU hapus foto lama saat ada update
             if ($request->hasFile('foto_barang')) {

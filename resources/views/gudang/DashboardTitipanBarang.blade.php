@@ -1,3 +1,4 @@
+<!-- COPY SEMUA -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,7 +28,7 @@
                     <a href="{{ route('gudang.DashboardGudang') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-user-circle mr-2"></i>
-                        <span>Profile Saya</span>
+                        <span>{{ $pegawaiLogin->nama_pegawai }}</span>
                     </a>
                     <a href="{{ route('gudang.DashboardTitipanBarang') }}"
                         class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
@@ -38,6 +39,11 @@
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-boxes mr-2"></i>
                         <span>Daftar Barang</span>
+                    </a>
+                    <a href="{{ route('gudang.DasboardCatatanPengembalianBarang') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-boxes mr-2"></i>
+                        <span>Catatan Pengembalian Barang</span>
                     </a>
                 </div>
             </nav>
@@ -445,12 +451,6 @@
                                     </div>
 
                                     <div>
-                                        <strong class="text-gray-700">Tanggal Batas Pengambilan:</strong>
-                                        <span
-                                            class="text-gray-600">{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('d M Y') : '-' }}</span>
-                                    </div>
-
-                                    <div>
                                         <strong class="text-gray-700">Tanggal Pengambilan Barang:</strong>
                                         <span
                                             class="text-gray-600">{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('d M Y') : 'Belum diambil' }}</span>
@@ -590,13 +590,6 @@
                         <div>
                             <label class="block font-semibold mb-2 text-gray-700">Tanggal Akhir Penitipan</label>
                             <input type="date" name="tanggal_akhir_penitipan" x-model="formData.tanggal_akhir_penitipan"
-                                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-
-                        <div>
-                            <label class="block font-semibold mb-2 text-gray-700">Tanggal Batas Pengambilan</label>
-                            <input type="date" name="tanggal_batas_pengambilan"
-                                x-model="formData.tanggal_batas_pengambilan"
                                 class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
 

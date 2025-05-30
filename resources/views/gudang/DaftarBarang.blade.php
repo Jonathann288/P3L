@@ -1,3 +1,4 @@
+<!-- COPY SEMUA -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -36,6 +37,11 @@
                         class="flex items-center space-x-4 p-3 bg-gray-700 rounded-lg">
                         <i class="fas fa-boxes mr-2"></i>
                         <span>Daftar Barang</span>
+                    </a>
+                    <a href="{{ route('gudang.DasboardCatatanPengembalianBarang') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-boxes mr-2"></i>
+                        <span>Catatan Pengembalian Barang</span>
                     </a>
                 </div>
             </nav>
