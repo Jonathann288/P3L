@@ -1,3 +1,4 @@
+<!-- SEMUA COPY -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -113,11 +114,31 @@
     <main class="pb-12 px-4 max-w-6xl mx-auto">
         <!-- Product Section -->
         <div class="flex flex-col md:flex-row gap-8 pt-8">
-            <!-- Product Images -->
+            <!-- Product Images Section -->
+            @php
+                $fotos = $barang->foto_barang;
+                $mainImage = $fotos[0] ?? null; // Ambil gambar pertama sebagai default
+            @endphp
+
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
-                <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
-                    <!-- Ganti dengan gambar dari database -->
-                    <img src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}" class="max-h-full max-w-full">
+                <!-- Gambar Utama Besar -->
+                <div class="bg-white-100 rounded-lg h-96 flex items-center justify-center mb-4">
+                    @if ($mainImage)
+                        <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama" class="max-h-full max-w-full object-contain">
+                    @else
+                        <span class="text-gray-400">Tidak ada gambar</span>
+                    @endif
+                </div>
+
+                <!-- Thumbnail Gambar Kecil -->
+                <div class="flex gap-2 overflow-x-auto py-2">
+                    @foreach ($fotos as $index => $foto)
+                        <div class="flex-shrink-0">
+                            <img src="{{ asset($foto) }}" alt="Thumbnail {{ $index + 1 }}" 
+                                class="w-20 h-20 object-cover rounded border {{ $index === 0 ? 'border-blue-500' : 'border-gray-300 hover:border-blue-300' }} cursor-pointer"
+                                onclick="changeMainImage(this)">
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -164,6 +185,14 @@
                     <p class="text-gray-800 font-medium">
                         Berat Barang: <span class="font-normal">{{ $barang->berat_barang }} gram</span>
                     </p>
+                    @if($isElektronik)
+                        <p class="text-gray-800 font-medium mt-2">
+                            Garansi Hingga: 
+                            <span class="font-normal">
+                                {{ \Carbon\Carbon::parse($barang->tanggal_garansi)->translatedFormat('d F Y') }}
+                            </span>
+                        </p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -194,6 +223,20 @@
             let value = parseInt(quantityInput.value);
             quantityInput.value = value + 1;
         });
+
+        function changeMainImage(element) {
+            const mainImage = document.getElementById('main-image');
+            mainImage.src = element.src;
+
+            // Optional: atur border aktif
+            document.querySelectorAll('.flex-shrink-0 img').forEach(img => {
+                img.classList.remove('border-blue-500');
+                img.classList.add('border-gray-300');
+            });
+            element.classList.remove('border-gray-300');
+            element.classList.add('border-blue-500');
+        }
+
     </script>
 </body>
 </html>

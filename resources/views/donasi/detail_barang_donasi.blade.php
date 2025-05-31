@@ -1,4 +1,5 @@
-<!-- <!DOCTYPE html>
+<!-- SEMUA COPY -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -118,61 +119,57 @@
 
 
     <main class="pb-12 px-4 max-w-6xl mx-auto">
-
         <div class="flex flex-col md:flex-row gap-8 pt-8">
+             <!-- Product Images Section -->
+            @php
+                $fotos = $barang->foto_barang;
+                $mainImage = $fotos[0] ?? null; // Ambil gambar pertama sebagai default
+            @endphp
 
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
-
-                <div class="bg-gray-100 rounded-lg h-96 mb-4 flex items-center justify-center overflow-hidden relative">
-                    @if(count($barang->foto_barang) > 0)
-
-                        <img src="{{ asset($barang->foto_barang[0]) }}" 
-                             alt="{{ $barang->nama_barang }}" 
-                             class="w-full h-full object-cover transition-opacity duration-300" 
-                             id="mainImage">
-                        
-
-                        <div id="imageFallback" class="absolute inset-0 flex items-center justify-center bg-gray-200 hidden">
-                            <span class="text-gray-500">Gambar tidak tersedia</span>
-                        </div>
+                <!-- Gambar Utama Besar -->
+                <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center mb-4">
+                    @if ($mainImage)
+                        <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama" class="max-h-full max-w-full object-contain">
                     @else
-                        <div class="text-gray-500">Tidak ada gambar tersedia</div>
+                        <span class="text-gray-400">Tidak ada gambar</span>
                     @endif
                 </div>
 
-
-                @if(count($barang->foto_barang) > 1)
-                    <div class="flex gap-2 overflow-x-auto py-2 thumbnail-container">
-                        @for($i = 0; $i < count($barang->foto_barang); $i++)
-                            @php $gambar = $barang->foto_barang[$i]; @endphp
-                            <div class="flex-shrink-0 w-20 h-20 cursor-pointer relative group">
-                                @if(isset($gambar) && $gambar !== null && file_exists(public_path($gambar)))
-                                    <img 
-                                        src="{{ asset($gambar) }}" 
-                                        alt="Thumbnail {{ $i + 1 }}"
-                                        class="w-full h-full object-cover border-2 rounded transition-all duration-200
-                                                {{ $i === 0 ? 'border-blue-500' : 'border-transparent hover:border-blue-300' }}"
-                                        onclick="changeMainImage(this)"
-                                    >
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
-                                        Gambar tidak tersedia
-                                    </div>
-                                @endif
-                                <div class="absolute inset-0 bg-white bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded"></div>
-                            </div>
-                        @endfor
-                    </div>
-                @endif
+                <!-- Thumbnail Gambar Kecil -->
+                <div class="flex gap-2 overflow-x-auto py-2">
+                    @foreach ($fotos as $index => $foto)
+                        <div class="flex-shrink-0">
+                            <img src="{{ asset($foto) }}" alt="Thumbnail {{ $index + 1 }}" 
+                                class="w-20 h-20 object-cover rounded border {{ $index === 0 ? 'border-blue-500' : 'border-gray-300 hover:border-blue-300' }} cursor-pointer"
+                                onclick="changeMainImage(this)">
+                        </div>
+                    @endforeach
+                </div>
             </div>
 
             <div class="w-full md:w-1/2">
 
                 <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ $barang->nama_barang }}</h1>
 
-                <div class="mb-6">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Deskripsi Barang</h2>
-                    <p class="text-gray-600">{{ $barang->deskripsi_barang }}</p>
+                <div class="mt-6 border rounded-lg p-4 bg-gray-50 shadow-sm">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-3">Deskripsi Produk</h2>
+
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
+                        {{ $barang->deskripsi_barang }}
+                    </p>
+
+                    <p class="text-gray-800 font-medium">
+                        Berat Barang: <span class="font-normal">{{ $barang->berat_barang }} gram</span>
+                    </p>
+                    @if($isElektronik)
+                        <p class="text-gray-800 font-medium mt-2">
+                            Garansi Hingga: 
+                            <span class="font-normal">
+                                {{ \Carbon\Carbon::parse($barang->tanggal_garansi)->translatedFormat('d F Y') }}
+                            </span>
+                        </p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -222,6 +219,18 @@
             this.classList.add('hidden');
             document.getElementById('imageFallback').classList.remove('hidden');
         });
+        function changeMainImage(element) {
+            const mainImage = document.getElementById('main-image');
+            mainImage.src = element.src;
+
+            // Optional: atur border aktif
+            document.querySelectorAll('.flex-shrink-0 img').forEach(img => {
+                img.classList.remove('border-blue-500');
+                img.classList.add('border-gray-300');
+            });
+            element.classList.remove('border-gray-300');
+            element.classList.add('border-blue-500');
+        }
     </script>
 </body>
-</html> -->
+</html>

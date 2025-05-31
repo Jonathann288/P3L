@@ -101,40 +101,21 @@
 
         <div class="bg-blue-600 p-4">
             <div class="container mx-auto flex items-center justify-between flex-wrap">
-                <div class="flex items-center space-x-2">
+                <a href="{{ route('pembeli.Shop-Pembeli') }}" class="flex items-center space-x-2">
                     <img src="{{ asset('images/logo6.png') }}" alt="ReUseMart" class="h-12">
-                </div>
+                </a>
 
                 <div class="hidden md:block flex-grow mx-4">
                     <input type="text" placeholder="Mau cari apa nih kamu?"
                         class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none">
                 </div>
 
-                <!-- Cart Icon -->
-                <a href="{{ route('pembeli.cart') }}" class="relative mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-7 h-7 text-white hover:text-gray-200">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 3h1.386a1.5 1.5 0 011.45 1.114l.637 2.548m0 0h12.522a1.125 1.125 0 011.087 1.47l-1.509 5.276a2.25 2.25 0 01-2.163 1.629H7.125a2.25 2.25 0 01-2.163-1.629L3.453 6.662m0 0L2.25 3m6.375 14.25a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                    </svg>
-                    @php
-                        $cartCount = session('cart') ? count(session('cart')) : 0;
-                    @endphp
-                    @if ($cartCount > 0)
-                        <span
-                            class="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                            {{ $cartCount }}
-                        </span>
-                    @endif
-                </a>
-
-
                 <!-- Cek Autentikasi -->
                 @if(Auth::guard('pembeli')->check())
                     <div class="relative">
                         <button id="dropdownToggle"
                             class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md hover:bg-blue-800 flex items-center space-x-2">
-                            <img src="{{asset(Auth::guard('pembeli')->user()->foto_pembeli) }}" alt="profile"
+                            <img src="{{ asset(Auth::guard('pembeli')->user()->foto_pembeli) }}" alt="profile"
                                 class="w-8 h-8 rounded-full object-cover">
                             <span>{{ Auth::guard('pembeli')->user()->nama_pembeli }}</span>
                         </button>
@@ -178,15 +159,34 @@
     <main class="pb-12 px-4 max-w-6xl mx-auto">
         <!-- Product Section -->
         <div class="flex flex-col md:flex-row gap-8 pt-8">
-            <!-- Product Images -->
+            <!-- Product Images Section -->
+            @php
+                $fotos = $barang->foto_barang;
+                $mainImage = $fotos[0] ?? null; // Ambil gambar pertama sebagai default
+            @endphp
+
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
-                <div class="bg-white-100 rounded-lg h-96 flex items-center justify-center">
-                    <!-- Ganti dengan gambar dari database -->
-                    <img src="{{ asset($barang->foto_barang) }}" alt="{{ $barang->nama_barang }}"
-                        class="max-h-full max-w-full" />
+                <!-- Gambar Utama Besar -->
+                <div class="bg-white-100 rounded-lg h-96 flex items-center justify-center mb-4">
+                    @if ($mainImage)
+                        <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama"
+                            class="max-h-full max-w-full object-contain">
+                    @else
+                        <span class="text-gray-400">Tidak ada gambar</span>
+                    @endif
+                </div>
+
+                <!-- Thumbnail Gambar Kecil -->
+                <div class="flex gap-2 overflow-x-auto py-2">
+                    @foreach ($fotos as $index => $foto)
+                        <div class="flex-shrink-0">
+                            <img src="{{ asset($foto) }}" alt="Thumbnail {{ $index + 1 }}"
+                                class="w-20 h-20 object-cover rounded border {{ $index === 0 ? 'border-blue-500' : 'border-gray-300 hover:border-blue-300' }} cursor-pointer"
+                                onclick="changeMainImage(this)">
+                        </div>
+                    @endforeach
                 </div>
             </div>
-
             <!-- Product Details -->
             <div class="w-full md:w-1/2">
                 <!-- Nama Barang -->
@@ -220,6 +220,7 @@
                 </div>
 
                 <!-- Kotak Deskripsi Produk -->
+                <!-- INI JUGA COPY -->
                 <div class="mt-6 border rounded-lg p-4 bg-gray-50 shadow-sm">
                     <h2 class="text-lg font-semibold text-gray-900 mb-3">Deskripsi Produk</h2>
 
@@ -230,37 +231,16 @@
                     <p class="text-gray-800 font-medium">
                         Berat Barang: <span class="font-normal">{{ $barang->berat_barang }} gram</span>
                     </p>
+                    @if($isElektronik)
+                        <p class="text-gray-800 font-medium mt-2">
+                            Garansi Hingga:
+                            <span class="font-normal">
+                                {{ \Carbon\Carbon::parse($barang->tanggal_garansi)->translatedFormat('d F Y') }}
+                            </span>
+                        </p>
+                    @endif
                 </div>
-
-
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                @if (session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                @if(Auth::guard('pembeli')->check())
-                    <form action="{{ route('keranjang.tambah', ['id' => $barang->id_barang]) }}" method="POST" class="mt-6">
-                        @csrf
-                        <input type="hidden" name="id_barang" value="{{ $barang->id_barang }}">
-                        <div class="flex items-center gap-4">
-                            <button type="submit"
-                                class="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
-                                <i class="fas fa-cart-plus mr-1"></i> Tambah ke Keranjang
-                            </button>
-                        </div>
-                    </form>
-                @else
-                    <p class="mt-6 text-red-500 font-medium">Silakan <a href="{{ route('loginPembeli') }}"
-                            class="underline text-blue-600 hover:text-blue-800">login</a> untuk menambahkan ke keranjang.
-                    </p>
-                @endif
+                <!--SAMPE INI -->
             </div>
         </div>
 
@@ -434,6 +414,19 @@
                 ratingContainer.appendChild(star);
             }
         });
+        function changeMainImage(thumbnail) {
+            const mainImage = document.getElementById('main-image');
+            mainImage.src = thumbnail.src;
+
+            // Update border thumbnail yang aktif
+            document.querySelectorAll('.thumbnail-container img').forEach(img => {
+                img.classList.remove('border-2', 'border-blue-500');
+                img.classList.add('border', 'border-gray-300');
+            });
+
+            thumbnail.classList.remove('border', 'border-gray-300');
+            thumbnail.classList.add('border-2', 'border-blue-500');
+        }
     </script>
 </body>
 

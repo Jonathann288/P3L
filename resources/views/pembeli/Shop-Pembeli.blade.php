@@ -35,7 +35,7 @@
                             $cartCount = session('cart') ? count(session('cart')) : 0;
                         @endphp
                         @if ($cartCount > 0)
-                            <span
+                            <span id="cart-count"
                                 class="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                                 {{ $cartCount }}
                             </span>
@@ -132,8 +132,8 @@
                                 href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}" <!-- Tambahkan route di
                                 sini -->
                                 >
-                                <img class="absolute top-0 right-0 h-full w-full object-cover" src="{{ $item->foto_barang }}"
-                                    alt="{{ $item->nama_barang }}">
+                                <img class="absolute top-0 right-0 h-full w-full object-cover"
+                                    src="{{ asset($item->foto_barang[0] ?? 'default.jpg') }}" alt="{{ $item->nama_barang }}">
                             </a>
 
                             <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
@@ -150,20 +150,22 @@
                                     </p>
                                 </div>
 
-                                <form action="{{ route('keranjang.tambah', $item->id_barang) }}" method="POST"
-                                    class="mt-auto flex flex-col space-y-2">
-                                    @csrf
+                                <div class="mt-auto flex flex-col space-y-2">
+                                    <!-- Tombol Add to Cart -->
+                                    <form action="{{ route('keranjang.tambah', $item->id_barang) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                            class="w-full text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-3 text-center min-h-[44px]">
+                                            Add to cart
+                                        </button>
+                                    </form>
 
-                                    <button type="submit"
-                                        class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-3 text-center min-h-[44px]">
-                                        Add to cart
-                                    </button>
-
-                                    <a href="{{ route('pembeli.checkOutPembeli', $item->id_barang) }}"
-                                        class="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-semibold rounded-lg text-sm px-5 py-3 text-center min-h-[44px]">
+                                    <!-- Tombol Beli (dengan JavaScript untuk menambah ke cart dulu) -->
+                                    <button onclick="buyNow({{ $item->id_barang }})"
+                                        class="w-full text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-semibold rounded-lg text-sm px-5 py-3 text-center min-h-[44px]">
                                         Beli
-                                    </a>
-                                </form>
+                                    </button>
+                                </div>
 
                             </div>
 
@@ -174,6 +176,12 @@
         </div>
 
         <div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white z-50"></div>
+
+        <!-- Form tersembunyi untuk add to cart -->
+        <form id="hidden-cart-form" action="" method="POST" style="display: none;">
+            @csrf
+        </form>
+
         <!-- Script Toggle Menu -->
         <script>
             document.getElementById("menu-toggle").addEventListener("click", function () {
@@ -196,6 +204,7 @@
                     menu.classList.add('hidden');
                 }
             });
+
             // Fungsi untuk menampilkan Toast
             function showToast(message, type = 'success') {
                 const toast = document.getElementById('toast');
@@ -224,16 +233,90 @@
                 }, 3000);
             }
 
+            // Fungsi untuk membeli item (tambah ke cart dulu, lalu redirect ke checkout)
+            function buyNow(itemId) {
+                // Siapkan form tersembunyi
+                const form = document.getElementById('hidden-cart-form');
+                form.action = `/keranjang/tambah/${itemId}`;
+
+                // Submit form menggunakan fetch untuk menambah ke cart
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                            document.querySelector('input[name="_token"]').value,
+                        'Accept': 'application/json',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update cart count jika ada
+                            updateCartCount();
+
+                            // Show success message
+                            showToast('Item berhasil ditambahkan ke keranjang', 'success');
+
+                            // Redirect ke halaman checkout setelah delay singkat
+                            setTimeout(() => {
+                                window.location.href = "{{ route('pembeli.checkOutPembeli') }}";
+                            }, 1000);
+                        } else {
+                            showToast(data.message || 'Gagal menambahkan ke keranjang', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Terjadi kesalahan saat menambahkan item', 'error');
+                    });
+            }
+
+            // Fungsi untuk update cart count
+            function updateCartCount() {
+                fetch('/cart/count', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                            document.querySelector('input[name="_token"]').value,
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const cartCountElement = document.getElementById('cart-count');
+                        if (data.count > 0) {
+                            if (cartCountElement) {
+                                cartCountElement.textContent = data.count;
+                            } else {
+                                // Buat elemen cart count baru jika belum ada
+                                const cartIcon = document.querySelector('a[href*="cart"]');
+                                if (cartIcon) {
+                                    const newCountElement = document.createElement('span');
+                                    newCountElement.id = 'cart-count';
+                                    newCountElement.className = 'absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full';
+                                    newCountElement.textContent = data.count;
+                                    cartIcon.appendChild(newCountElement);
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating cart count:', error);
+                    });
+            }
+
             // Saat halaman dimuat, cek jika ada session flash
             document.addEventListener('DOMContentLoaded', function () {
                 @if (session('success'))
                     showToast('{{ session('success') }}', 'success');
                 @endif
 
-
                 @if (session('error'))
                     showToast('{{ session('error') }}', 'error');
                 @endif
-                                                                                    });
+                });
         </script>
 @endsection

@@ -8,13 +8,15 @@
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-    <script src="https://cdn.tailwindcss.com"></script> 
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body class="font-sans bg-gray-100 text-gray-800 grid grid-cols-1 md:grid-cols-[250px_1fr] min-h-screen">
-    
+
     <!-- Sidebar Navigation -->
     <div class="bg-gray-800 text-white p-6 flex flex-col justify-between">
         <div>
@@ -22,38 +24,40 @@
             <nav>
                 <div class="space-y-4">
                     <a href="{{ route('CustomerService.DashboardCS') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-600 rounded-lg">
                         <i class="text-2xl font-bold"></i> {{$pegawaiLogin->nama_pegawai}}
                     </a>
 
                     <a href="{{ route('CustomerService.DashboardPenitip') }}"
                         class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                        <i class="fas fa-user mr-2"></i> <span>Penitip</span> 
+                        <i class="fas fa-user mr-2"></i> <span>Penitip</span>
+                    </a>
+
+
+                    <a href="{{ route('CustomerService.DashboardVerifikasiItem') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-600 rounded-lg">
+                        <i class="fa-solid fa-check-to-slot"></i> <span>Verifikasi</span>
                     </a>
                 </div>
             </nav>
         </div>
-    </div>    
+    </div>
 
     <div class="bg-gray-100 p-10">
         <div class="container mx-auto">
             <div class="flex justify-between items-center mb-5">
                 <div class="flex items-center space-x-4">
                     <h1 class="text-2xl font-bold">Data Penitip</h1>
-                    <form action="{{ route('CustomerService.penitip.search') }}" method="GET" class="flex items-center space-x-2">
-                        <input
-                            type="text"
-                            name="keyword"
-                            placeholder="Cari Penitip..."
-                            class="p-2 border rounded-lg"
-                            value="{{ request('keyword') }}"
-                        />
+                    <form action="{{ route('CustomerService.penitip.search') }}" method="GET"
+                        class="flex items-center space-x-2">
+                        <input type="text" name="keyword" placeholder="Cari Penitip..." class="p-2 border rounded-lg"
+                            value="{{ request('keyword') }}" />
                         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
                             Cari
                         </button>
                     </form>
                 </div>
-                
+
                 <button onclick="openModalTambah()" class="bg-blue-500 text-white px-4 py-2 rounded-lg">
                     Tambah Penitip
                 </button>
@@ -103,12 +107,16 @@
                     <input type="text" name="nama_penitip" placeholder="Nama Penitip" class="w-full p-2 mb-4 border">
                     <input type="text" name="nomor_ktp" placeholder="Nomor KTP" class="w-full p-2 mb-4 border">
                     <input type="date" name="tanggal_lahir" class="w-full p-2 mb-4 border">
-                    <input type="text" name="nomor_telepon_penitip" placeholder="Nomor Telepon" class="w-full p-2 mb-4 border">
+                    <input type="text" name="nomor_telepon_penitip" placeholder="Nomor Telepon"
+                        class="w-full p-2 mb-4 border">
                     <input type="email" name="email_penitip" placeholder="Email Penitip" class="w-full p-2 mb-4 border">
-                    <input type="password" name="password_penitip" placeholder="Password Penitip" class="w-full p-2 mb-4 border">
+                    <input type="password" name="password_penitip" placeholder="Password Penitip"
+                        class="w-full p-2 mb-4 border">
                     <div class="flex justify-end space-x-2">
-                        <button type="button" onclick="closeModalTambah()" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
-                        <button type="submit" onclick="return confirmCreate()" class="bg-green-600 text-white px-4 py-2 rounded">Simpan</button>
+                        <button type="button" onclick="closeModalTambah()"
+                            class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+                        <button type="submit" onclick="return confirmCreate()"
+                            class="bg-green-600 text-white px-4 py-2 rounded">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -125,15 +133,17 @@
                     <input type="date" id="editTanggalLahir" name="tanggal_lahir" class="w-full p-2 mb-4 border">
                     <input type="text" id="editTelepon" name="nomor_telepon_penitip" class="w-full p-2 mb-4 border">
                     <div class="flex justify-end space-x-2">
-                        <button type="button" onclick="closeModalEdit()" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
-                        <button type="submit" onclick="return confirmUpdate()" class="bg-green-600 text-white px-4 py-2 rounded">Simpan Perubahan</button>
+                        <button type="button" onclick="closeModalEdit()"
+                            class="bg-gray-500 text-white px-4 py-2 rounded">Batal</button>
+                        <button type="submit" onclick="return confirmUpdate()"
+                            class="bg-green-600 text-white px-4 py-2 rounded">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-        <!-- Modal Konfirmasi Hapus -->
+    <!-- Modal Konfirmasi Hapus -->
     <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
         <div class="bg-white p-8 rounded-lg w-[400px]">
             <h2 class="text-2xl font-bold mb-6 text-center">Konfirmasi Hapus</h2>
@@ -156,12 +166,12 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white"></div>
-    
+
     <!-- Script Modal -->
     <script>
-         function confirmCreate() {
+        function confirmCreate() {
             event.preventDefault(); // Mencegah form submit langsung
-            
+
             Swal.fire({
                 title: 'Yakin ingin menyimpan data?',
                 text: "Data penitip akan disimpan ke database.",
@@ -183,7 +193,7 @@
 
         function confirmUpdate() {
             event.preventDefault(); // Mencegah form submit langsung
-            
+
             Swal.fire({
                 title: 'Yakin ingin menyimpan perubahan?',
                 text: "Data penitip akan di-update di database.",
@@ -210,9 +220,9 @@
         @if (session('error'))
             showToast('{{ session('error') }}', 'error');
         @endif
-        function openModalTambah() {
-            document.getElementById('modalTambah').classList.remove('hidden');
-        }
+            function openModalTambah() {
+                document.getElementById('modalTambah').classList.remove('hidden');
+            }
 
         function closeModalTambah() {
             document.getElementById('modalTambah').classList.add('hidden');
@@ -239,7 +249,7 @@
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
         }
-         function showToast(message, type = 'success') {
+        function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
 

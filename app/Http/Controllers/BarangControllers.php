@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\transaksipenitipan;
+use App\Models\DetailTransaksiPenitipan;
 use App\Models\KategoriBarang;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -85,8 +87,9 @@ class BarangControllers extends Controller
         ];
 
         // Kirim data ke view
-        return view('donasi', compact('kategoris', 'barang', 'images'));
+        return view('organisasi.donasi-organisasi', compact('kategoris', 'barang', 'images'));
     }
+    // sampe ini
 
     public function showShopPembeli()
     {
@@ -139,14 +142,15 @@ class BarangControllers extends Controller
         // Kirim data ke view
         return view('penitip.Shop-Penitip', compact('kategoris', 'barang', 'images'));
     }
-
+    
     public function showDetail($id_barang)
     {
         $barang = Barang::findOrFail($id_barang);
         if ($barang->status_barang !== 'tidak laku') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
-        return view('shop.detail_barang', compact('barang'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('shop.detail_barang', compact('barang','isElektronik'));
     }
 
     public function showDetailDonasi($id_barang)
@@ -156,8 +160,8 @@ class BarangControllers extends Controller
         if ($barang->status_barang !== 'di donasikan') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
-        
-        return view('donasi.detail_barang_donasi', compact('barang'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('donasi.detail_barang_donasi', compact('barang','isElektronik'));
     }
 
     public function showDetailDonasiOranisasi($id_barang)
@@ -166,7 +170,8 @@ class BarangControllers extends Controller
         if ($barang->status_barang !== 'di donasikan') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
-        return view('oranisasi.detail_barang_donasi', compact('barang'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('organisasi.detail_barang_donasi', compact('barang','isElektronik'));
     }
 
     public function showDetailPembeli($id_barang)
@@ -182,8 +187,8 @@ class BarangControllers extends Controller
 
         // Load diskusi with proper sorting (newest first)
         $barang->setRelation('diskusi', $barang->diskusi->sortByDesc('tanggal_diskusi'));
-
-        return view('pembeli.detail_barangPembeli', compact('barang','pembeli'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('pembeli.detail_barangPembeli', compact('barang','pembeli','isElektronik'));
     }
 
     public function showDetailPenitip($id_barang)
@@ -192,7 +197,8 @@ class BarangControllers extends Controller
         if ($barang->status_barang !== 'tidak laku') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
-        return view('penitip.detail_barangPenitip', compact('barang'));
+        $isElektronik = $barang->id_kategori == 1;
+        return view('penitip.detail_barangPenitip', compact('barang','isElektronik'));
     }
 
     // Simpan barang baru
@@ -292,6 +298,90 @@ class BarangControllers extends Controller
             return view('shop', compact('barang','kategoris','images'));
         }
 
+    }
+
+    // COPY INI
+     public function showDaftarBarang()
+    {
+        // Ambil semua barang dengan relasi kategori dan informasi pegawai
+        $barang = Barang::with(['kategoribarang'])->get();
+
+        // Untuk setiap barang, cari pegawai yang bertanggung jawab melalui transaksi penitipan
+        $barang = $barang->map(function ($item) {
+            // Cari transaksi penitipan terbaru untuk barang ini
+            $transaksi = transaksipenitipan::whereHas('DetailTransaksiPenitipan', function ($query) use ($item) {
+                $query->where('id_barang', $item->id_barang);
+            })->with('pegawai')->latest('tanggal_penitipan')->first();
+
+            $item->pegawai_penanggungjawab = $transaksi ? $transaksi->pegawai : null;
+
+            return $item;
+        });
+
+        $pegawai = auth()->user()->pegawai ?? null;
+
+
+        // Ambil semua kategori untuk modal edit
+        $kategoris = \App\Models\KategoriBarang::all();
+
+        return view('gudang.DaftarBarang', compact('barang', 'pegawai', 'kategoris'));
+    }
+
+    // Tampilkan detail barang untuk gudang
+    public function showDetailBarangGudang($id_barang)
+    {
+        $barang = Barang::with(['kategoribarang'])->findOrFail($id_barang);
+
+        $pegawai = auth()->user()->pegawai ?? null;
+        if (!$pegawai) {
+            $pegawai = (object) [
+                'nama_pegawai' => 'Admin Gudang',
+                'email_pegawai' => 'admin@gudang.com',
+                'nomor_telepon_pegawai' => '08123456789'
+            ];
+        }
+
+        return view('gudang.DetailBarang', compact('barang', 'pegawai'));
+    }
+
+    // Tampilkan form edit barang
+    public function showEditBarang($id_barang)
+    {
+        $barang = Barang::findOrFail($id_barang);
+        $kategoris = KategoriBarang::all();
+
+        $pegawai = auth()->user()->pegawai ?? null;
+        if (!$pegawai) {
+            $pegawai = (object) [
+                'nama_pegawai' => 'Admin Gudang',
+                'email_pegawai' => 'admin@gudang.com',
+                'nomor_telepon_pegawai' => '08123456789'
+            ];
+        }
+
+        return view('gudang.EditBarang', compact('barang', 'kategoris', 'pegawai'));
+    }
+
+    // Update barang dari form gudang
+    public function updateBarangGudang(Request $request, $id_barang)
+    {
+        $request->validate([
+            'id_kategori' => 'required|integer',
+            'nama_barang' => 'required|string|max:255',
+            'harga_barang' => 'required|numeric',
+            'deskripsi_barang' => 'nullable|string',
+            'foto_barang' => 'nullable|string',
+            'status_barang' => 'nullable|string',
+            'rating_barang' => 'nullable|numeric|between:0,5',
+            'berat_barang' => 'nullable|numeric',
+            'garansi_barang' => 'nullable|date',
+            'masa_penitipan' => 'nullable|integer',
+        ]);
+
+        $barang = Barang::findOrFail($id_barang);
+        $barang->update($request->all());
+
+        return redirect()->route('gudang.DaftarBarang')->with('success', 'Barang berhasil diperbarui');
     }
 
 }

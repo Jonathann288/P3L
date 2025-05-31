@@ -1,5 +1,5 @@
 <?php
-
+// COPY SEMUA
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;

@@ -34,7 +34,7 @@ class lupaPasswordOrganisasiControllers extends Controller
             "created_at" => now(),
             "updated_at" => now(),
         ]);
-        
+
         // Kirim email dengan token
         Mail::send("LupaPasswordOrg.PesanLupaPasswordOrganisasi", ["token" => $token], function ($message) use ($request) {
             $message->to($request->email_organisasi);
@@ -71,9 +71,6 @@ class lupaPasswordOrganisasiControllers extends Controller
             return back()->withErrors(['email' => 'Organisasi tidak ditemukan']);
         }
 
-        // Update password organisasi
-        $organisasi->password = Hash::make($request->password_organisasi);
-        $organisasi->save();
 
         // Hapus token setelah berhasil reset
         DB::table('password_forgot')->where('token', $request->token)->delete();

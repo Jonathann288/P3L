@@ -1,264 +1,144 @@
 @extends('layouts.loading')
 
+@section('title', 'Keranjang Belanja')
+
 @section('content')
-    <div class="bg-blue-600 shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <a href="{{ route('pembeli.Shop-Pembeli') }}" class="flex items-center text-white font-bold text-xl">
-                    <img src="{{ asset('images/logo6.png') }}" alt="ReuseMart Logo" class="h-16 w-19 mr-2">
-                    <span> | Keranjang Belanja</span>
-                </a>
-            </div>
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
 
-            <div class="hidden sm:flex items-center space-x-4">
-                <form action="{{ route('pembeli.Shop-Pembeli') }}" method="GET" class="flex">
-                    <input type="text" name="search" placeholder="Cari barang..."
-                        class="px-3 py-1.5 w-full max-w-xs rounded-l-lg border border-white text-sm focus:outline-none focus:ring-2 focus:ring-white bg-white text-gray-800">
-                    <button type="submit"
-                        class="px-4 py-1.5 bg-white text-blue-600 border border-white rounded-r-lg font-semibold hover:bg-blue-200 transition whitespace-nowrap">
-                        Cari
-                    </button>
-                </form>
-
-                <a href="{{ route('pembeli.profilPembeli') }}"
-                    class="flex items-center space-x-2 text-white hover:text-blue-200 transition">
-                    <img src="{{ asset($pembeli->foto_pembeli) }}" alt="profile" class="w-8 h-8 rounded-full object-cover">
-                    <span>{{ auth('pembeli')->user()->nama_pembeli ?? 'Nama Pembeli' }}</span>
+        <div class="bg-blue-600 text-white px-6 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Back Button -->
+                <a href="{{ route('pembeli.Shop-Pembeli') }}" class="inline-flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 -ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z" clip-rule="evenodd" />
+                    </svg>
+                    Lanjut Belanja
                 </a>
 
+                <div>
+                    <h1 class="text-3xl font-bold text-white-900">Keranjang Belanja</h1>
+                    <p class="text-white-600 mt-1">Selamat berbelanja, <span class="font-semibold text-white-600">{{ $pembeli->nama_pembeli ?? 'Pelanggan' }}</span></p>
+                </div>
             </div>
-
         </div>
 
-
-        <div class="min-h-screen py-10 px-4 bg-gradient-to-b from-blue-50 to-gray-100">
-
-            <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-                <div class="bg-blue-600 px-6 py-4 flex items-center justify-between">
-                    <a href="{{ route('pembeli.Shop-Pembeli') }}"
-                        class="flex items-center text-white hover:text-blue-200 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        @if(session('success'))
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
-                        Kembali
-                    </a>
-
-                    <div class="w-6"></div>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-green-800">{{ session('success') }}</h3>
+                    </div>
                 </div>
+            </div>
+        @endif
 
+        @if(session('error'))
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414l-1.293-1.293 1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">{{ session('error') }}</h3>
+                    </div>
+                </div>
+            </div>
+        @endif
 
-                <div class="p-6">
-                    @if(session('error'))
-                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                    clip-rule="evenodd" />
+        @if(empty($keranjang))
+            <div class="bg-white rounded-xl shadow-sm border border-white-200 overflow-hidden">
+                <div class="text-center py-16 px-6">
+                    <div class="mx-auto mb-6 h-48 w-48 flex items-center justify-center bg-white-50">
+                        <img src="{{ asset('images/boxKosong.png') }}" alt="">
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Keranjang Anda Kosong</h3>
+                    <p class="text-gray-500 max-w-md mx-auto mb-6">Belum ada barang yang ditambahkan ke keranjang belanja Anda. Mulai jelajahi produk kami sekarang!</p>
+                    <div class="flex justify-center gap-3">
+                        <a href="{{ route('pembeli.Shop-Pembeli') }}" class="inline-flex items-center px-6 py-3 text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 -ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222 1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z" />
+                                <path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
                             </svg>
-                            <div>
-                                <span class="block sm:inline">{{ session('error') }}</span>
-                                @if(session('existing_item_id'))
-                                    <div class="mt-2">
-                                        <a href="#item-{{ session('existing_item_id') }}"
-                                            class="text-blue-600 hover:text-blue-800 underline flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            Lihat item yang sudah ada
-                                        </a>
+                            Mulai Belanja
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="divide-y divide-gray-200">
+                    @foreach($keranjang as $id => $item)
+                    <div class="p-6 hover:bg-gray-50 transition-colors duration-150">
+                        <div class="flex items-start space-x-4">
+                            <!-- Product Image -->
+                            <div class="flex-shrink-0 w-32 h-32 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                                @if(isset($item['gambar']))
+                                    <img src="{{ asset('storage/' . $item['gambar']) }}" alt="{{ $item['nama_barang'] }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                        <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
                                     </div>
                                 @endif
                             </div>
-                        </div>
-                    @endif
 
-                    @if(session('success'))
-                        <div
-                            class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-lg flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <span class="block sm:inline">{{ session('success') }}</span>
-                        </div>
-                    @endif
-
-                    @if($keranjang->isEmpty())
-                        <div class="text-center py-12">
-                            <div class="max-w-md mx-auto">
-                                <img src="{{ asset('images/boxKosong.png') }}" alt="Empty Cart"
-                                    class="w-48 mx-auto mb-6 animate-bounce">
-                                <h3 class="text-xl font-semibold text-gray-700 mb-2">Keranjang Belanja Kosong</h3>
-                                <p class="text-gray-500 mb-6">Belum ada item di keranjang belanja Anda.</p>
-                                <a href="{{ route('pembeli.Shop-Pembeli') }}"
-                                    class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 shadow-md hover:shadow-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    Mulai Belanja
-                                </a>
-                            </div>
-                        </div>
-                    @else
-                                    <div class="space-y-6">
-                                        <form action="{{ route('keranjang.hapusTerpilih') }}" method="POST" id="formHapusTerpilih">
-                                            @csrf
-                                            @method('DELETE')
-
-                                            {{-- Container untuk tombol delete, awalnya hidden --}}
-                                            <div id="deleteSelectedContainer" class="hidden mb-4">
-                                                <button type="submit"
-                                                    class="flex items-center px-3 py-1.5 bg-red-100 text-red-600 text-sm rounded-lg hover:bg-red-200 transition duration-200">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                    Hapus Item Yang dipilih
-                                                </button>
+                            <!-- Product Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-col h-full">
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start gap-2">
+                                            <div class="min-w-0">
+                                                <h3 class="text-lg font-semibold text-gray-900 truncate">{{ $item['nama_barang'] }}</h3>
+                                                <p class="text-sm text-gray-500 mt-1">Kode: {{ $item['id_barang'] }}</p>
+                                                <p class="text-sm text-gray-500 mt-1">Jumlah: {{ $item['jumlah'] }} pcs</p>
+                                                <form action="{{ route('keranjang.hapus') }}" method="POST" class="mt-2">
+                                                    @csrf
+                                                    <input type="hidden" name="id_barang" value="{{ $item['id_barang'] }}">
+                                                    <button type="submit" class="inline-flex items-center gap-2 text-sm font-semibold text-red-600 border border-red-600 px-4 py-2 rounded-lg hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4a1 1 0 011 1v1H9V5a1 1 0 011-1zm-3 4h10M9 10v6m3-6v6m3-6v6" />
+                                                        </svg>
+                                                        Hapus
+                                                    </button>
+                                                </form>
                                             </div>
-
-                                            @foreach ($keranjang as $item)
-                                                <div id="item-{{ $item->id }}"
-                                                    class="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition duration-200 border border-gray-200">
-                                                    <div class="flex items-center space-x-4 w-full sm:w-auto mb-4 sm:mb-0">
-                                                        <input type="checkbox" name="selected_items[]" value="{{ $item->id }}"
-                                                            class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
-
-                                                        <div class="flex-shrink-0">
-                                                            <div
-                                                                class="h-16 w-16 bg-white rounded-lg flex items-center justify-center shadow-sm overflow-hidden">
-                                                                @if($item->barang && $item->barang->foto_barang)
-                                                                    @php
-                                                                        // Cek apakah path gambar sudah berupa URL lengkap
-                                                                        $imagePath = $item->barang->foto_barang;
-                                                                        if (!Str::startsWith($imagePath, ['http://', 'https://'])) {
-                                                                            $imagePath = asset('storage/' . $imagePath);
-                                                                        }
-                                                                    @endphp
-                                                                    <img src="{{ $imagePath }}" alt="{{ $item->nama_barang }}"
-                                                                        class="h-full w-full object-cover">
-                                                                @else
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500"
-                                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                                                    </svg>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <h4 class="font-semibold text-gray-800">{{ $item->nama_barang }}</h4>
-                                                            <div class="flex items-center mt-1">
-                                                                <span class="text-gray-600 mr-3">Jumlah:</span>
-                                                                <span class="px-2 py-1 bg-white rounded border border-gray-300 text-gray-700">
-                                                                    {{ $item->jumlah }}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div
-                                                        class="flex flex-col sm:flex-row items-end sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-                                                        <p class="text-lg font-semibold text-blue-700 whitespace-nowrap">
-                                                            Rp {{ number_format($item->harga_barang, 0, ',', '.') }}
-                                                        </p>
-                                                        <form action="{{ route('keranjang.hapus', $item->id) }}" method="POST" class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                class="flex items-center px-3 py-1.5 bg-red-100 text-red-600 text-sm rounded-lg hover:bg-red-200 transition duration-200">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
-                                                                Hapus
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </form>
-
-                                        <div class="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-100">
-                                            <div class="flex flex-col sm:flex-row justify-between items-center">
-                                                <div class="mb-4 sm:mb-0">
-                                                    <p class="text-gray-600">Total Items: {{ $keranjang->sum('jumlah') }}</p>
-                                                    <h3 class="text-2xl font-bold text-blue-800">
-                                                        Rp {{ number_format($keranjang->sum(function ($item) {
-                            return $item->harga_barang * $item->jumlah;
-                        }), 0, ',', '.') }}
-                                                    </h3>
-                                                </div>
-                                                <div class="flex space-x-3">
-                                                    <a href="{{ route('pembeli.Shop-Pembeli') }}"
-                                                        class="px-5 py-2.5 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition duration-300">
-                                                        Lanjut Belanja
-                                                    </a>
-                                                    <a href="{{ route('pembeli.checkOutPembeli', $item->id_barang) }}"
-                                                        class="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-semibold rounded-lg text-sm px-5 py-3 text-center min-h-[44px]">
-                                                        Checkout
-                                                    </a>
-                                                </div>
+                                            <div class="text-right">
+                                                <p class="text-lg font-bold text-gray-900">Rp {{ number_format($item['harga_barang'], 0, ',', '.') }}</p>
+                                                <p class="text-sm text-gray-500">Per unit</p>
+                                                <p class="text-lg font-bold text-blue-600 mt-2">Rp {{ number_format($item['harga_barang'] * $item['jumlah'], 0, ',', '.') }}</p>
+                                                <p class="text-sm text-gray-500">Subtotal</p>
                                             </div>
                                         </div>
                                     </div>
-                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                <!-- Checkout Summary -->
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                    <form id="checkout-form" action="{{ url('pembeli/checkout') }}" method="POST">
+                        @csrf
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                Checkout
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
+        @endif
+    </div>
+</div>
 @endsection
-
-    @section('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const checkboxes = document.querySelectorAll('input[name="selected_items[]"]');
-                const deleteContainer = document.getElementById('deleteSelectedContainer');
-                const formHapusTerpilih = document.getElementById('formHapusTerpilih');
-
-                function toggleDeleteButton() {
-                    // Cek ada tidaknya checkbox yang dicentang
-                    const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
-
-                    // Jika ada yang dicentang, tampilkan tombol, kalau tidak sembunyikan
-                    if (anyChecked) {
-                        deleteContainer.classList.remove('hidden');
-                    } else {
-                        deleteContainer.classList.add('hidden');
-                    }
-                }
-
-                // Pasang event listener pada tiap checkbox
-                checkboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', toggleDeleteButton);
-                });
-
-                // Cek sebelum submit form hapus terpilih, pastikan ada item terpilih
-                formHapusTerpilih.addEventListener('submit', function (e) {
-                    const selectedItems = Array.from(checkboxes).filter(checkbox => checkbox.checked);
-                    if (selectedItems.length === 0) {
-                        e.preventDefault(); // Mencegah form disubmit jika tidak ada item terpilih
-                        alert('Pilih minimal satu item untuk dihapus.');
-                        return false;
-                    }
-
-                    // Konfirmasi sebelum menghapus
-                    return confirm('Apakah Anda yakin ingin menghapus item yang dipilih?');
-                });
-
-                // Jalankan cek awal saat halaman dimuat untuk mengatur visibilitas tombol di awal
-                toggleDeleteButton();
-            });
-        </script>
-    @endsection

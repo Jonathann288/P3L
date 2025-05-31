@@ -126,7 +126,7 @@
                     >
                         <img 
                             class="absolute top-0 right-0 h-full w-full object-cover" 
-                            src="{{ $item->foto_barang }}" 
+                            src="{{ asset($item->foto_barang[0] ?? 'default.jpg') }}" 
                             alt="{{ $item->nama_barang }}"
                         >
                     </a>
@@ -149,9 +149,9 @@
 
                         <!-- Tombol "Add to Cart" (opsional) -->
                         <div class="mt-auto">
-                            <a href="{{ route('login') }}" class="flex items-center justify-center rounded-md bg-slate-900 px-3 py-1 text-center text-xs font-medium text-white hover:bg-gray-700">
+                            <button class="w-full rounded-md bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-gray-700">
                                 Add to cart
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>

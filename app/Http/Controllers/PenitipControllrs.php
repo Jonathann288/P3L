@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
 use App\Models\Penitip;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+
+
 class PenitipControllrs extends Controller
-{   
+{
 
     public function showlistPenitip()
     {
@@ -18,15 +21,21 @@ class PenitipControllrs extends Controller
             // Ambil semua data pegawai beserta jabatannya
             $penitip = penitip::all();
             // Return ke view dengan data pegawai
-            return view('CustomerService.DashboardPenitip', compact('penitip','pegawaiLogin'));
+            return view('CustomerService.DashboardPenitip', compact('penitip', 'pegawaiLogin'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
+
+
+
+
+
+
     public function registerPenitip(Request $request)
-    {   
-        try{
+    {
+        try {
             $request->validate([
                 'nama_penitip' => 'required|string|max:255',
                 'nomor_ktp' => 'required|string|max:16',
@@ -76,8 +85,8 @@ class PenitipControllrs extends Controller
 
             // Redirect atau beri pesan sukses
             return redirect()->route('CustomerService.DashboardPenitip')->with('success', 'Penitip berhasil ditambahkan.');
-        }catch (\Exception $e) {
-        // Jika terjadi kesalahan, tampilkan pesan error
+        } catch (\Exception $e) {
+            // Jika terjadi kesalahan, tampilkan pesan error
             return redirect()->back()->with('error', 'Gagal menambahkan Penitip: ' . $e->getMessage());
         }
     }
@@ -120,10 +129,10 @@ class PenitipControllrs extends Controller
         }
     }
 
-    
+
     public function update(Request $request, $id)
-    {   
-        try{
+    {
+        try {
             // Validasi input
             $request->validate([
                 'nama_penitip' => 'required|string|max:255',
@@ -146,8 +155,8 @@ class PenitipControllrs extends Controller
 
             // Redirect dengan pesan sukses
             return redirect()->route('CustomerService.DashboardPenitip')->with('success', 'Data Penitip berhasil diupdate.');
-        }catch (\Exception $e) {
-        // Jika terjadi kesalahan, tampilkan pesan error
+        } catch (\Exception $e) {
+            // Jika terjadi kesalahan, tampilkan pesan error
             return redirect()->back()->with('error', 'Gagal melakukan update Penitip: ' . $e->getMessage());
         }
     }
@@ -171,8 +180,8 @@ class PenitipControllrs extends Controller
 
 
     public function search(Request $request)
-    {   
-        try{
+    {
+        try {
             $keyword = $request->input('keyword');
 
             $query = Penitip::query();
@@ -188,9 +197,9 @@ class PenitipControllrs extends Controller
             $penitip = $query->get();
             $pegawaiLogin = Auth::guard('pegawai')->user();
             // Kirim data ke view, misalnya 'admin.DashboardPenitip'
-            return view('CustomerService.DashboardPenitip', compact('penitip','pegawaiLogin'));
-        }catch (\Exception $e) {
-        // Jika terjadi kesalahan, tampilkan pesan error
+            return view('CustomerService.DashboardPenitip', compact('penitip', 'pegawaiLogin'));
+        } catch (\Exception $e) {
+            // Jika terjadi kesalahan, tampilkan pesan error
             return redirect()->back()->with('error', 'Cari Penitip hanya nama saja');
         }
     }

@@ -22,6 +22,7 @@ class transaksipenjualan extends Model
         'poin',
         'tanggal_kirim',
         'ongkir',
+        'status_transaksi'
     ];
 
     protected $casts = [
@@ -41,4 +42,17 @@ class transaksipenjualan extends Model
     {
         return $this->belongsTo(Pegawai::class, 'id_pegawai');
     }
+
+    public function detailTransaksi()
+    {
+        return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_penjualan', 'id_transaksi_penjualan');
+    }
+
+
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'id_barang');
+    }
+
+
 }

@@ -51,10 +51,5 @@ class Pembeli extends Authenticatable
         return $this->hasMany(transaksipenjualan::class, 'pembeli_id', 'pembeli_id');
     }
 
-
-    public function keranjang()
-    {
-        return $this->hasMany(Keranjang::class, 'pembeli_id');
-    }
-
+    
 }
