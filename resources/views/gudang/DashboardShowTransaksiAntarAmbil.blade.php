@@ -116,6 +116,12 @@
                                         Status Pembayaran</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status Transaksi</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Nama Kurir</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions</th>
                                 </tr>
                             </thead>
@@ -156,6 +162,14 @@
                                             <span
                                                 class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full capitalize">{{ $transaksi->status_pembayaran }}</span>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full capitalize">{{ $transaksi->status_transaksi }}</span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="px-2 py-1 bg-blue-100 text-gray-800 text-xs rounded">{{  $transaksi->kurir->nama_pegawai ?? 'Belum ada kurir' }}</span>
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                             <button 
                                                 class="text-blue-600 hover:text-blue-900 inline-flex items-center btn-detail"
@@ -188,19 +202,10 @@
                                                 </svg>
                                                 Jadwalkan
                                             </button>
-
-                                            <form action="{{ route('reject.transaction', $transaksi->id) }}" method="POST"
-                                                class="inline">
+                                            <form action="{{ route('gudang.cetak-notaKurir', $transaksi->id_transaksi_penjualan) }}" method="POST">
                                                 @csrf
-                                                @method('PATCH')
-                                                <button type="submit" onclick="return confirm('Tolak transaksi ini?')"
-                                                    class="text-red-600 hover:text-red-900 inline-flex items-center">
-                                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd"
-                                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.536-10.464a1 1 0 00-1.414-1.414L10 8.586 7.879 6.464a1 1 0 10-1.414 1.414L8.586 10l-2.121 2.121a1 1 0 101.414 1.414L10 11.414l2.121 2.121a1 1 0 001.414-1.414L11.414 10l2.122-2.121z"
-                                                            clip-rule="evenodd"></path>
-                                                    </svg>
-                                                    Reject
+                                                <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded text-sm">
+                                                    Cetak Nota
                                                 </button>
                                             </form>
 
@@ -414,13 +419,13 @@
         <h2 class="text-lg font-bold mb-4">Pilih Kurir Pengiriman</h2>
         <form action="{{ route('gudang.jadwal-baru') }}" method="POST">
             @csrf
-            <input type="hidden" name="transaksi_id" id="jadwal-transaksi-id">
+            <input type="hidden" name="id_transaksi_penjualan" id="jadwal-transaksi-id">
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Pilih Kurir</label>
-                <select name="id_kurir" class="mt-1 p-2 w-full border rounded" required>
+                <select name="id_pegawai" class="mt-1 p-2 w-full border rounded" required>
                     @foreach($kurirList as $kurir)
-                        <option value="{{ $kurir->id }}">{{ $kurir->nama_pegawai }}</option>
+                        <option value="{{ $kurir->id_pegawai }}">{{ $kurir->nama_pegawai }}</option>
                     @endforeach
                 </select>
             </div>

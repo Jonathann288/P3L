@@ -49,7 +49,7 @@ class transaksipenjualan extends Model
 
     public function detailTransaksi()
     {
-        return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_penjualan', 'id_transaksi_penjualan');
+        return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_penjualan');
     }
 
 
@@ -60,7 +60,8 @@ class transaksipenjualan extends Model
 
     public function kurir()
     {
-        return $this->belongsTo(Pegawai::class, 'id_kurir');
+        return $this->belongsTo(Pegawai::class, 'id_pegawai', 'id_pegawai');
     }
+
 
 }

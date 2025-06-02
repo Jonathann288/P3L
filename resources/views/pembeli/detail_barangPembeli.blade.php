@@ -167,7 +167,7 @@
 
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
                 <!-- Gambar Utama Besar -->
-                <div class="bg-white-100 rounded-lg h-96 flex items-center justify-center mb-4">
+                <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center mb-4">
                     @if ($mainImage)
                         <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama"
                             class="max-h-full max-w-full object-contain">
@@ -218,6 +218,61 @@
                     <span class="mx-2 text-gray-400">|</span>
                     <span class="text-gray-600">{{ $barang->jumlah_terjual }} Terjual</span>
                 </div>
+
+                {{-- AWAL BAGIAN INFORMASI PENJUAL (PENITIP) --}}
+                @php
+                    $penitipInfo = null; // Inisialisasi untuk keamanan
+                    // Langsung gunakan variabel $barang yang merupakan objek utama halaman ini
+                    // Asumsikan $barang selalu ada di view ini. Accessor 'penitip_data' akan mengembalikan null jika tidak ada penitip.
+                    if (isset($barang) && $barang) { // Pastikan $barang ada dan tidak null
+                        $penitipInfo = $barang->penitip_data;
+                    }
+                @endphp
+
+                @if ($penitipInfo)
+                    <div class="mb-6 pt-4 border-t border-gray-200">
+                        <h3 class="text-md font-semibold text-gray-800 mb-2">Informasi Penjual:</h3>
+                        <div class="flex items-center">
+                            @if(isset($penitipInfo->foto_profil) && $penitipInfo->foto_profil)
+                                <img src="{{ asset($penitipInfo->foto_profil) }}" alt="{{ $penitipInfo->nama_penitip }}"
+                                    class="w-10 h-10 rounded-full mr-3 object-cover border">
+                            @else
+                                <div
+                                    class="w-10 h-10 rounded-full mr-3 bg-gray-200 flex items-center justify-center text-gray-500 border">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            @endif
+                            <div>
+                                <p class="text-lg font-medium text-gray-900">{{ $penitipInfo->nama_penitip }}</p>
+                               
+                                @if (isset($penitipInfo->Rating_penitip))
+                                    <div class="flex items-center text-sm text-gray-600" title="Rata-rata rating penjual">
+                                        <span class="text-yellow-500 mr-1">
+                                            @php $roundedRating = round($penitipInfo->Rating_penitip * 2) / 2; @endphp
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $roundedRating)
+                                                    <i class="fas fa-star"></i>
+                                                @elseif ($i - 0.5 <= $roundedRating)
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                @else
+                                                    <i class="far fa-star"></i>
+                                                @endif
+                                            @endfor
+                                        </span>
+                                        <span>{{ number_format($penitipInfo->Rating_penitip, 1) }}/5.0</span>
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-500">Belum ada rating untuk penjual ini.</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="mb-6 pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-500">Informasi penjual tidak tersedia.</p>
+                    </div>
+                @endif
+                {{-- AKHIR BAGIAN INFORMASI PENJUAL (PENITIP) --}}
 
                 <!-- Kotak Deskripsi Produk -->
                 <!-- INI JUGA COPY -->
@@ -414,18 +469,17 @@
                 ratingContainer.appendChild(star);
             }
         });
-        function changeMainImage(thumbnail) {
+        function changeMainImage(element) {
             const mainImage = document.getElementById('main-image');
-            mainImage.src = thumbnail.src;
+            mainImage.src = element.src;
 
-            // Update border thumbnail yang aktif
-            document.querySelectorAll('.thumbnail-container img').forEach(img => {
-                img.classList.remove('border-2', 'border-blue-500');
-                img.classList.add('border', 'border-gray-300');
+            // Optional: atur border aktif
+            document.querySelectorAll('.flex-shrink-0 img').forEach(img => {
+                img.classList.remove('border-blue-500');
+                img.classList.add('border-gray-300');
             });
-
-            thumbnail.classList.remove('border', 'border-gray-300');
-            thumbnail.classList.add('border-2', 'border-blue-500');
+            element.classList.remove('border-gray-300');
+            element.classList.add('border-blue-500');
         }
     </script>
 </body>

@@ -112,4 +112,20 @@ class Barang extends Model
             'id_transaksi_penitipan' 
         );
     }
+
+    public function getPenitipDataAttribute()
+    {
+        // Muat relasi bertingkat: Barang -> DetailTransaksiPenitipan -> TransaksiPenitipan -> Penitip
+        $this->loadMissing('detailTransaksiPenitipan.transaksiPenitipan.penitip');
+
+        if ($this->detailTransaksiPenitipan &&
+            $this->detailTransaksiPenitipan->transaksiPenitipan &&
+            $this->detailTransaksiPenitipan->transaksiPenitipan->penitip) {
+            
+            // dd($this->detailTransaksiPenitipan->transaksiPenitipan->penitip->toArray()); // UNCOMMENT UNTUK DEBUG DI SINI
+
+            return $this->detailTransaksiPenitipan->transaksiPenitipan->penitip;
+        }
+        return null;
+    }
 }

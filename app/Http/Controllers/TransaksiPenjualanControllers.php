@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
@@ -199,165 +200,123 @@ class TransaksiPenjualanControllers extends Controller
             return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
         }
 
-        // Validasi poin yang digunakan
-        $request->validate([
+        // 1. Buat ID transaksi baru
+        $lastTransaction = transaksipenjualan::where('id', 'like', 'TP%')
+            ->orderBy('id', 'desc')->first();
+
+        $newId = !$lastTransaction
+            ? 'TP01'
+            : 'TP' . str_pad(((int) substr($lastTransaction->id, 2)) + 1, 2, '0', STR_PAD_LEFT);
+
+        // 2. Validasi request
+        $validator = Validator::make($request->all(), [
+            'metode_pengantaran' => 'required|in:ambil_sendiri,diantar_kurir',
+            'selected_address' => 'required_if:metode_pengantaran,diantar_kurir|nullable|exists:alamat,id',
             'poin_digunakan' => 'nullable|integer|min:0|max:' . $pembeli->total_poin,
         ], [
+            'metode_pengantaran.required' => 'Silakan pilih metode pengantaran.',
+            'selected_address.required_if' => 'Silakan pilih alamat pengiriman.',
+            'selected_address.exists' => 'Alamat tidak ditemukan.',
             'poin_digunakan.max' => 'Poin yang digunakan tidak boleh melebihi total poin Anda (' . number_format($pembeli->total_poin, 0, ',', '.') . ' poin).',
-            'poin_digunakan.min' => 'Poin yang digunakan tidak boleh kurang dari 0.',
-            'poin_digunakan.integer' => 'Poin yang digunakan harus berupa angka.',
         ]);
 
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // 3. Ambil keranjang dari session
         $keranjangKey = 'keranjang_' . $pembeli->id;
-        $keranjang = session()->get($keranjangKey, []);
+        $keranjang = session($keranjangKey, []);
         if (empty($keranjang)) {
             return redirect()->route('pembeli.cart')->with('error', 'Keranjang Anda kosong.');
         }
 
-        // Validasi request
-        $validationRules = [
-            'metode_pengantaran' => 'required|in:ambil_sendiri,diantar_kurir',
-        ];
-        if ($request->metode_pengantaran === 'diantar_kurir') {
-            $validationRules['selected_address'] = 'required|exists:alamat,id';
-        }
-        $request->validate($validationRules, [
-            'metode_pengantaran.required' => 'Silakan pilih metode pengantaran.',
-            'metode_pengantaran.in' => 'Metode pengantaran tidak valid.',
-            'selected_address.required' => 'Silakan pilih alamat pengiriman.',
-            'selected_address.exists' => 'Alamat yang dipilih tidak valid.',
-        ]);
+        // 4. Inisialisasi dan hitung total
+        $subtotal = collect($keranjang)->sum('harga_barang');
+        $totalItems = count($keranjang);
 
+        $ongkir = $request->metode_pengantaran === 'diantar_kurir' && $subtotal < 1500000 ? 100000 : 0;
+        $poin_digunakan = (int) $request->input('poin_digunakan', 0);
+        $diskon_poin = min($poin_digunakan * 100, $subtotal);
+        $total = $subtotal + $ongkir - $diskon_poin;
+
+        // PERBAIKAN: Hapus sistem random poin, hanya simpan poin yang digunakan
+        // $poin_didapat = floor($total / 10000); // DIHAPUS
+
+        $tanggal_kirim = $request->metode_pengantaran === 'diantar_kurir' ? now()->addDays(2) : null;
+        $id_pegawai = $request->metode_pengantaran === 'diantar_kurir' ? 5 : 4;
+
+        $data = [
+            'id' => $newId,
+            'id_pembeli' => $pembeli->id_pembeli,
+            'id_pegawai' => $id_pegawai,
+            'tanggal_transaksi' => now(),
+            'metode_pengantaran' => $request->metode_pengantaran,
+            'tanggal_lunas' => null,
+            'bukti_pembayaran' => null,
+            'status_pembayaran' => 'Belum Lunas',
+            'poin' => $poin_digunakan, // PERBAIKAN: Simpan poin yang digunakan (terpotong)
+            'poin_digunakan' => $poin_digunakan,
+            'diskon_poin' => $diskon_poin,
+            'tanggal_kirim' => $tanggal_kirim,
+            'ongkir' => $ongkir,
+            'status_transaksi' => 'diproses'
+        ];
+
+        // 5. Simpan transaksi dan detail secara atomic
+        $transaksi = null;
         DB::beginTransaction();
         try {
-            // Hitung total belanja (semua item quantity = 1)
-            $subtotal = collect($keranjang)->sum(function ($item) {
-                return $item['harga_barang']; // Tidak perlu dikali jumlah karena selalu 1
-            });
-
-            // Hitung ongkir
-            $ongkir = 0;
-            $metode_pengantaran = $request->metode_pengantaran;
-            if ($metode_pengantaran === 'diantar_kurir') {
-                $ongkir = $subtotal >= 1500000 ? 0 : 100000;
-            }
-
-            // Hitung poin yang digunakan (jika ada)
-            $poin_digunakan = intval($request->input('poin_digunakan', 0));
-            $diskon_poin = 0;
-
-            // Validasi ulang poin yang digunakan (double check)
+            // Kurangi poin pembeli
             if ($poin_digunakan > 0) {
-                if ($poin_digunakan > $pembeli->total_poin) {
-                    throw new \Exception('Poin yang digunakan melebihi total poin Anda.');
-                }
-
-                // Konversi poin ke diskon (contoh: 1 poin = Rp 100)
-                $diskon_poin = $poin_digunakan * 100; // Sesuaikan dengan nilai konversi poin Anda
-                if ($diskon_poin > $subtotal) {
-                    $diskon_poin = $subtotal; // Jangan sampai diskon melebihi subtotal
-                    $poin_digunakan = $subtotal / 100; // Recalculate poin yang benar-benar digunakan
-                }
-            }
-
-            $total = $subtotal + $ongkir - $diskon_poin;
-            $poin_didapat = floor($total / 10000); // Hitung poin yang didapat dari transaksi ini
-
-            // Tentukan tanggal kirim
-            $tanggal_kirim = null;
-            if ($metode_pengantaran === 'diantar_kurir') {
-                $tanggal_kirim = now()->addDays(2);
-            }
-
-            // Generate ID transaksi
-            $lastTransaction = transaksipenjualan::where('id', 'like', 'TP%')
-                ->orderBy('id', 'desc')
-                ->first();
-            if (!$lastTransaction) {
-                $newId = 'TP01';
-            } else {
-                $lastNumber = (int) substr($lastTransaction->id, 2);
-                $nextNumber = $lastNumber + 1;
-                $formattedNumber = str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
-                $newId = 'TP' . $formattedNumber;
-            }
-
-            $id_pegawai = ($metode_pengantaran === 'diantar_kurir') ? 5 : 4;
-
-            // KURANGI POIN PEMBELI TERLEBIH DAHULU (SEBELUM MEMBUAT TRANSAKSI)
-            if ($poin_digunakan > 0) {
-                // Refresh data pembeli untuk memastikan data terbaru
                 $pembeli->refresh();
-
-                // Pastikan poin masih cukup
                 if ($poin_digunakan > $pembeli->total_poin) {
-                    throw new \Exception('Poin tidak mencukupi. Poin Anda saat ini: ' . $pembeli->total_poin);
+                    throw new \Exception('Poin Anda tidak mencukupi.');
                 }
-
-                // Kurangi poin pembeli
-                $pembeli->total_poin -= $poin_digunakan;
-                $pembeli->save();
-
-                // Log untuk debugging
-                \Log::info('Poin pembeli dikurangi', [
-                    'id_pembeli' => $pembeli->id_pembeli,
-                    'poin_digunakan' => $poin_digunakan,
-                    'total_poin_sebelum' => $pembeli->total_poin + $poin_digunakan,
-                    'total_poin_sesudah' => $pembeli->total_poin
-                ]);
+                $pembeli->decrement('total_poin', $poin_digunakan);
             }
 
-            // Buat transaksi baru
-            $transaksi = transaksipenjualan::create([
-                'id' => $newId,
-                'id_pembeli' => $pembeli->id_pembeli,
-                'id_pegawai' => $id_pegawai,
-                'tanggal_transaksi' => now(),
-                'metode_pengantaran' => $metode_pengantaran,
-                'tanggal_lunas' => null,
-                'bukti_pembayaran' => null,
-                'status_pembayaran' => 'Belum Lunas',
-                'poin' => $poin_didapat,
-                'poin_digunakan' => $poin_digunakan, // Simpan poin yang digunakan
-                'diskon_poin' => $diskon_poin, // Simpan diskon dari poin
-                'tanggal_kirim' => $tanggal_kirim,
-                'ongkir' => $ongkir,
-                'status_transaksi' => 'diproses'
-            ]);
+            // Simpan header transaksi
+            $transaksi = transaksipenjualan::create($data);
 
-            // PROSES UPDATE STATUS BARANG dan detail transaksi
+            // Simpan detail dan update status barang
             foreach ($keranjang as $id_barang => $item) {
-                $barang = Barang::where('id_barang', $id_barang)->first();
-                if (!$barang) {
+                $barang = Barang::find($id_barang);
+                if (!$barang)
                     continue;
-                }
-                // Subtotal item selalu harga barang x 1
-                $subtotalItem = $barang->harga_barang * 1;
-                $detailTransaksi = $transaksi->detailTransaksi()->create([
-                    'id_barang' => $barang->id_barang,
+
+                $hargaBarang = $barang->harga_barang;
+                $porsi = $subtotal > 0 ? ($hargaBarang / $subtotal) : (1 / $totalItems);
+                $ongkirItem = $porsi * $ongkir;
+                $diskonItem = $porsi * $diskon_poin;
+                $totalHargaFinal = $hargaBarang + $ongkirItem - $diskonItem;
+
+                $transaksi->detailTransaksi()->create([
+                    'id_barang' => $id_barang,
                     'jumlah' => 1,
-                    'harga' => $barang->harga_barang,
-                    'subtotal' => $subtotalItem,
-                    'total_harga' => $subtotalItem,
+                    'harga' => $hargaBarang,
+                    'subtotal' => $hargaBarang,
+                    'total_harga' => round($totalHargaFinal),
                 ]);
+
                 $barang->status_barang = 'laku';
                 $barang->save();
             }
 
-            // Kosongkan keranjang
             session()->forget($keranjangKey);
-
             DB::commit();
+
             return redirect()->route('pembayaranPembeli', ['id' => $transaksi->id])
-                ->with('success', 'Transaksi berhasil diproses dengan ID: ' . $newId .
+                ->with('success', 'Checkout berhasil. ID transaksi: ' . $transaksi->id .
                     ($poin_digunakan > 0 ? '. Poin sebesar ' . number_format($poin_digunakan, 0, ',', '.') . ' telah digunakan.' : ''));
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('pembeli.cart')
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan saat memproses checkout: ' . $e->getMessage());
+                ->with('error', 'Gagal checkout: ' . $e->getMessage());
         }
     }
+
 
     public function showPembayaran($id)
     {
@@ -394,21 +353,21 @@ class TransaksiPenjualanControllers extends Controller
     /**
      * Method untuk membersihkan transaksi yang sudah expired
      */
-    private function cleanupExpiredTransaction($transaksi)
+     private function cleanupExpiredTransaction($transaksi)
     {
         DB::beginTransaction();
         try {
             \Log::info('Starting cleanup for expired transaction: ' . $transaksi->id);
 
             // 1. Kembalikan poin terlebih dahulu
-            if ($transaksi->poin_digunakan > 0) {
+            if ($transaksi->poin > 0) {
                 $pembeli = $transaksi->pembeli;
-                $pembeli->total_poin += $transaksi->poin_digunakan;
+                $pembeli->total_poin += $transaksi->poin;
                 $pembeli->save();
 
                 \Log::info('Poin dikembalikan', [
                     'pembeli_id' => $pembeli->id_pembeli,
-                    'poin_dikembalikan' => $transaksi->poin_digunakan,
+                    'poin_dikembalikan' => $transaksi->poin,
                     'total_poin_sekarang' => $pembeli->total_poin
                 ]);
             }
@@ -440,6 +399,7 @@ class TransaksiPenjualanControllers extends Controller
             throw $e;
         }
     }
+
 
     public function prosesPembayaran(Request $request, $id)
     {
@@ -756,7 +716,7 @@ class TransaksiPenjualanControllers extends Controller
             $pegawaiLogin = Auth::guard('pegawai')->user();
 
             // Ambil transaksi dengan eager loading
-            $transaksiAntar = TransaksiPenjualan::with(['detailTransaksi.barang', 'pembeli'])
+            $transaksiAntar = TransaksiPenjualan::with(['detailTransaksi.barang', 'pembeli', 'kurir'])
                 ->where('metode_pengantaran', 'diantar_kurir')
                 ->orderBy('tanggal_transaksi', 'desc')
                 ->get();
@@ -777,77 +737,74 @@ class TransaksiPenjualanControllers extends Controller
         }
     }
 
+   public function jadwalkanPengiriman(Request $request)
+    {
+        $request->validate([
+            'id_transaksi_penjualan' => 'required|exists:TransaksiPenjualan,id_transaksi_penjualan',
+            'id_pegawai' => 'required|exists:pegawai,id_pegawai',
+        ]);
+
+        $transaksi = TransaksiPenjualan::findOrFail($request->id_transaksi_penjualan);
+
+        $now = now();
+        $batasWaktuHariIni = now()->setHour(16)->setMinute(0)->setSecond(0);
+
+        if ($now->isToday() && $now->greaterThan($batasWaktuHariIni)) {
+            $tanggalKirim = now()->addDay()->setHour(8)->setMinute(0)->setSecond(0);
+        } else {
+            $tanggalKirim = now();
+        }
+
+        $transaksi->update([
+            'id_pegawai' => $request->id_pegawai,
+            'tanggal_kirim' => $tanggalKirim,
+            'status_transaksi' => 'dijadwalkan',
+        ]);
+
+        return back()->with('success', 'Jadwal pengiriman berhasil disimpan untuk tanggal ' . $tanggalKirim->translatedFormat('d M Y H:i') . '.');
+    }
+
+
     // public function jadwalPengiriman(Request $request)
     // {
     //     $request->validate([
     //         'transaksi_id' => 'required|exists:transaksipenjualan,id_transaksi_penjualan',
-    //         'tanggal_kirim' => 'required|date|after_or_equal:today',
-    //         'id_kurir' => 'required|exists:pegawai,id',
+    //         'id_pegawai' => 'required|exists:pegawai,id_pegawai',
     //     ]);
 
-    //     $kurir = Pegawai::findOrFail($request->id_kurir);
+    //     $kurir = Pegawai::findOrFail($request->id_pegawai);
 
-    //     if (strtolower($kurir->jabatan) !== 'kurir') {
+    //     if (strtolower($kurir->jabatan) !== 'Kurir') {
     //         return back()->withErrors('Pegawai terpilih bukan kurir.');
     //     }
 
     //     $transaksi = TransaksiPenjualan::findOrFail($request->transaksi_id);
 
-    //     $jamTransaksi = Carbon::parse($transaksi->tanggal_transaksi)->hour;
+    //     $tanggalTransaksi = Carbon::parse($transaksi->tanggal_transaksi);
+    //     $jamTransaksi = $tanggalTransaksi->hour;
 
+    //     // Tentukan tanggal kirim berdasarkan jam transaksi
     //     if ($jamTransaksi >= 16) {
-    //         $tanggalDipilih = Carbon::parse($request->tanggal_kirim);
-    //         $tanggalTransaksi = Carbon::parse($transaksi->tanggal_transaksi);
-
-    //         if ($tanggalDipilih->isSameDay($tanggalTransaksi)) {
-    //             return back()->withErrors('Transaksi setelah jam 16.00 hanya bisa dikirim mulai hari berikutnya.');
-    //         }
+    //         $tanggalKirim = $tanggalTransaksi->copy()->addDay()->setHour(8)->setMinute(0)->setSecond(0);
+    //     } else {
+    //         $tanggalKirim = $tanggalTransaksi->copy()->setHour(8)->setMinute(0)->setSecond(0);
     //     }
 
-    //     $transaksi->update([
-    //         'tanggal_kirim' => $request->tanggal_kirim,
-    //         'id_kurir' => $kurir->id,
+    //     \Log::info('Mengupdate jadwal pengiriman', [
+    //         'id_transaksi_penjualan' => $transaksi->id_transaksi_penjualan,
+    //         'tanggal_kirim' => $tanggalKirim,
+    //         'id_pegawai' => $request->id_pegawai,
     //     ]);
 
-    //     return back()->with('success', 'Pengiriman berhasil dijadwalkan.');
+    //     $transaksi->update([
+    //         'id_pegawai' => $request->id_pegawai,
+    //         'tanggal_kirim' => $tanggalKirim,
+    //         'status_transaksi' => 'dijadwalkan', // jika kamu menggunakan status
+    //     ]);
+
+    //     return back()->with('success', 'Pengiriman berhasil dijadwalkan untuk tanggal ' . $tanggalKirim->translatedFormat('d M Y H:i') . '.');
     // }
 
-    public function jadwalPengiriman(Request $request)
-    {
-        $request->validate([
-            'transaksi_id' => 'required|exists:transaksipenjualan,id_transaksi_penjualan',
-            'id_kurir' => 'required|exists:pegawai,id_pegawai',
-        ]);
-
-        $kurir = Pegawai::findOrFail($request->id_kurir);
-
-        if (strtolower($kurir->jabatan) !== 'Kurir') {
-            return back()->withErrors('Pegawai terpilih bukan kurir.');
-        }
-
-        $transaksi = TransaksiPenjualan::findOrFail($request->transaksi_id);
-
-        $tanggalTransaksi = Carbon::parse($transaksi->tanggal_transaksi);
-        $jamTransaksi = $tanggalTransaksi->hour;
-
-        // Tentukan tanggal kirim berdasarkan jam transaksi
-        if ($jamTransaksi >= 16) {
-            $tanggalKirim = $tanggalTransaksi->copy()->addDay()->startOfDay();
-        } else {
-            $tanggalKirim = $tanggalTransaksi->copy()->startOfDay();
-        }
-        \Log::info('Updating transaksi', [
-            'id_transaksi_penjualan' => $transaksi->id_transaksi_penjualan,
-            'tanggal_kirim' => $tanggalKirim,
-            'id_kurir' => $kurir->id_kurir,
-        ]);
-        $transaksi->update([
-            'tanggal_kirim' => $tanggalKirim,
-            'id_kurir' => $kurir->id_kurir,
-        ]);
-
-        return back()->with('success', 'Pengiriman berhasil dijadwalkan.');
-    }
 
     public function jadwalAmbil(Request $request)
     {
@@ -867,20 +824,41 @@ class TransaksiPenjualanControllers extends Controller
 
     public function konfirmasiTerima($id)
     {
+        DB::beginTransaction();
+
         try {
-            $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $id)->firstOrFail();
+            $transaksi = TransaksiPenjualan::with('detailTransaksi.barang.detailTransaksiPenitipan.transaksiPenitipan.penitip')
+                ->where('id_transaksi_penjualan', $id)
+                ->firstOrFail();
+
+            foreach ($transaksi->detailTransaksi as $detail) {
+                $barang = $detail->barang;
+
+                // Ambil penitip dari relasi yang benar
+                $penitip = optional($barang->detailTransaksiPenitipan->transaksiPenitipan)->penitip;
+
+                if ($penitip) {
+                    $penitip->saldo_penitip += $detail->total_harga;
+                    $penitip->save();
+                }
+            }
 
             $transaksi->update([
                 'status_transaksi' => 'transaksi selesai',
             ]);
 
-            return back()->with('success', 'Transaksi berhasil dikonfirmasi selesai.');
+            DB::commit();
+
+            return back()->with('success', 'Transaksi dikonfirmasi dan saldo penitip diperbarui.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
             return back()->with('error', 'Transaksi tidak ditemukan.');
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 
     public function konfirmasiDanCetakNota($id)
     {
@@ -920,6 +898,63 @@ class TransaksiPenjualanControllers extends Controller
 
             // Generate PDF nota
             $pdf = PDF::loadView('gudang.NotaAmbilSendiri', $data)
+                ->setPaper('a4', 'portrait')
+                ->setOptions([
+                    'dpi' => 150,
+                    'defaultFont' => 'sans-serif',
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => true
+                ]);
+
+            // Nama file, bisa pakai no_nota supaya lebih mudah
+            $namaFile = 'Nota_Transaksi_' . $transaksi->no_nota . '_' . now()->format('YmdHis') . '.pdf';
+
+            // Return sebagai file download
+            return $pdf->download($namaFile);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mencetak nota: ' . $e->getMessage());
+        }
+    }
+
+    public function CetakNota($id)
+    {
+        try {
+            // Ambil data transaksi beserta relasi
+            $transaksi = transaksipenjualan::with(['pembeli', 'pegawai', 'kurir', 'detailTransaksi.barang'])->findOrFail($id);
+
+            // Cek apakah no_nota sudah ada, kalau belum generate dan simpan
+            if (empty($transaksi->no_nota)) {
+                // Ambil nomor urut terakhir berdasarkan id_transaksi_penjualan
+                $lastTransaction = DB::table('transaksipenjualan')->orderBy('id_transaksi_penjualan', 'desc')->first();
+                $lastNumber = $lastTransaction ? $lastTransaction->id_transaksi_penjualan : 0;
+                $newNumber = $lastNumber + 1;
+
+                $year = Carbon::now()->format('Y');
+                $month = Carbon::now()->format('m');
+
+                // Format no nota
+                $noNota = $year . '.' . $month . '.' . $newNumber;
+
+                // Simpan no_nota ke database
+                $transaksi->no_nota = $noNota;
+                $transaksi->save();
+            }
+
+            // Siapkan data untuk nota
+            $data = [
+                'transaksi' => $transaksi,
+                'tanggal_cetak' => Carbon::now()->format('d F Y H:i:s'),
+                'perusahaan' => [
+                    'nama' => 'ReUse Mart',
+                    'alamat' => 'Jl. Green Eco Park No. 456 Yogyakarta',
+                    'telepon' => '(0274) 123-4567',
+                    'email' => 'info@reusermart.com'
+                ]
+            ];
+
+            // Generate PDF nota
+            $pdf = PDF::loadView('gudang.NotaAntarKurir', $data)
                 ->setPaper('a4', 'portrait')
                 ->setOptions([
                     'dpi' => 150,

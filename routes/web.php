@@ -107,6 +107,7 @@ Route::middleware(['pembeli'])->group(function () {
     Route::get('/Pembeli/barang/{id_barang}', [BarangControllers::class, 'showDetailPembeli'])->name('pembeli.detail_barangPembeli');
 
     Route::get('/historyPembeli', [PembeliControllrs::class, 'showHistory'])->name('pembeli.historyPembeli');
+    Route::get('/history', [PembeliControllrs::class, 'showHistory2'])->name('pembeli.historyPembeli2');
     //
 
     Route::post('/diskusi', [DiskusiControllers::class, 'store'])->name('diskusi.store');
@@ -264,10 +265,11 @@ Route::middleware(['checkjabatan:Gudang'])->group(function () {
     Route::post('/gudang/konfirmasi-pengambilan/{id}', [TransaksiPenitipanControllers::class, 'konfirmasiPengambilan'])->name('gudang.konfirmasiPengambilan');
     // SAMPE INI
     Route::get('/DashboardDaftarTransaksi', [TransaksiPenjualanControllers::class, 'showTransaksiKirim'])->name('gudang.DashboardShowTransaksiAntarAmbil');
-    Route::post('/gudang/jadwal-baru', [TransaksiPenjualanControllers::class, 'jadwalPengiriman'])->name('gudang.jadwal-baru');
+    Route::post('/gudang/jadwal-baru', [TransaksiPenjualanControllers::class, 'jadwalkanPengiriman'])->name('gudang.jadwal-baru');
     Route::post('/gudang/jadwal-ambil', [TransaksiPenjualanControllers::class, 'jadwalAmbil'])->name('gudang.jadwal-ambil');
     Route::post('/gudang/konfirmasi-terima/{id}', [TransaksiPenjualanControllers::class, 'konfirmasiTerima'])->name('gudang.konfirmasi-terima');
     Route::post('/transaksi/nota-cetak/{id}', [TransaksiPenjualanControllers::class, 'konfirmasiDanCetakNota'])->name('gudang.cetak-nota');
+    Route::post('/transaksi/nota-cetakAntar/{id}', [TransaksiPenjualanControllers::class, 'CetakNota'])->name('gudang.cetak-notaKurir');
 
 
 

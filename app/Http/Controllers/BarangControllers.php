@@ -365,23 +365,63 @@ class BarangControllers extends Controller
     // Update barang dari form gudang
     public function updateBarangGudang(Request $request, $id_barang)
     {
-        $request->validate([
-            'id_kategori' => 'required|integer',
+        $validated = $request->validate([
+            'id_kategori' => 'required|exists:kategoribarang,id_kategori',
             'nama_barang' => 'required|string|max:255',
-            'harga_barang' => 'required|numeric',
+            'harga_barang' => 'required|numeric|min:0',
+            'berat_barang' => 'nullable|numeric|min:0',
+            'status_barang' => 'required|string',
+            'masa_penitipan' => 'nullable|integer|min:1',
             'deskripsi_barang' => 'nullable|string',
-            'foto_barang' => 'nullable|string',
-            'status_barang' => 'nullable|string',
-            'rating_barang' => 'nullable|numeric|between:0,5',
-            'berat_barang' => 'nullable|numeric',
+            'rating_barang' => 'nullable|numeric|min:0|max:5',
             'garansi_barang' => 'nullable|date',
-            'masa_penitipan' => 'nullable|integer',
+            'foto_barang' => 'nullable|array|max:5',
+            'foto_barang.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $barang = Barang::findOrFail($id_barang);
-        $barang->update($request->all());
+        try {
+            $barang = Barang::findOrFail($id_barang);
 
-        return redirect()->route('gudang.DaftarBarang')->with('success', 'Barang berhasil diperbarui');
+            // Handle foto upload jika ada
+            if ($request->hasFile('foto_barang')) {
+                // Hapus foto lama
+                $oldFotos = $barang->foto_barang;
+                if (is_array($oldFotos)) {
+                    foreach ($oldFotos as $oldFoto) {
+                        if (file_exists(public_path($oldFoto))) {
+                            unlink(public_path($oldFoto));
+                        }
+                    }
+                }
+
+                // Upload foto baru
+                $fotoPaths = [];
+                foreach ($request->file('foto_barang') as $index => $foto) {
+                    $filename = 'barang_' . time() . '_' . $index . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                    $foto->move(public_path('images'), $filename);
+                    $fotoPaths[] = 'images/' . $filename;
+                }
+                $barang->foto_barang = $fotoPaths;
+            }
+
+            // Update data barang
+            $barang->update([
+                'id_kategori' => $validated['id_kategori'],
+                'nama_barang' => $validated['nama_barang'],
+                'harga_barang' => $validated['harga_barang'],
+                'berat_barang' => $validated['berat_barang'],
+                'status_barang' => $validated['status_barang'],
+                'masa_penitipan' => $validated['masa_penitipan'],
+                'deskripsi_barang' => $validated['deskripsi_barang'],
+                'rating_barang' => $validated['rating_barang'],
+                'garansi_barang' => $validated['garansi_barang'],
+            ]);
+
+            return redirect()->route('gudang.DaftarBarang')->with('success', 'Barang berhasil diupdate!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
 }

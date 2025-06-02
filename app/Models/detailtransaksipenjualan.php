@@ -14,10 +14,12 @@ class detailtransaksipenjualan extends Model
         'id_transaksi_penjualan',
         'id_barang',
         'total_harga',
+        'rating_untuk_penitip'
     ];
 
     protected $casts = [
         'total_harga' => 'float',
+        'rating_untuk_penitip' => 'integer'
     ];
 
     public function transaksipenjualan()
@@ -30,4 +32,9 @@ class detailtransaksipenjualan extends Model
         return $this->belongsTo(Barang::class, 'id_barang');
     }
 
+    public function transaksiPenitipan()
+    {
+        // Asumsi: tabel ini punya 'id_transaksi_penitipan' sebagai FK ke 'transaksipenitipan'
+        return $this->belongsTo(TransaksiPenitipan::class, 'id_transaksi_penitipan', 'id_transaksi_penitipan');
+    }
 }
