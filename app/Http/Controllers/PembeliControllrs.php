@@ -7,9 +7,13 @@ use App\Models\Pembeli;
 use App\Models\TransaksiPenjualan;
 use App\Models\DetailTransaksiPenitipan;
 use App\Models\Barang;
+use App\Models\DetailTransaksiPenjualan; 
+use App\Models\Penitip;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class PembeliControllrs extends Controller
 {
@@ -73,20 +77,25 @@ class PembeliControllrs extends Controller
     }
 
     public function showHistory()
-    {
-        try {
-            $pembeli = Auth::guard('pembeli')->user();
-
-            // Ambil transaksi dan eager load detail + barang
-            $transaksiPenjualan = $pembeli->transaksiPenjualan()
-                ->with(['detailTransaksiPenjualan.barang'])
-                ->get();
-
-            return view('pembeli.historyPembeli', compact('pembeli', 'transaksiPenjualan'));
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+{
+    try {
+        $pembeli = Auth::guard('pembeli')->user();
+        if (!$pembeli) {
+            return redirect()->route('login'); // Ganti 'login' dengan nama route login pembeli Anda
         }
+        $transaksiPenjualan = $pembeli->transaksiPenjualan()
+            ->with([
+                // Muat data Penitip melalui jalur: DetailTransaksiPenjualan -> Barang -> DetailTransaksiPenitipan -> TransaksiPenitipan -> Penitip
+                'detailTransaksiPenjualan.barang.detailTransaksiPenitipan.transaksiPenitipan.penitip'
+            ])
+            ->orderBy('tanggal_transaksi', 'desc')
+            ->get();
+        return view('pembeli.historyPembeli', compact('pembeli', 'transaksiPenjualan'));
+    } catch (\Exception $e) {
+        Log::error('Error showing history: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat riwayat: ' . $e->getMessage());
     }
+}
 
     public function update(Request $request)
     {   
@@ -135,6 +144,68 @@ class PembeliControllrs extends Controller
         
         return redirect()->route('pembeli.profilPembeli')->with('success', 'Foto profil berhasil diupdate.');
     }
+
+    public function submitRating(Request $request)
+{
+    try {
+        $request->validate([
+            'detail_transaksi_id' => 'required|exists:detailtransaksipenjualan,id_detail_transaksi_penjualan',
+            'rating' => 'required|integer|min:1|max:5',
+        ]);
+
+        $detailTransaksi = DetailTransaksiPenjualan::with([
+            'transaksipenjualan', 
+            'barang.detailTransaksiPenitipan.transaksiPenitipan.penitip' // Eager load path ke penitip
+        ])->find($request->detail_transaksi_id);
+        
+        $pembeli = Auth::guard('pembeli')->user();
+
+        if (!$detailTransaksi || !$detailTransaksi->transaksipenjualan) {
+            return response()->json(['message' => 'Detail transaksi tidak ditemukan.'], 404);
+        }
+        
+        if ($detailTransaksi->transaksipenjualan->id_pembeli !== $pembeli->id_pembeli) {
+            return response()->json(['message' => 'Unauthorized. Transaksi ini bukan milik Anda.'], 403);
+        }
+        
+        $barang = $detailTransaksi->barang;
+        $penitip = null;
+
+        if ($barang && $barang->penitip_data) { // Menggunakan accessor yang sudah dibuat
+            $penitip = $barang->penitip_data;
+        }
+        
+        if (!$penitip) {
+            Log::warning("Penitip tidak ditemukan untuk barang_id: " . ($barang ? $barang->id_barang : 'N/A') . " melalui jalur penitipan. Detail Transaksi Penjualan ID: " . $detailTransaksi->id_detail_transaksi_penjualan);
+            // Rating tetap disimpan, tapi penitipnya tidak ketemu untuk update rata-rata.
+        }
+
+        $detailTransaksi->rating_untuk_penitip = $request->rating;
+        $detailTransaksi->save();
+        
+        $newAverageRating = null;
+        if ($penitip) {
+            $penitip->updateAverageRating();
+            $newAverageRating = $penitip->rating_penitip;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $penitip ? 'Rating berhasil disimpan!' : 'Rating disimpan, namun data penitip tidak terjangkau untuk update rata-rata.',
+            'new_average_rating' => $newAverageRating,
+            'penitip_id' => $penitip ? $penitip->id_penitip : null, // Kirim penitip_id untuk update UI
+            'detail_id' => $detailTransaksi->id_detail_transaksi_penjualan,
+            'given_rating' => $detailTransaksi->rating_untuk_penitip
+        ], $penitip ? 200 : 202); // 202 jika penitip tidak terupdate
+
+    } catch (ValidationException $e) {
+        Log::warning("Validation error in submitRating: " . $e->getMessage(), $e->errors());
+        return response()->json(['message' => $e->getMessage(), 'errors' => $e->errors()], 422);
+    } catch (\Exception $e) {
+        Log::error("General error in submitRating: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine() . " Trace: " . $e->getTraceAsString());
+        return response()->json(['message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.'], 500);
+    }
+}
 
 
 }

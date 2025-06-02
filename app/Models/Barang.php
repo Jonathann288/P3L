@@ -37,11 +37,6 @@ class Barang extends Model
         return $this->belongsTo(kategoribarang::class, 'id_kategori');
     }
 
-    public function penitip()
-    {
-        return $this->belongsTo(penitip::class, 'id'); // Asumsi relasi ke tabel penitip
-    }
-
         public function kategori()
     {
         return $this->belongsTo(kategoribarang::class, 'id_kategori');
@@ -111,5 +106,23 @@ class Barang extends Model
             'id_barang',
             'id_transaksi_penitipan' 
         );
+    }
+
+    // ... (properti dan method lain) ...
+
+    public function getPenitipDataAttribute()
+    {
+        // Muat relasi bertingkat: Barang -> DetailTransaksiPenitipan -> TransaksiPenitipan -> Penitip
+        $this->loadMissing('detailTransaksiPenitipan.transaksiPenitipan.penitip');
+
+        if ($this->detailTransaksiPenitipan &&
+            $this->detailTransaksiPenitipan->transaksiPenitipan &&
+            $this->detailTransaksiPenitipan->transaksiPenitipan->penitip) {
+            
+            // dd($this->detailTransaksiPenitipan->transaksiPenitipan->penitip->toArray()); // UNCOMMENT UNTUK DEBUG DI SINI
+
+            return $this->detailTransaksiPenitipan->transaksiPenitipan->penitip;
+        }
+        return null;
     }
 }

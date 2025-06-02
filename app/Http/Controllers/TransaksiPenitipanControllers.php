@@ -1,7 +1,6 @@
 <?php
-// COPY SEMUA
-namespace App\Http\Controllers;
 
+namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\transaksipenitipan;
@@ -31,28 +30,28 @@ class TransaksiPenitipanControllers extends Controller
         return view('penitip.barang-titipan', compact('detailBarang', 'penitip'));
     }
 
-        public function search(Request $request)
-    {   
+    public function search(Request $request)
+    {
         $penitip = Auth::guard('penitip')->user();
         $search = $request->input('search');
 
-        if($search){
+        if ($search) {
             $detailBarang = detailtransaksipenitipan::whereHas('barang', function ($query) use ($search) {
                 $query->where('nama_barang', 'like', "%{$search}%");
             })
-            ->orWhereHas('transaksipenitipan', function ($query) use ($search) {
-                // Coba cek search ini cocok dengan tanggal_penitipan atau tanggal_akhir_penitipan
-                // Karena input text, kita coba ubah input ke tanggal
-                $date = date('Y-m-d', strtotime($search));
-                
-                // Pastikan tanggal valid supaya query aman
-                if ($date) {
-                    $query->where('tanggal_penitipan', $date)
-                        ->orWhere('tanggal_akhir_penitipan', $date);
-                }
-            })
-            ->get();
-        }else{
+                ->orWhereHas('transaksipenitipan', function ($query) use ($search) {
+                    // Coba cek search ini cocok dengan tanggal_penitipan atau tanggal_akhir_penitipan
+                    // Karena input text, kita coba ubah input ke tanggal
+                    $date = date('Y-m-d', strtotime($search));
+
+                    // Pastikan tanggal valid supaya query aman
+                    if ($date) {
+                        $query->where('tanggal_penitipan', $date)
+                            ->orWhere('tanggal_akhir_penitipan', $date);
+                    }
+                })
+                ->get();
+        } else {
             $detailBarang = detailtransaksipenitipan::whereHas('transaksipenitipan', function ($query) use ($penitip) {
                 $query->where('id_penitip', $penitip->id_penitip);
             })->get();
@@ -63,7 +62,7 @@ class TransaksiPenitipanControllers extends Controller
     public function perpanjangMasaPenitipan($id)
     {
         $detail = detailtransaksipenitipan::with('transaksipenitipan')->findOrFail($id);
-        $tanggalAkhir =  \Carbon\Carbon::parse($detail->transaksipenitipan->tanggal_akhir_penitipan);
+        $tanggalAkhir = \Carbon\Carbon::parse($detail->transaksipenitipan->tanggal_akhir_penitipan);
         $sekarang = Carbon::now();
 
         // Cek jika masa penitipan sudah lewat (tanggal akhir lebih kecil dari sekarang)
@@ -84,7 +83,7 @@ class TransaksiPenitipanControllers extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Masa penitipan berhasil diperpanjang 30 hari.');
-    } 
+    }
 
 
     // PUNYA MU SOKO KENE DHA LEK PENGEN NGECEK SENG ATAS DEWE PUNYA KU BEDA FUNGSI KARO PUNYA MU
@@ -140,7 +139,7 @@ class TransaksiPenitipanControllers extends Controller
             ->orderBy('nama_kategori')
             ->get();
 
-            
+
 
         return view('gudang.DashboardTitipanBarang', compact('titipans', 'penitips', 'kategoris'));
     }
@@ -336,6 +335,7 @@ class TransaksiPenitipanControllers extends Controller
             return redirect()->back()
                 ->withInput($request->except(['foto_barang'])) // Don't return file input
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
         }
     }
 
@@ -597,7 +597,6 @@ class TransaksiPenitipanControllers extends Controller
 
     public function updateTitipanBarang(Request $request, $id)
     {
-        // Validasi data
         $validated = $request->validate([
             'nama_penitip' => 'required|string|max:255',
             'email_penitip' => 'required|email|max:255',
@@ -605,15 +604,22 @@ class TransaksiPenitipanControllers extends Controller
             'tanggal_akhir_penitipan' => 'nullable|date',
             'tanggal_batas_pengambilan' => 'nullable|date',
             'tanggal_pengambilan_barang' => 'nullable|date',
-            'foto_barang.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'nama_barang' => 'required|string|max:255',
+            'deskripsi_barang' => 'required|string|min:3',
+            'harga_barang' => 'required|numeric|min:1',
+            'berat_barang' => 'required|numeric|min:0.1',
+            'status_barang' => 'required|string|in:tidak laku,di donasikan,laku,donasikan',
+            'has_garansi' => 'required|in:ya,tidak',
+            'garansi_type' => 'nullable|string|in:6_bulan,1_tahun,2_tahun,custom',
+            'garansi_barang' => 'nullable|date|after:tanggal_penitipan',
+            'foto_barang.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'auto_calculate' => 'nullable|boolean'
         ]);
 
         try {
-            // Ambil data transaksi
-            $titipan = transaksipenitipan::findOrFail($id);
+            $titipan = TransaksiPenitipan::with('detailTransaksiPenitipan.barang')->findOrFail($id);
 
-            // Update data penitip terkait
+            // Update data penitip
             $penitip = $titipan->penitip;
             if ($penitip) {
                 $penitip->nama_penitip = $validated['nama_penitip'];
@@ -621,55 +627,72 @@ class TransaksiPenitipanControllers extends Controller
                 $penitip->save();
             }
 
-            // Update data titipan
-            $titipan->tanggal_penitipan = $validated['tanggal_penitipan'];
-
-            // Jika auto calculate diaktifkan atau tanggal masuk gudang berubah
-            if (
-                $request->auto_calculate ||
-                ($validated['tanggal_penitipan'] && $validated['tanggal_penitipan'] != $titipan->tanggal_penitipan)
-            ) {
-
-                $tanggalMasuk = $validated['tanggal_penitipan'] ?? $validated['tanggal_penitipan'];
-                $durasi = $this->hitungDurasiPenitipan($tanggalMasuk);
-
+            // Hitung durasi otomatis jika diminta
+            if ($request->auto_calculate) {
+                $durasi = $this->hitungDurasiPenitipan($validated['tanggal_penitipan']);
                 $titipan->tanggal_penitipan = $durasi['tanggal_penitipan'];
                 $titipan->tanggal_akhir_penitipan = $durasi['tanggal_akhir_penitipan'];
                 $titipan->tanggal_batas_pengambilan = $durasi['tanggal_batas_pengambilan'];
             } else {
-                // Manual input
-                $titipan->tanggal_penitipan = $validated['tanggal_penitipan'] ?? $titipan->tanggal_penitipan;
+                $titipan->tanggal_penitipan = $validated['tanggal_penitipan'];
                 $titipan->tanggal_akhir_penitipan = $validated['tanggal_akhir_penitipan'];
                 $titipan->tanggal_batas_pengambilan = $validated['tanggal_batas_pengambilan'];
             }
 
-            $titipan->tanggal_pengambilan_barang = $validated['tanggal_pengambilan_barang'];
-
-            // Handle foto barang - SELALU hapus foto lama saat ada update
-            if ($request->hasFile('foto_barang')) {
-                $details = $titipan->detailtransaksipenitipan;
-
-                foreach ($details as $index => $detail) {
-                    $barang = $detail->barang;
-
-                    if ($barang) {
-                        $this->deleteOldPhotos($barang);
-
-                        if (isset($request->file('foto_barang')[$index])) {
-                            $foto = $request->file('foto_barang')[$index];
-
-                            $filename = time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
-                            $foto->move(public_path('images'), $filename);
-
-                            $barang->foto_barang = ['images/' . $filename]; // pastikan kolomnya bisa menyimpan array atau JSON
-                            $barang->save();
-                        }
-                    }
-                }
-            }
-
+            $titipan->tanggal_pengambilan_barang = $validated['tanggal_pengambilan_barang'] ?? null;
 
             $titipan->save();
+
+            // Update semua barang terkait
+            foreach ($titipan->detailTransaksiPenitipan as $index => $detail) {
+                $barang = $detail->barang;
+                if ($barang) {
+                    $barang->nama_barang = $validated['nama_barang'];
+                    $barang->deskripsi_barang = $validated['deskripsi_barang'];
+                    $barang->harga_barang = $validated['harga_barang'];
+                    $barang->berat_barang = $validated['berat_barang'];
+                    $barang->status_barang = $validated['status_barang'];
+
+                    // Hitung garansi
+                    $tanggalPenitipan = Carbon::parse($validated['tanggal_penitipan']);
+                    $garansiBarang = null;
+
+                    if ($validated['has_garansi'] === 'ya') {
+                        if ($request->filled('garansi_barang')) {
+                            $garansiBarang = Carbon::parse($validated['garansi_barang']);
+                        } else {
+                            $garansiType = $validated['garansi_type'] ?? '1_tahun';
+                            $garansiBarang = $tanggalPenitipan->copy();
+
+                            switch ($garansiType) {
+                                case '6_bulan':
+                                    $garansiBarang->addMonths(6);
+                                    break;
+                                case '1_tahun':
+                                default:
+                                    $garansiBarang->addYear();
+                                    break;
+                            }
+                        }
+                    }
+
+                    $barang->garansi_barang = $garansiBarang;
+
+                    // Handle update foto jika ada
+                    if ($request->hasFile("foto_barang.{$index}")) {
+                        $this->deleteOldPhotos($barang);
+                        $foto = $request->file("foto_barang.{$index}");
+
+                        if ($foto && $foto->isValid()) {
+                            $filename = 'barang_' . time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                            $foto->move(public_path('images'), $filename);
+                            $barang->foto_barang = ['images/' . $filename];
+                        }
+                    }
+
+                    $barang->save();
+                }
+            }
 
             return redirect()->route('gudang.DashboardTitipanBarang')->with('success', 'Data titipan berhasil diperbarui.');
 
@@ -677,6 +700,7 @@ class TransaksiPenitipanControllers extends Controller
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 
     private function deleteOldPhotos($titipan)
     {
@@ -770,17 +794,21 @@ class TransaksiPenitipanControllers extends Controller
     {
         // Ambil data pegawai yang sedang login (sesuaikan dengan sistem autentikasi Anda)
         $pegawai = auth()->user(); // atau sesuai dengan cara Anda mengambil data pegawai
-        
+
         // Atau jika menggunakan session/cara lain:
         // $pegawai = Pegawai::find(session('id_pegawai'));
-        
+
         // Ambil semua barang dengan relasi yang diperlukan
         $barang = Barang::with([
             'kategoribarang',
             'detailTransaksiPenitipan.transaksiPenitipan.pegawai',
             'detailTransaksiPenitipan.transaksiPenitipan.penitip'
         ])->get();
-        
+
+        foreach ($barang as $item) {
+            $item->foto_barang = $item->getFotoBarangAttribute($item->foto_barang);
+        }
+
         return view('gudang.DaftarBarang', compact('pegawai', 'barang'));
     }
 
@@ -789,16 +817,18 @@ class TransaksiPenitipanControllers extends Controller
     {
         // Ambil data pegawai yang sedang login
         $pegawai = auth()->user(); // sesuaikan dengan sistem autentikasi Anda
-        
+
         // Ambil barang yang ditangani oleh pegawai ini
-        $barang = Barang::whereHas('detailTransaksiPenitipan.transaksiPenitipan', function($query) use ($pegawai) {
+        $barang = Barang::whereHas('detailTransaksiPenitipan.transaksiPenitipan', function ($query) use ($pegawai) {
             $query->where('id_pegawai', $pegawai->id_pegawai);
         })->with([
-            'kategoribarang',
-            'detailTransaksiPenitipan.transaksiPenitipan.pegawai',
-            'detailTransaksiPenitipan.transaksiPenitipan.penitip'
-        ])->get();
-        
+                    'kategoribarang',
+                    'detailTransaksiPenitipan.transaksiPenitipan.pegawai',
+                    'detailTransaksiPenitipan.transaksiPenitipan.penitip'
+                ])->get();
+
         return view('gudang.DaftarBarang', compact('pegawai', 'barang'));
     }
+
+
 }

@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +8,12 @@
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-    <link rel="stylesheet" href="{{asset('css/style.css')}}"> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-BxRzY...dllnya..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{asset('css/style.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        integrity="sha512-BxRzY...dllnya..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         .rating-stars {
@@ -21,6 +23,7 @@
             color: #ddd;
             font-size: 24px;
         }
+
         .rating-stars .filled {
             color: #fbbf24;
             position: absolute;
@@ -29,6 +32,7 @@
             width: 90%;
             overflow: hidden;
         }
+
         .discussion-item {
             border-bottom: 1px solid #e5e7eb;
             padding-bottom: 1.5rem;
@@ -80,6 +84,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <!-- Navigation -->
     <nav class="w-full">
@@ -110,19 +115,20 @@
                     <div class="relative">
                         <button id="dropdownToggle"
                             class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md hover:bg-blue-800 flex items-center space-x-2">
-                            <img src="{{ asset(Auth::guard('pembeli')->user()->foto_pembeli) }}"
-                                alt="profile" class="w-8 h-8 rounded-full object-cover">
+                            <img src="{{ asset(Auth::guard('pembeli')->user()->foto_pembeli) }}" alt="profile"
+                                class="w-8 h-8 rounded-full object-cover">
                             <span>{{ Auth::guard('pembeli')->user()->nama_pembeli }}</span>
                         </button>
 
                         <div id="dropdownMenu"
                             class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
-                            <a href="{{ route('pembeli.profilPembeli') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
-                                <form action="{{ route('logout.pembeli') }}" method="POST">
-                                    @csrf
-                                    <button type="submit"
-                                        class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
-                                </form>
+                            <a href="{{ route('pembeli.profilPembeli') }}"
+                                class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profil</a>
+                            <form action="{{ route('logout.pembeli') }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                    class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
+                            </form>
                         </div>
                     </div>
                 @else
@@ -150,10 +156,10 @@
     </nav>
 
     <!-- Main Content -->
-   <main class="pb-12 px-4 max-w-6xl mx-auto">
+    <main class="pb-12 px-4 max-w-6xl mx-auto">
         <!-- Product Section -->
         <div class="flex flex-col md:flex-row gap-8 pt-8">
-             <!-- Product Images Section -->
+            <!-- Product Images Section -->
             @php
                 $fotos = $barang->foto_barang;
                 $mainImage = $fotos[0] ?? null; // Ambil gambar pertama sebagai default
@@ -163,7 +169,8 @@
                 <!-- Gambar Utama Besar -->
                 <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center mb-4">
                     @if ($mainImage)
-                        <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama" class="max-h-full max-w-full object-contain">
+                        <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama"
+                            class="max-h-full max-w-full object-contain">
                     @else
                         <span class="text-gray-400">Tidak ada gambar</span>
                     @endif
@@ -173,7 +180,7 @@
                 <div class="flex gap-2 overflow-x-auto py-2">
                     @foreach ($fotos as $index => $foto)
                         <div class="flex-shrink-0">
-                            <img src="{{ asset($foto) }}" alt="Thumbnail {{ $index + 1 }}" 
+                            <img src="{{ asset($foto) }}" alt="Thumbnail {{ $index + 1 }}"
                                 class="w-20 h-20 object-cover rounded border {{ $index === 0 ? 'border-blue-500' : 'border-gray-300 hover:border-blue-300' }} cursor-pointer"
                                 onclick="changeMainImage(this)">
                         </div>
@@ -212,8 +219,63 @@
                     <span class="text-gray-600">{{ $barang->jumlah_terjual }} Terjual</span>
                 </div>
 
+                {{-- AWAL BAGIAN INFORMASI PENJUAL (PENITIP) --}}
+                @php
+                    $penitipInfo = null; // Inisialisasi untuk keamanan
+                    // Langsung gunakan variabel $barang yang merupakan objek utama halaman ini
+                    // Asumsikan $barang selalu ada di view ini. Accessor 'penitip_data' akan mengembalikan null jika tidak ada penitip.
+                    if (isset($barang) && $barang) { // Pastikan $barang ada dan tidak null
+                        $penitipInfo = $barang->penitip_data;
+                    }
+                @endphp
+
+                @if ($penitipInfo)
+                    <div class="mb-6 pt-4 border-t border-gray-200">
+                        <h3 class="text-md font-semibold text-gray-800 mb-2">Informasi Penjual:</h3>
+                        <div class="flex items-center">
+                            @if(isset($penitipInfo->foto_profil) && $penitipInfo->foto_profil)
+                                <img src="{{ asset($penitipInfo->foto_profil) }}" alt="{{ $penitipInfo->nama_penitip }}"
+                                    class="w-10 h-10 rounded-full mr-3 object-cover border">
+                            @else
+                                <div
+                                    class="w-10 h-10 rounded-full mr-3 bg-gray-200 flex items-center justify-center text-gray-500 border">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            @endif
+                            <div>
+                                <p class="text-lg font-medium text-gray-900">{{ $penitipInfo->nama_penitip }}</p>
+                               
+                                @if (isset($penitipInfo->Rating_penitip))
+                                    <div class="flex items-center text-sm text-gray-600" title="Rata-rata rating penjual">
+                                        <span class="text-yellow-500 mr-1">
+                                            @php $roundedRating = round($penitipInfo->Rating_penitip * 2) / 2; @endphp
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $roundedRating)
+                                                    <i class="fas fa-star"></i>
+                                                @elseif ($i - 0.5 <= $roundedRating)
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                @else
+                                                    <i class="far fa-star"></i>
+                                                @endif
+                                            @endfor
+                                        </span>
+                                        <span>{{ number_format($penitipInfo->Rating_penitip, 1) }}/5.0</span>
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-500">Belum ada rating untuk penjual ini.</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div class="mb-6 pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-500">Informasi penjual tidak tersedia.</p>
+                    </div>
+                @endif
+                {{-- AKHIR BAGIAN INFORMASI PENJUAL (PENITIP) --}}
+
                 <!-- Kotak Deskripsi Produk -->
-                 <!-- INI JUGA COPY -->
+                <!-- INI JUGA COPY -->
                 <div class="mt-6 border rounded-lg p-4 bg-gray-50 shadow-sm">
                     <h2 class="text-lg font-semibold text-gray-900 mb-3">Deskripsi Produk</h2>
 
@@ -226,7 +288,7 @@
                     </p>
                     @if($isElektronik)
                         <p class="text-gray-800 font-medium mt-2">
-                            Garansi Hingga: 
+                            Garansi Hingga:
                             <span class="font-normal">
                                 {{ \Carbon\Carbon::parse($barang->tanggal_garansi)->translatedFormat('d F Y') }}
                             </span>
@@ -295,7 +357,7 @@
     </main>
 
     <script>
-                const toggle = document.getElementById('dropdownToggle');
+        const toggle = document.getElementById('dropdownToggle');
         const menu = document.getElementById('dropdownMenu');
 
         toggle.addEventListener('click', () => {
@@ -421,4 +483,5 @@
         }
     </script>
 </body>
+
 </html>

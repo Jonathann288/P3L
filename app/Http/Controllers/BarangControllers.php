@@ -142,7 +142,7 @@ class BarangControllers extends Controller
         // Kirim data ke view
         return view('penitip.Shop-Penitip', compact('kategoris', 'barang', 'images'));
     }
-    
+
     public function showDetail($id_barang)
     {
         $barang = Barang::findOrFail($id_barang);
@@ -150,18 +150,18 @@ class BarangControllers extends Controller
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
         $isElektronik = $barang->id_kategori == 1;
-        return view('shop.detail_barang', compact('barang','isElektronik'));
+        return view('shop.detail_barang', compact('barang', 'isElektronik'));
     }
 
     public function showDetailDonasi($id_barang)
     {
         $barang = Barang::findOrFail($id_barang);
-        
+
         if ($barang->status_barang !== 'di donasikan') {
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
         $isElektronik = $barang->id_kategori == 1;
-        return view('donasi.detail_barang_donasi', compact('barang','isElektronik'));
+        return view('donasi.detail_barang_donasi', compact('barang', 'isElektronik'));
     }
 
     public function showDetailDonasiOranisasi($id_barang)
@@ -171,7 +171,7 @@ class BarangControllers extends Controller
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
         $isElektronik = $barang->id_kategori == 1;
-        return view('organisasi.detail_barang_donasi', compact('barang','isElektronik'));
+        return view('organisasi.detail_barang_donasi', compact('barang', 'isElektronik'));
     }
 
     public function showDetailPembeli($id_barang)
@@ -188,7 +188,7 @@ class BarangControllers extends Controller
         // Load diskusi with proper sorting (newest first)
         $barang->setRelation('diskusi', $barang->diskusi->sortByDesc('tanggal_diskusi'));
         $isElektronik = $barang->id_kategori == 1;
-        return view('pembeli.detail_barangPembeli', compact('barang','pembeli','isElektronik'));
+        return view('pembeli.detail_barangPembeli', compact('barang', 'pembeli', 'isElektronik'));
     }
 
     public function showDetailPenitip($id_barang)
@@ -198,7 +198,7 @@ class BarangControllers extends Controller
             abort(404, 'Barang tidak ditemukan atau sudah laku/didonasikan.');
         }
         $isElektronik = $barang->id_kategori == 1;
-        return view('penitip.detail_barangPenitip', compact('barang','isElektronik'));
+        return view('penitip.detail_barangPenitip', compact('barang', 'isElektronik'));
     }
 
     // Simpan barang baru
@@ -266,8 +266,7 @@ class BarangControllers extends Controller
     }
 
     public function search(Request $request)
-    {
-        {
+    { {
             $request->validate([
                 'nama_barang' => 'nullable|string|max:255',
             ]);
@@ -295,13 +294,13 @@ class BarangControllers extends Controller
                 asset('images/cosmetics.png'),
             ];
 
-            return view('shop', compact('barang','kategoris','images'));
+            return view('shop', compact('barang', 'kategoris', 'images'));
         }
 
     }
 
     // IKI DHA PUNYA MU LEK PENGEN NGECEK
-     public function showDaftarBarang()
+    public function showDaftarBarang()
     {
         // Ambil semua barang dengan relasi kategori dan informasi pegawai
         $barang = Barang::with(['kategoribarang'])->get();
@@ -365,23 +364,63 @@ class BarangControllers extends Controller
     // Update barang dari form gudang
     public function updateBarangGudang(Request $request, $id_barang)
     {
-        $request->validate([
-            'id_kategori' => 'required|integer',
+        $validated = $request->validate([
+            'id_kategori' => 'required|exists:kategoribarang,id_kategori',
             'nama_barang' => 'required|string|max:255',
-            'harga_barang' => 'required|numeric',
+            'harga_barang' => 'required|numeric|min:0',
+            'berat_barang' => 'nullable|numeric|min:0',
+            'status_barang' => 'required|string',
+            'masa_penitipan' => 'nullable|integer|min:1',
             'deskripsi_barang' => 'nullable|string',
-            'foto_barang' => 'nullable|string',
-            'status_barang' => 'nullable|string',
-            'rating_barang' => 'nullable|numeric|between:0,5',
-            'berat_barang' => 'nullable|numeric',
+            'rating_barang' => 'nullable|numeric|min:0|max:5',
             'garansi_barang' => 'nullable|date',
-            'masa_penitipan' => 'nullable|integer',
+            'foto_barang' => 'nullable|array|max:5',
+            'foto_barang.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $barang = Barang::findOrFail($id_barang);
-        $barang->update($request->all());
+        try {
+            $barang = Barang::findOrFail($id_barang);
 
-        return redirect()->route('gudang.DaftarBarang')->with('success', 'Barang berhasil diperbarui');
+            // Handle foto upload jika ada
+            if ($request->hasFile('foto_barang')) {
+                // Hapus foto lama
+                $oldFotos = $barang->foto_barang;
+                if (is_array($oldFotos)) {
+                    foreach ($oldFotos as $oldFoto) {
+                        if (file_exists(public_path($oldFoto))) {
+                            unlink(public_path($oldFoto));
+                        }
+                    }
+                }
+
+                // Upload foto baru
+                $fotoPaths = [];
+                foreach ($request->file('foto_barang') as $index => $foto) {
+                    $filename = 'barang_' . time() . '_' . $index . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                    $foto->move(public_path('images'), $filename);
+                    $fotoPaths[] = 'images/' . $filename;
+                }
+                $barang->foto_barang = $fotoPaths;
+            }
+
+            // Update data barang
+            $barang->update([
+                'id_kategori' => $validated['id_kategori'],
+                'nama_barang' => $validated['nama_barang'],
+                'harga_barang' => $validated['harga_barang'],
+                'berat_barang' => $validated['berat_barang'],
+                'status_barang' => $validated['status_barang'],
+                'masa_penitipan' => $validated['masa_penitipan'],
+                'deskripsi_barang' => $validated['deskripsi_barang'],
+                'rating_barang' => $validated['rating_barang'],
+                'garansi_barang' => $validated['garansi_barang'],
+            ]);
+
+            return redirect()->route('gudang.DaftarBarang')->with('success', 'Barang berhasil diupdate!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
 }
