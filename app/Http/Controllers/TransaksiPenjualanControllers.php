@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+
 
 class TransaksiPenjualanControllers extends Controller
 {
@@ -196,165 +198,123 @@ class TransaksiPenjualanControllers extends Controller
             return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
         }
 
-        // Validasi poin yang digunakan
-        $request->validate([
+        // 1. Buat ID transaksi baru
+        $lastTransaction = transaksipenjualan::where('id', 'like', 'TP%')
+            ->orderBy('id', 'desc')->first();
+
+        $newId = !$lastTransaction
+            ? 'TP01'
+            : 'TP' . str_pad(((int) substr($lastTransaction->id, 2)) + 1, 2, '0', STR_PAD_LEFT);
+
+        // 2. Validasi request
+        $validator = Validator::make($request->all(), [
+            'metode_pengantaran' => 'required|in:ambil_sendiri,diantar_kurir',
+            'selected_address' => 'required_if:metode_pengantaran,diantar_kurir|nullable|exists:alamat,id',
             'poin_digunakan' => 'nullable|integer|min:0|max:' . $pembeli->total_poin,
         ], [
+            'metode_pengantaran.required' => 'Silakan pilih metode pengantaran.',
+            'selected_address.required_if' => 'Silakan pilih alamat pengiriman.',
+            'selected_address.exists' => 'Alamat tidak ditemukan.',
             'poin_digunakan.max' => 'Poin yang digunakan tidak boleh melebihi total poin Anda (' . number_format($pembeli->total_poin, 0, ',', '.') . ' poin).',
-            'poin_digunakan.min' => 'Poin yang digunakan tidak boleh kurang dari 0.',
-            'poin_digunakan.integer' => 'Poin yang digunakan harus berupa angka.',
         ]);
 
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // 3. Ambil keranjang dari session
         $keranjangKey = 'keranjang_' . $pembeli->id;
-        $keranjang = session()->get($keranjangKey, []);
+        $keranjang = session($keranjangKey, []);
         if (empty($keranjang)) {
             return redirect()->route('pembeli.cart')->with('error', 'Keranjang Anda kosong.');
         }
 
-        // Validasi request
-        $validationRules = [
-            'metode_pengantaran' => 'required|in:ambil_sendiri,diantar_kurir',
-        ];
-        if ($request->metode_pengantaran === 'diantar_kurir') {
-            $validationRules['selected_address'] = 'required|exists:alamat,id';
-        }
-        $request->validate($validationRules, [
-            'metode_pengantaran.required' => 'Silakan pilih metode pengantaran.',
-            'metode_pengantaran.in' => 'Metode pengantaran tidak valid.',
-            'selected_address.required' => 'Silakan pilih alamat pengiriman.',
-            'selected_address.exists' => 'Alamat yang dipilih tidak valid.',
-        ]);
+        // 4. Inisialisasi dan hitung total
+        $subtotal = collect($keranjang)->sum('harga_barang');
+        $totalItems = count($keranjang);
 
+        $ongkir = $request->metode_pengantaran === 'diantar_kurir' && $subtotal < 1500000 ? 100000 : 0;
+        $poin_digunakan = (int) $request->input('poin_digunakan', 0);
+        $diskon_poin = min($poin_digunakan * 100, $subtotal);
+        $total = $subtotal + $ongkir - $diskon_poin;
+
+        // PERBAIKAN: Hapus sistem random poin, hanya simpan poin yang digunakan
+        // $poin_didapat = floor($total / 10000); // DIHAPUS
+
+        $tanggal_kirim = $request->metode_pengantaran === 'diantar_kurir' ? now()->addDays(2) : null;
+        $id_pegawai = $request->metode_pengantaran === 'diantar_kurir' ? 5 : 4;
+
+        $data = [
+            'id' => $newId,
+            'id_pembeli' => $pembeli->id_pembeli,
+            'id_pegawai' => $id_pegawai,
+            'tanggal_transaksi' => now(),
+            'metode_pengantaran' => $request->metode_pengantaran,
+            'tanggal_lunas' => null,
+            'bukti_pembayaran' => null,
+            'status_pembayaran' => 'Belum Lunas',
+            'poin' => $poin_digunakan, // PERBAIKAN: Simpan poin yang digunakan (terpotong)
+            'poin_digunakan' => $poin_digunakan,
+            'diskon_poin' => $diskon_poin,
+            'tanggal_kirim' => $tanggal_kirim,
+            'ongkir' => $ongkir,
+            'status_transaksi' => 'diproses'
+        ];
+
+        // 5. Simpan transaksi dan detail secara atomic
+        $transaksi = null;
         DB::beginTransaction();
         try {
-            // Hitung total belanja (semua item quantity = 1)
-            $subtotal = collect($keranjang)->sum(function ($item) {
-                return $item['harga_barang']; // Tidak perlu dikali jumlah karena selalu 1
-            });
-
-            // Hitung ongkir
-            $ongkir = 0;
-            $metode_pengantaran = $request->metode_pengantaran;
-            if ($metode_pengantaran === 'diantar_kurir') {
-                $ongkir = $subtotal >= 1500000 ? 0 : 100000;
-            }
-
-            // Hitung poin yang digunakan (jika ada)
-            $poin_digunakan = intval($request->input('poin_digunakan', 0));
-            $diskon_poin = 0;
-
-            // Validasi ulang poin yang digunakan (double check)
+            // Kurangi poin pembeli
             if ($poin_digunakan > 0) {
-                if ($poin_digunakan > $pembeli->total_poin) {
-                    throw new \Exception('Poin yang digunakan melebihi total poin Anda.');
-                }
-
-                // Konversi poin ke diskon (contoh: 1 poin = Rp 100)
-                $diskon_poin = $poin_digunakan * 100; // Sesuaikan dengan nilai konversi poin Anda
-                if ($diskon_poin > $subtotal) {
-                    $diskon_poin = $subtotal; // Jangan sampai diskon melebihi subtotal
-                    $poin_digunakan = $subtotal / 100; // Recalculate poin yang benar-benar digunakan
-                }
-            }
-
-            $total = $subtotal + $ongkir - $diskon_poin;
-            $poin_didapat = floor($total / 10000); // Hitung poin yang didapat dari transaksi ini
-
-            // Tentukan tanggal kirim
-            $tanggal_kirim = null;
-            if ($metode_pengantaran === 'diantar_kurir') {
-                $tanggal_kirim = now()->addDays(2);
-            }
-
-            // Generate ID transaksi
-            $lastTransaction = transaksipenjualan::where('id', 'like', 'TP%')
-                ->orderBy('id', 'desc')
-                ->first();
-            if (!$lastTransaction) {
-                $newId = 'TP01';
-            } else {
-                $lastNumber = (int) substr($lastTransaction->id, 2);
-                $nextNumber = $lastNumber + 1;
-                $formattedNumber = str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
-                $newId = 'TP' . $formattedNumber;
-            }
-
-            $id_pegawai = ($metode_pengantaran === 'diantar_kurir') ? 5 : 4;
-
-            // KURANGI POIN PEMBELI TERLEBIH DAHULU (SEBELUM MEMBUAT TRANSAKSI)
-            if ($poin_digunakan > 0) {
-                // Refresh data pembeli untuk memastikan data terbaru
                 $pembeli->refresh();
-
-                // Pastikan poin masih cukup
                 if ($poin_digunakan > $pembeli->total_poin) {
-                    throw new \Exception('Poin tidak mencukupi. Poin Anda saat ini: ' . $pembeli->total_poin);
+                    throw new \Exception('Poin Anda tidak mencukupi.');
                 }
-
-                // Kurangi poin pembeli
-                $pembeli->total_poin -= $poin_digunakan;
-                $pembeli->save();
-
-                // Log untuk debugging
-                \Log::info('Poin pembeli dikurangi', [
-                    'id_pembeli' => $pembeli->id_pembeli,
-                    'poin_digunakan' => $poin_digunakan,
-                    'total_poin_sebelum' => $pembeli->total_poin + $poin_digunakan,
-                    'total_poin_sesudah' => $pembeli->total_poin
-                ]);
+                $pembeli->decrement('total_poin', $poin_digunakan);
             }
 
-            // Buat transaksi baru
-            $transaksi = transaksipenjualan::create([
-                'id' => $newId,
-                'id_pembeli' => $pembeli->id_pembeli,
-                'id_pegawai' => $id_pegawai,
-                'tanggal_transaksi' => now(),
-                'metode_pengantaran' => $metode_pengantaran,
-                'tanggal_lunas' => null,
-                'bukti_pembayaran' => null,
-                'status_pembayaran' => 'Belum Lunas',
-                'poin' => $poin_didapat,
-                'poin_digunakan' => $poin_digunakan, // Simpan poin yang digunakan
-                'diskon_poin' => $diskon_poin, // Simpan diskon dari poin
-                'tanggal_kirim' => $tanggal_kirim,
-                'ongkir' => $ongkir,
-                'status_transaksi' => 'diproses'
-            ]);
+            // Simpan header transaksi
+            $transaksi = transaksipenjualan::create($data);
 
-            // PROSES UPDATE STATUS BARANG dan detail transaksi
+            // Simpan detail dan update status barang
             foreach ($keranjang as $id_barang => $item) {
-                $barang = Barang::where('id_barang', $id_barang)->first();
-                if (!$barang) {
+                $barang = Barang::find($id_barang);
+                if (!$barang)
                     continue;
-                }
-                // Subtotal item selalu harga barang x 1
-                $subtotalItem = $barang->harga_barang * 1;
-                $detailTransaksi = $transaksi->detailTransaksi()->create([
-                    'id_barang' => $barang->id_barang,
+
+                $hargaBarang = $barang->harga_barang;
+                $porsi = $subtotal > 0 ? ($hargaBarang / $subtotal) : (1 / $totalItems);
+                $ongkirItem = $porsi * $ongkir;
+                $diskonItem = $porsi * $diskon_poin;
+                $totalHargaFinal = $hargaBarang + $ongkirItem - $diskonItem;
+
+                $transaksi->detailTransaksi()->create([
+                    'id_barang' => $id_barang,
                     'jumlah' => 1,
-                    'harga' => $barang->harga_barang,
-                    'subtotal' => $subtotalItem,
-                    'total_harga' => $subtotalItem,
+                    'harga' => $hargaBarang,
+                    'subtotal' => $hargaBarang,
+                    'total_harga' => round($totalHargaFinal),
                 ]);
+
                 $barang->status_barang = 'laku';
                 $barang->save();
             }
 
-            // Kosongkan keranjang
             session()->forget($keranjangKey);
-
             DB::commit();
+
             return redirect()->route('pembayaranPembeli', ['id' => $transaksi->id])
-                ->with('success', 'Transaksi berhasil diproses dengan ID: ' . $newId .
+                ->with('success', 'Checkout berhasil. ID transaksi: ' . $transaksi->id .
                     ($poin_digunakan > 0 ? '. Poin sebesar ' . number_format($poin_digunakan, 0, ',', '.') . ' telah digunakan.' : ''));
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('pembeli.cart')
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan saat memproses checkout: ' . $e->getMessage());
+                ->with('error', 'Gagal checkout: ' . $e->getMessage());
         }
     }
+
 
     public function showPembayaran($id)
     {
@@ -398,14 +358,14 @@ class TransaksiPenjualanControllers extends Controller
             \Log::info('Starting cleanup for expired transaction: ' . $transaksi->id);
 
             // 1. Kembalikan poin terlebih dahulu
-            if ($transaksi->poin_digunakan > 0) {
+            if ($transaksi->poin > 0) {
                 $pembeli = $transaksi->pembeli;
-                $pembeli->total_poin += $transaksi->poin_digunakan;
+                $pembeli->total_poin += $transaksi->poin;
                 $pembeli->save();
 
                 \Log::info('Poin dikembalikan', [
                     'pembeli_id' => $pembeli->id_pembeli,
-                    'poin_dikembalikan' => $transaksi->poin_digunakan,
+                    'poin_dikembalikan' => $transaksi->poin,
                     'total_poin_sekarang' => $pembeli->total_poin
                 ]);
             }
