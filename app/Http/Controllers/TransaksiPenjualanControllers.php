@@ -5,12 +5,15 @@ use App\Models\Barang;
 use App\Models\Keranjang;
 use App\Models\Alamat;
 use App\Models\transaksipenjualan;
+use App\Models\Pegawai;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class TransaksiPenjualanControllers extends Controller
 {
@@ -746,5 +749,235 @@ class TransaksiPenjualanControllers extends Controller
         }
     }
 
+
+     public function showTransaksiKirim()
+    {
+        try {
+            $pegawaiLogin = Auth::guard('pegawai')->user();
+
+            // Ambil transaksi dengan eager loading
+            $transaksiAntar = TransaksiPenjualan::with(['detailTransaksi.barang', 'pembeli'])
+                ->where('metode_pengantaran', 'diantar_kurir')
+                ->orderBy('tanggal_transaksi', 'desc')
+                ->get();
+
+            $transaksiAmbilsendiri = TransaksiPenjualan::with(['detailTransaksi.barang', 'pembeli'])
+                ->where('metode_pengantaran', 'ambil_sendiri')
+                ->orderBy('tanggal_transaksi', 'desc')
+                ->get();
+            $kurirList = Pegawai::where('id_jabatan', 5)->get();
+            return view('gudang.DashboardShowTransaksiAntarAmbil', compact(
+                'transaksiAntar',
+                'transaksiAmbilsendiri',
+                'pegawaiLogin',
+                'kurirList'
+            ));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal membuka halaman verifikasi: ' . $e->getMessage());
+        }
+    }
+
+    // public function jadwalPengiriman(Request $request)
+    // {
+    //     $request->validate([
+    //         'transaksi_id' => 'required|exists:transaksipenjualan,id_transaksi_penjualan',
+    //         'tanggal_kirim' => 'required|date|after_or_equal:today',
+    //         'id_kurir' => 'required|exists:pegawai,id',
+    //     ]);
+
+    //     $kurir = Pegawai::findOrFail($request->id_kurir);
+
+    //     if (strtolower($kurir->jabatan) !== 'kurir') {
+    //         return back()->withErrors('Pegawai terpilih bukan kurir.');
+    //     }
+
+    //     $transaksi = TransaksiPenjualan::findOrFail($request->transaksi_id);
+
+    //     $jamTransaksi = Carbon::parse($transaksi->tanggal_transaksi)->hour;
+
+    //     if ($jamTransaksi >= 16) {
+    //         $tanggalDipilih = Carbon::parse($request->tanggal_kirim);
+    //         $tanggalTransaksi = Carbon::parse($transaksi->tanggal_transaksi);
+
+    //         if ($tanggalDipilih->isSameDay($tanggalTransaksi)) {
+    //             return back()->withErrors('Transaksi setelah jam 16.00 hanya bisa dikirim mulai hari berikutnya.');
+    //         }
+    //     }
+
+    //     $transaksi->update([
+    //         'tanggal_kirim' => $request->tanggal_kirim,
+    //         'id_kurir' => $kurir->id,
+    //     ]);
+
+    //     return back()->with('success', 'Pengiriman berhasil dijadwalkan.');
+    // }
+
+    public function jadwalPengiriman(Request $request)
+    {
+        $request->validate([
+            'transaksi_id' => 'required|exists:transaksipenjualan,id_transaksi_penjualan',
+            'id_kurir' => 'required|exists:pegawai,id_pegawai',
+        ]);
+
+        $kurir = Pegawai::findOrFail($request->id_kurir);
+
+        if (strtolower($kurir->jabatan) !== 'Kurir') {
+            return back()->withErrors('Pegawai terpilih bukan kurir.');
+        }
+
+        $transaksi = TransaksiPenjualan::findOrFail($request->transaksi_id);
+
+        $tanggalTransaksi = Carbon::parse($transaksi->tanggal_transaksi);
+        $jamTransaksi = $tanggalTransaksi->hour;
+
+        // Tentukan tanggal kirim berdasarkan jam transaksi
+        if ($jamTransaksi >= 16) {
+            $tanggalKirim = $tanggalTransaksi->copy()->addDay()->startOfDay();
+        } else {
+            $tanggalKirim = $tanggalTransaksi->copy()->startOfDay();
+        }
+        \Log::info('Updating transaksi', [
+            'id_transaksi_penjualan' => $transaksi->id_transaksi_penjualan,
+            'tanggal_kirim' => $tanggalKirim,
+            'id_kurir' => $kurir->id_kurir,
+        ]);
+        $transaksi->update([
+            'tanggal_kirim' => $tanggalKirim,
+            'id_kurir' => $kurir->id_kurir,
+        ]);
+
+        return back()->with('success', 'Pengiriman berhasil dijadwalkan.');
+    }
+
+    public function jadwalAmbil(Request $request)
+    {
+        $request->validate([
+            'transaksi_id' => 'required|exists:transaksipenjualan,id_transaksi_penjualan',
+            'tanggal_ambil' => 'required|date|after_or_equal:today',
+        ]);
+
+            $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $request->transaksi_id)->first();
+
+        $transaksi->update([
+            'tanggal_ambil' => $request->tanggal_ambil,
+        ]);
+
+        return back()->with('success', 'Tanggal pengambilan berhasil dijadwalkan.');
+    }
+
+    public function konfirmasiTerima($id)
+    {
+        try {
+            $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $id)->firstOrFail();
+
+            $transaksi->update([
+                'status_transaksi' => 'transaksi selesai',
+            ]);
+
+            return back()->with('success', 'Transaksi berhasil dikonfirmasi selesai.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return back()->with('error', 'Transaksi tidak ditemukan.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function konfirmasiDanCetakNota($id)
+    {
+        try {
+            // Ambil data transaksi beserta relasi
+            $transaksi = transaksipenjualan::with(['pembeli', 'pegawai', 'kurir', 'detailTransaksi.barang'])->findOrFail($id);
+
+            // Cek apakah no_nota sudah ada, kalau belum generate dan simpan
+            if (empty($transaksi->no_nota)) {
+                // Ambil nomor urut terakhir berdasarkan id_transaksi_penjualan
+                $lastTransaction = DB::table('transaksipenjualan')->orderBy('id_transaksi_penjualan', 'desc')->first();
+                $lastNumber = $lastTransaction ? $lastTransaction->id_transaksi_penjualan : 0;
+                $newNumber = $lastNumber + 1;
+
+                $year = Carbon::now()->format('Y');
+                $month = Carbon::now()->format('m');
+
+                // Format no nota
+                $noNota = $year . '.' . $month . '.' . $newNumber;
+
+                // Simpan no_nota ke database
+                $transaksi->no_nota = $noNota;
+                $transaksi->save();
+            }
+
+            // Siapkan data untuk nota
+            $data = [
+                'transaksi' => $transaksi,
+                'tanggal_cetak' => Carbon::now()->format('d F Y H:i:s'),
+                'perusahaan' => [
+                    'nama' => 'ReUse Mart',
+                    'alamat' => 'Jl. Green Eco Park No. 456 Yogyakarta',
+                    'telepon' => '(0274) 123-4567',
+                    'email' => 'info@reusermart.com'
+                ]
+            ];
+
+            // Generate PDF nota
+            $pdf = PDF::loadView('gudang.NotaAmbilSendiri', $data)
+                ->setPaper('a4', 'portrait')
+                ->setOptions([
+                    'dpi' => 150,
+                    'defaultFont' => 'sans-serif',
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => true
+                ]);
+
+            // Nama file, bisa pakai no_nota supaya lebih mudah
+            $namaFile = 'Nota_Transaksi_' . $transaksi->no_nota . '_' . now()->format('YmdHis') . '.pdf';
+
+            // Return sebagai file download
+            return $pdf->download($namaFile);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mencetak nota: ' . $e->getMessage());
+        }
+    }
+
+    public function cekStatusHangus($id)
+    {
+        try {
+            $transaksi = transaksipenjualan::with('detailTransaksi.barang')->findOrFail($id);
+
+            // Pastikan tanggal ambil tidak null
+            if (!$transaksi->tanggal_ambil) {
+                return redirect()->back()->with('error', 'Tanggal ambil belum ditentukan.');
+            }
+
+            $tanggalAmbil = Carbon::parse($transaksi->tanggal_ambil);
+            $sekarang = Carbon::now();
+
+            // Hitung selisih hari
+            $selisihHari = $sekarang->diffInDays($tanggalAmbil);
+
+            if ($selisihHari > 2 && $transaksi->status_transaksi !== 'Hangus') {
+                DB::transaction(function () use ($transaksi) {
+                    // Update status transaksi jadi Hangus
+                    $transaksi->status_transaksi = 'Hangus';
+                    $transaksi->save();
+
+                    // Update status barang di detail transaksi
+                    foreach ($transaksi->detailTransaksi as $detail) {
+                        if ($detail->barang) {
+                            $detail->barang->status = 'di donasikan';
+                            $detail->barang->save();
+                        }
+                    }
+                });
+
+                return redirect()->back()->with('success', 'Status transaksi dan barang berhasil diubah menjadi Hangus dan barang untuk donasi.');
+            }
+
+            return redirect()->back()->with('info', 'Transaksi belum melewati batas waktu 2 hari atau sudah Hangus.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memproses: ' . $e->getMessage());
+        }
+    }
 
 }

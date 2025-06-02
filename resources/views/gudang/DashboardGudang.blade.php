@@ -23,25 +23,29 @@
             <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
             <nav>
                 <div class="space-y-4">
-                    <a href="{{ route('gudang.DashboardGudang') }}"
-                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                        <span class="text-2xl font-bold">{{ $pegawai->nama_pegawai }}</span>
-                    </a>
-                    <a href="{{ route('gudang.DashboardTitipanBarang') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-dolly mr-2"></i>
-                        <span>Tambah Titip Barang</span>
-                    </a>
-                    <a href="{{ route('gudang.DaftarBarang') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-boxes mr-2"></i>
-                        <span>Daftar Barang</span>
-                    </a>
-                    <a href="{{ route('gudang.DasboardCatatanPengembalianBarang') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-boxes mr-2"></i>
-                        <span>Catatan Pengembalian Barang</span>
-                    </a>
+                        <a href="{{ route('gudang.DashboardGudang') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                            <span  class="text-2xl font-bold">{{ $pegawai->nama_pegawai }}</span>
+                        </a>
+                        <a href="{{ route('gudang.DashboardTitipanBarang') }}"
+                            class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                            <i class="fas fa-dolly mr-2"></i>
+                            <span>Tambah Titip Barang</span>
+                        </a>
+                        <a href="{{ route('gudang.DaftarBarang') }}"
+                            class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                            <i class="fas fa-boxes mr-2"></i>
+                            <span>Daftar Barang</span>
+                        </a>
+                        <a href="{{ route('gudang.DasboardCatatanPengembalianBarang') }}"
+                            class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                            <i class="fas fa-boxes mr-2"></i>
+                            <span>Catatan Pengembalian Barang</span>
+                        </a>
+                        <a href="{{ route('gudang.DashboardShowTransaksiAntarAmbil') }}"
+                            class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                            <i class="fa-solid fa-truck"></i> 
+                            <span>Daftar Transakasi Kirim dan Ambil sendiri</span>
+                        </a>
                 </div>
             </nav>
         </div>

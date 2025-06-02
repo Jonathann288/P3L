@@ -263,6 +263,15 @@ Route::middleware(['checkjabatan:Gudang'])->group(function () {
     Route::get('/Dashboard-catatan-pengambilan', [TransaksiPenitipanControllers::class, 'showCatatanPengambilanBarang'])->name('gudang.DasboardCatatanPengembalianBarang');
     Route::post('/gudang/konfirmasi-pengambilan/{id}', [TransaksiPenitipanControllers::class, 'konfirmasiPengambilan'])->name('gudang.konfirmasiPengambilan');
     // SAMPE INI
+    Route::get('/DashboardDaftarTransaksi', [TransaksiPenjualanControllers::class, 'showTransaksiKirim'])->name('gudang.DashboardShowTransaksiAntarAmbil');
+    Route::post('/gudang/jadwal-baru', [TransaksiPenjualanControllers::class, 'jadwalPengiriman'])->name('gudang.jadwal-baru');
+    Route::post('/gudang/jadwal-ambil', [TransaksiPenjualanControllers::class, 'jadwalAmbil'])->name('gudang.jadwal-ambil');
+    Route::post('/gudang/konfirmasi-terima/{id}', [TransaksiPenjualanControllers::class, 'konfirmasiTerima'])->name('gudang.konfirmasi-terima');
+    Route::post('/transaksi/nota-cetak/{id}', [TransaksiPenjualanControllers::class, 'konfirmasiDanCetakNota'])->name('gudang.cetak-nota');
+
+
+
+
 });
 Route::middleware(['checkjabatan:Kurir'])->group(function () {
     Route::get('/DashboardKurir', function () {

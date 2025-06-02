@@ -22,13 +22,17 @@ class transaksipenjualan extends Model
         'poin',
         'tanggal_kirim',
         'ongkir',
-        'status_transaksi'
+        'status_transaksi',
+        'id_kurir',
+        'tanggal_ambil',
+        'no_nota'
     ];
 
     protected $casts = [
         'tanggal_transaksi' => 'datetime',
         'tanggal_lunas' => 'datetime',
         'tanggal_kirim' => 'datetime',
+        'tanggal_ambil' => 'datetime',
         'poin' => 'integer',
         'ongkir' => 'float',
     ];
@@ -54,5 +58,9 @@ class transaksipenjualan extends Model
         return $this->belongsTo(Barang::class, 'id_barang');
     }
 
+    public function kurir()
+    {
+        return $this->belongsTo(Pegawai::class, 'id_kurir');
+    }
 
 }
