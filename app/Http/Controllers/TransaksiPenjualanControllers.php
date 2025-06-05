@@ -279,7 +279,6 @@ class TransaksiPenjualanControllers extends Controller
             // Simpan header transaksi
             $transaksi = transaksipenjualan::create($data);
 
-            // Simpan detail dan update status barang
             foreach ($keranjang as $id_barang => $item) {
                 $barang = Barang::find($id_barang);
                 if (!$barang)
@@ -353,7 +352,7 @@ class TransaksiPenjualanControllers extends Controller
     /**
      * Method untuk membersihkan transaksi yang sudah expired
      */
-     private function cleanupExpiredTransaction($transaksi)
+    private function cleanupExpiredTransaction($transaksi)
     {
         DB::beginTransaction();
         try {
@@ -689,28 +688,75 @@ class TransaksiPenjualanControllers extends Controller
         try {
             DB::beginTransaction();
 
-            // Gunakan firstOrFail() untuk mendapatkan error lebih jelas
-            $transaksi = TransaksiPenjualan::where('id', $id)->firstOrFail();
+            // Ambil transaksi beserta relasi pembeli dan detail transaksi
+            $transaksi = TransaksiPenjualan::with(['pembeli', 'detailTransaksi'])->where('id', $id)->firstOrFail();
 
+            // Validasi: hanya bisa di-approve jika status masih "Menunggu Konfirmasi"
+            if ($transaksi->status_pembayaran !== 'Menunggu Konfirmasi') {
+                return redirect()->back()->with('error', 'Transaksi ini sudah diproses sebelumnya.');
+            }
+
+            // Hitung total transaksi dari detailTransaksi
+            // $subtotal = $transaksi->detailTransaksi->sum('total_harga');
+            // $totalSetelahDiskon = $subtotal - $transaksi->diskon_poin;
+
+            $totalHarga = $transaksi->detailTransaksi->sum('total_harga');
+            $poinDidapat = floor($totalHarga / 10000);
+
+
+            // Hitung poin yang didapat (1 poin per 10.000)
+            // $poinDidapat = floor($totalSetelahDiskon / 10000);
+
+            // // Tambahkan bonus poin 20% jika subtotal > 500.000
+            // if ($subtotal > 500000) {
+            //     $bonusPoin = floor($poinDidapat * 0.20);
+            //     $poinDidapat += $bonusPoin;
+            // }
+
+            if ($totalHarga > 500000) {
+                $bonus = round($poinDidapat * 0.2);
+                $poinDidapat += $bonus;
+            }
+
+
+            // Update status transaksi dan simpan poin ke kolom poin_dapat
             $transaksi->update([
                 'status_pembayaran' => 'Lunas',
-                'status_transaksi' => 'Di siapkan'
+                'status_transaksi' => 'Di siapkan',
+                'poin_dapat' => $poinDidapat
+            ]);
+
+            // Logging poin yang didapat untuk tracking
+            \Log::info('Poin disimpan di transaksi', [
+                'transaksi_id' => $transaksi->id,
+                'pembeli_id' => $transaksi->pembeli->id_pembeli,
+                'poin_dapat' => $poinDidapat,
+                'totalHarga' => $totalHarga,
+                'bonus_applicable' => $totalHarga > 500000
             ]);
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Transaksi berhasil di-approve.');
+            $message = 'Transaksi berhasil di-approve.';
+            if ($poinDidapat > 0) {
+                $message .= ' Pembeli mendapat ' . number_format($poinDidapat, 0, ',', '.') . ' poin (tersimpan di data transaksi).';
+            }
+
+            return redirect()->back()->with('success', $message);
+
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Transaksi dengan ID ' . $id . ' tidak ditemukan.');
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Error approve transaction: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal mengapprove transaksi: ' . $e->getMessage());
         }
     }
 
 
-     public function showTransaksiKirim()
+
+    public function showTransaksiKirim()
     {
         try {
             $pegawaiLogin = Auth::guard('pegawai')->user();
@@ -737,7 +783,7 @@ class TransaksiPenjualanControllers extends Controller
         }
     }
 
-   public function jadwalkanPengiriman(Request $request)
+    public function jadwalkanPengiriman(Request $request)
     {
         $request->validate([
             'id_transaksi_penjualan' => 'required|exists:TransaksiPenjualan,id_transaksi_penjualan',
@@ -813,7 +859,7 @@ class TransaksiPenjualanControllers extends Controller
             'tanggal_ambil' => 'required|date|after_or_equal:today',
         ]);
 
-            $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $request->transaksi_id)->first();
+        $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $request->transaksi_id)->first();
 
         $transaksi->update([
             'tanggal_ambil' => $request->tanggal_ambil,
@@ -827,7 +873,10 @@ class TransaksiPenjualanControllers extends Controller
         DB::beginTransaction();
 
         try {
-            $transaksi = TransaksiPenjualan::with('detailTransaksi.barang.detailTransaksiPenitipan.transaksiPenitipan.penitip')
+            $transaksi = TransaksiPenjualan::with([
+                'pembeli',
+                'detailTransaksi.barang.detailTransaksiPenitipan.transaksiPenitipan.penitip'
+            ])
                 ->where('id_transaksi_penjualan', $id)
                 ->firstOrFail();
 
@@ -843,13 +892,20 @@ class TransaksiPenjualanControllers extends Controller
                 }
             }
 
+            // Tambahkan poin_dapat ke total_poin pembeli
+            if ($transaksi->poin_dapat > 0) {
+                $pembeli = $transaksi->pembeli;
+                $pembeli->total_poin += $transaksi->poin_dapat;
+                $pembeli->save();
+            }
+
             $transaksi->update([
                 'status_transaksi' => 'transaksi selesai',
             ]);
 
             DB::commit();
 
-            return back()->with('success', 'Transaksi dikonfirmasi dan saldo penitip diperbarui.');
+            return back()->with('success', 'Transaksi dikonfirmasi dan saldo penitip serta poin pembeli diperbarui.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             DB::rollBack();
             return back()->with('error', 'Transaksi tidak ditemukan.');
@@ -858,6 +914,7 @@ class TransaksiPenjualanControllers extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 
 
     public function konfirmasiDanCetakNota($id)
@@ -1014,5 +1071,26 @@ class TransaksiPenjualanControllers extends Controller
             return redirect()->back()->with('error', 'Gagal memproses: ' . $e->getMessage());
         }
     }
+
+
+    public function showTesting()
+    {
+        $transaksi = transaksipenjualan::with(['detailtransaksi.barang'])
+            ->where('status_pembayaran', 'Lunas')
+            ->where('status_transaksi', 'Di Siapkan')
+            ->get();
+
+        return view('testing', compact('transaksi'));
+    }
+
+    public function ubahStatus($id)
+    {
+        $transaksi = transaksipenjualan::findOrFail($id);
+        $transaksi->status_transaksi = 'Disiapkan';
+        $transaksi->save();
+
+        return redirect()->back()->with('success', 'Status transaksi berhasil diubah menjadi Disiapkan.');
+    }
+
 
 }

@@ -25,7 +25,8 @@ class transaksipenjualan extends Model
         'status_transaksi',
         'id_kurir',
         'tanggal_ambil',
-        'no_nota'
+        'no_nota',
+        'poin_dapat'
     ];
 
     protected $casts = [

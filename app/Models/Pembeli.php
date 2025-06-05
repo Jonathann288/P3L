@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+use Laravel\Sanctum\HasApiTokens;
+
+
 class Pembeli extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable,HasApiTokens;
 
     protected $table = 'pembeli';
     protected $primaryKey = 'id_pembeli';
