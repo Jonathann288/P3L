@@ -6,6 +6,7 @@ use App\Models\Keranjang;
 use App\Models\Alamat;
 use App\Models\transaksipenjualan;
 use App\Models\Pegawai;
+use App\Models\Komisi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class TransaksiPenjualanControllers extends Controller
@@ -243,7 +245,7 @@ class TransaksiPenjualanControllers extends Controller
         // PERBAIKAN: Hapus sistem random poin, hanya simpan poin yang digunakan
         // $poin_didapat = floor($total / 10000); // DIHAPUS
 
-        $tanggal_kirim = $request->metode_pengantaran === 'diantar_kurir' ? now()->addDays(2) : null;
+        $tanggal_kirim = $request->metode_pengantaran === 'diantar_kurir' ? now() : null;
         $id_pegawai = $request->metode_pengantaran === 'diantar_kurir' ? 5 : 4;
 
         $data = [
@@ -683,7 +685,7 @@ class TransaksiPenjualanControllers extends Controller
 
 
 
-    public function approveTransaction(Request $request, $id)
+public function approveTransaction(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -786,20 +788,21 @@ class TransaksiPenjualanControllers extends Controller
     public function jadwalkanPengiriman(Request $request)
     {
         $request->validate([
-            'id_transaksi_penjualan' => 'required|exists:TransaksiPenjualan,id_transaksi_penjualan',
+            'id_transaksi_penjualan' => 'required|exists:transaksipenjualan,id_transaksi_penjualan',
             'id_pegawai' => 'required|exists:pegawai,id_pegawai',
+            'tanggal_kirim' => 'required|date_format:Y-m-d\TH:i',
         ]);
 
-        $transaksi = TransaksiPenjualan::findOrFail($request->id_transaksi_penjualan);
+        $timezone = 'Asia/Jakarta';
 
-        $now = now();
-        $batasWaktuHariIni = now()->setHour(16)->setMinute(0)->setSecond(0);
+        $tanggalKirim = Carbon::createFromFormat('Y-m-d\TH:i', $request->tanggal_kirim, $timezone);
+        $batasWaktuHariIni = Carbon::today($timezone)->setHour(16)->setMinute(0)->setSecond(0);
 
-        if ($now->isToday() && $now->greaterThan($batasWaktuHariIni)) {
-            $tanggalKirim = now()->addDay()->setHour(8)->setMinute(0)->setSecond(0);
-        } else {
-            $tanggalKirim = now();
+        if ($tanggalKirim->isToday() && $tanggalKirim->greaterThan($batasWaktuHariIni)) {
+            $tanggalKirim = Carbon::tomorrow($timezone)->setHour(8)->setMinute(0)->setSecond(0);
         }
+
+        $transaksi = transaksipenjualan::findOrFail($request->id_transaksi_penjualan);
 
         $transaksi->update([
             'id_pegawai' => $request->id_pegawai,
@@ -809,48 +812,6 @@ class TransaksiPenjualanControllers extends Controller
 
         return back()->with('success', 'Jadwal pengiriman berhasil disimpan untuk tanggal ' . $tanggalKirim->translatedFormat('d M Y H:i') . '.');
     }
-
-
-    // public function jadwalPengiriman(Request $request)
-    // {
-    //     $request->validate([
-    //         'transaksi_id' => 'required|exists:transaksipenjualan,id_transaksi_penjualan',
-    //         'id_pegawai' => 'required|exists:pegawai,id_pegawai',
-    //     ]);
-
-    //     $kurir = Pegawai::findOrFail($request->id_pegawai);
-
-    //     if (strtolower($kurir->jabatan) !== 'Kurir') {
-    //         return back()->withErrors('Pegawai terpilih bukan kurir.');
-    //     }
-
-    //     $transaksi = TransaksiPenjualan::findOrFail($request->transaksi_id);
-
-    //     $tanggalTransaksi = Carbon::parse($transaksi->tanggal_transaksi);
-    //     $jamTransaksi = $tanggalTransaksi->hour;
-
-    //     // Tentukan tanggal kirim berdasarkan jam transaksi
-    //     if ($jamTransaksi >= 16) {
-    //         $tanggalKirim = $tanggalTransaksi->copy()->addDay()->setHour(8)->setMinute(0)->setSecond(0);
-    //     } else {
-    //         $tanggalKirim = $tanggalTransaksi->copy()->setHour(8)->setMinute(0)->setSecond(0);
-    //     }
-
-    //     \Log::info('Mengupdate jadwal pengiriman', [
-    //         'id_transaksi_penjualan' => $transaksi->id_transaksi_penjualan,
-    //         'tanggal_kirim' => $tanggalKirim,
-    //         'id_pegawai' => $request->id_pegawai,
-    //     ]);
-
-    //     $transaksi->update([
-    //         'id_pegawai' => $request->id_pegawai,
-    //         'tanggal_kirim' => $tanggalKirim,
-    //         'status_transaksi' => 'dijadwalkan', // jika kamu menggunakan status
-    //     ]);
-
-    //     return back()->with('success', 'Pengiriman berhasil dijadwalkan untuk tanggal ' . $tanggalKirim->translatedFormat('d M Y H:i') . '.');
-    // }
-
 
     public function jadwalAmbil(Request $request)
     {
@@ -868,7 +829,7 @@ class TransaksiPenjualanControllers extends Controller
         return back()->with('success', 'Tanggal pengambilan berhasil dijadwalkan.');
     }
 
-    public function konfirmasiTerima($id)
+        public function konfirmasiTerima($id)
     {
         DB::beginTransaction();
 
@@ -914,9 +875,7 @@ class TransaksiPenjualanControllers extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-
-
-
+  
     public function konfirmasiDanCetakNota($id)
     {
         try {
@@ -1031,45 +990,47 @@ class TransaksiPenjualanControllers extends Controller
         }
     }
 
-    public function cekStatusHangus($id)
+    public function cekStatusHangus(Request $request, $id)
     {
-        try {
-            $transaksi = transaksipenjualan::with('detailTransaksi.barang')->findOrFail($id);
+        $transaksi = TransaksiPenjualan::with('detailTransaksi.barang')->findOrFail($id);
 
-            // Pastikan tanggal ambil tidak null
-            if (!$transaksi->tanggal_ambil) {
-                return redirect()->back()->with('error', 'Tanggal ambil belum ditentukan.');
-            }
-
-            $tanggalAmbil = Carbon::parse($transaksi->tanggal_ambil);
-            $sekarang = Carbon::now();
-
-            // Hitung selisih hari
-            $selisihHari = $sekarang->diffInDays($tanggalAmbil);
-
-            if ($selisihHari > 2 && $transaksi->status_transaksi !== 'Hangus') {
-                DB::transaction(function () use ($transaksi) {
-                    // Update status transaksi jadi Hangus
-                    $transaksi->status_transaksi = 'Hangus';
-                    $transaksi->save();
-
-                    // Update status barang di detail transaksi
-                    foreach ($transaksi->detailTransaksi as $detail) {
-                        if ($detail->barang) {
-                            $detail->barang->status = 'di donasikan';
-                            $detail->barang->save();
-                        }
-                    }
-                });
-
-                return redirect()->back()->with('success', 'Status transaksi dan barang berhasil diubah menjadi Hangus dan barang untuk donasi.');
-            }
-
-            return redirect()->back()->with('info', 'Transaksi belum melewati batas waktu 2 hari atau sudah Hangus.');
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memproses: ' . $e->getMessage());
+        if (!$transaksi->tanggal_ambil) {
+            Log::info("Cek status hangus - transaksi ID {$id}: tanggal ambil belum ditentukan.");
+            return redirect()->back()->with('error', 'Tanggal ambil belum ditentukan.');
         }
+
+        $tanggalAmbil = Carbon::parse($transaksi->tanggal_ambil);
+        $sekarang = Carbon::now();
+
+        // Hitung selisih hari (float, dengan tanda)
+        $selisihHari = $sekarang->floatDiffInDays($tanggalAmbil, false);
+
+        Log::info("Cek status hangus - transaksi ID {$id}: tanggal ambil = {$tanggalAmbil}, sekarang = {$sekarang}, selisih hari = {$selisihHari}");
+
+        // Cek apakah sekarang sudah lewat 2 hari dari tanggal ambil
+        if ($sekarang->greaterThan($tanggalAmbil->copy()->addDays(2)) && strtolower($transaksi->status_transaksi) !== 'hangus') {
+            Log::info("Cek status hangus - transaksi ID {$id}: status akan diubah ke Hangus.");
+
+            DB::transaction(function () use ($transaksi) {
+                $transaksi->status_transaksi = 'Hangus';
+                $transaksi->save();
+
+                foreach ($transaksi->detailTransaksi as $detail) {
+                    if ($detail->barang) {
+                        $detail->barang->status_barang = 'di donasikan';
+                        $detail->barang->save();
+                    }
+                }
+            });
+
+            Log::info("Cek status hangus - transaksi ID {$id}: status dan barang berhasil diupdate.");
+
+            return redirect()->back()->with('success', 'Status transaksi dan barang berhasil diubah menjadi Hangus dan barang untuk donasi.');
+        }
+
+        Log::info("Cek status hangus - transaksi ID {$id}: belum melewati batas waktu 2 hari atau sudah Hangus.");
+
+        return redirect()->back()->with('info', 'Transaksi belum melewati batas waktu 2 hari atau sudah Hangus.');
     }
 
 

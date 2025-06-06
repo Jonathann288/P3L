@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.2/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -193,7 +194,6 @@
                                             <button 
                                                 class="text-yellow-600 hover:text-yellow-900 inline-flex items-center btn-jadwal"
                                                 data-id="{{ $transaksi->id_transaksi_penjualan }}"
-                                                data-jam-transaksi="{{ \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->format('H') }}"
                                                 data-tanggal-kirim="{{ $transaksi->tanggal_kirim }}"
                                             >
                                                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -266,6 +266,9 @@
                                         Status Pembayaran</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status Transaksi</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions</th>
                                 </tr>
                             </thead>
@@ -306,6 +309,10 @@
                                             <span
                                                 class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full capitalize">{{ $transaksi->status_pembayaran }}</span>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full capitalize">{{ $transaksi->status_transaksi }}</span>
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                             <button 
                                                 class="text-blue-600 hover:text-blue-900 inline-flex items-center btn-detail"
@@ -339,6 +346,11 @@
                                                     Jadwalkan Ambil
                                                 </button>
                                             @endif
+
+                                            <form action="{{ route('gudang.cekHangus', ['id' => $transaksi->id_transaksi_penjualan]) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit" class="px-3 py-1 bg-yellow-600 text-white rounded text-sm">Cek Status Hangus</button>
+                                            </form>
 
                                             @if ($transaksi->status_transaksi == 'Di siapkan')
                                             <form action="{{ route('gudang.konfirmasi-terima', $transaksi->id_transaksi_penjualan) }}" method="POST" onsubmit="return confirm('Yakin ingin konfirmasi barang sudah diterima?');">
@@ -393,6 +405,7 @@
         </div>
     </div>
 
+<div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white"></div>
     <!-- Modal -->
 <div id="detailModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
     <div class="bg-white rounded-lg shadow-lg max-w-xl w-full p-6 relative">
@@ -416,7 +429,7 @@
 
 <div id="modal-jadwal" class="fixed inset-0 bg-black bg-opacity-30 hidden justify-center items-center z-50">
     <div class="bg-white p-6 rounded-lg w-full max-w-md shadow">
-        <h2 class="text-lg font-bold mb-4">Pilih Kurir Pengiriman</h2>
+        <h2 class="text-lg font-bold mb-4">Jadwalkan Pengiriman</h2>
         <form action="{{ route('gudang.jadwal-baru') }}" method="POST">
             @csrf
             <input type="hidden" name="id_transaksi_penjualan" id="jadwal-transaksi-id">
@@ -430,8 +443,13 @@
                 </select>
             </div>
 
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Tanggal Kirim</label>
+                <input type="datetime-local" name="tanggal_kirim" id="tanggal-kirim" class="mt-1 p-2 w-full border rounded" required>
+            </div>
+
             <div class="flex justify-end space-x-2">
-                <button type="button" onclick="document.getElementById('modal-jadwal').classList.add('hidden')" class="px-4 py-2 bg-gray-300 rounded">Batal</button>
+                <button type="button" onclick="tutupModalJadwal()" class="px-4 py-2 bg-gray-300 rounded">Batal</button>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Simpan</button>
             </div>
         </form>
@@ -562,28 +580,67 @@ function showModal(id, namaPembeli, tanggalTransaksi, buktiPembayaran, barangLis
     document.getElementById('detailModal').classList.remove('hidden');
 }
 
-function closeModal() {
-    document.getElementById('detailModal').classList.add('hidden');
-}
+    function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+    }
 
-document.querySelectorAll('.btn-jadwal').forEach(button => {
-    button.addEventListener('click', function () {
-        const id = this.dataset.id;
+    document.querySelectorAll('.btn-jadwal').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.getAttribute('data-id');
+            const tanggalKirim = this.getAttribute('data-tanggal-kirim');
 
-        document.getElementById('jadwal-transaksi-id').value = id;
-        document.getElementById('modal-jadwal').classList.remove('hidden');
+            document.getElementById('jadwal-transaksi-id').value = id;
+
+            if (tanggalKirim) {
+                const formatted = new Date(tanggalKirim).toISOString().slice(0, 16); // format: YYYY-MM-DDTHH:MM
+                document.getElementById('tanggal-kirim').value = formatted;
+            } else {
+                const now = new Date();
+                const defaultDate = now.toISOString().slice(0, 16);
+                document.getElementById('tanggal-kirim').value = defaultDate;
+            }
+
+            document.getElementById('modal-jadwal').classList.remove('hidden');
+        });
     });
-});
 
-document.querySelectorAll('.btn-ambil').forEach(button => {
-    button.addEventListener('click', function () {
-        const id = this.dataset.id;
-        document.getElementById('ambil-transaksi-id').value = id;
-        document.getElementById('modal-ambil').classList.remove('hidden');
+    function tutupModalJadwal() {
+        document.getElementById('modal-jadwal').classList.add('hidden');
+    }
+
+    document.querySelectorAll('.btn-ambil').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.dataset.id;
+            document.getElementById('ambil-transaksi-id').value = id;
+            document.getElementById('modal-ambil').classList.remove('hidden');
+        });
     });
-});
 
+    function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
 
+            // Set warna berdasarkan tipe
+            if (type === 'success') {
+                toast.classList.add('bg-green-500');
+                toast.classList.remove('bg-red-500');
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-500');
+                toast.classList.remove('bg-green-500');
+            }
+
+            // Tampilkan toast dengan animasi
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+
+            // Hilangkan toast setelah 3 detik
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 500);
+            }, 3000);
+        }
 
 </script>
 

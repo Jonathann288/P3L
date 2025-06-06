@@ -26,7 +26,7 @@ class transaksipenjualan extends Model
         'id_kurir',
         'tanggal_ambil',
         'no_nota',
-        'poin_dapat'
+        'poin_dapat',
     ];
 
     protected $casts = [
@@ -53,6 +53,10 @@ class transaksipenjualan extends Model
         return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_penjualan');
     }
 
+    public function detail()
+    {
+        return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_pembelian', 'id_transaksi_pembelian');
+    }
 
     public function barang()
     {

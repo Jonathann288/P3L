@@ -23,12 +23,12 @@
             <nav>
                 <div class="space-y-4">
                     <a href="{{ route('owner.DashboardOwner') }}"
-                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                        <img src="images/fotoprofil.jpg" alt="profile" class="w-8 h-8 rounded-full object-cover">
-                        <span>{{ $pegawai->nama_pegawai }}</span>
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-user-circle mr-2"></i>
+                        <span>{{ $pegawaiLogin->nama_pegawai }}</span>
                     </a>
                     <a href="{{ route('owner.DashboardDonasi') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
                         <span>Daftar Request Donasi</span>
                     </a>
