@@ -23,12 +23,12 @@
             <nav>
                 <div class="space-y-4">
                     <a href="{{ route('owner.DashboardOwner') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        class="flex items-center space-x-4 p-3 bg-blue-600  rounded-lg">
                         <i class="fas fa-user-circle mr-2"></i>
-                        <span>{{ $pegawaiLogin->nama_pegawai }}</span>
+                        <span>{{ $pegawai->nama_pegawai }}</span>
                     </a>
                     <a href="{{ route('owner.DashboardDonasi') }}"
-                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
                         <span>Daftar Request Donasi</span>
                     </a>
@@ -51,6 +51,16 @@
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-book"></i>
                         <span>Laporan Transaksi Penitip</span>
+                    </a>
+                    <a href="{{route('owner.LaporanPenjualanKategoriBarang')}}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fas fa-boxes mr-2"></i>
+                        <span>Laporan Penjualan Per Kategori Barang</span>
+                    </a>
+                    <a href="{{ route('owner.LaporanPenitipanMasaHabis') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-calendar-times"></i>
+                        <span>Laporan Penitipan Habis</span>
                     </a>
                 </div>
             </nav>

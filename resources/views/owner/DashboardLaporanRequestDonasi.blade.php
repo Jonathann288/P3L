@@ -56,6 +56,16 @@
                         <i class="fa-solid fa-book"></i>
                         <span>Laporan Transaksi Penitip</span>
                     </a>
+                    <a href="{{route('owner.LaporanPenjualanKategoriBarang')}}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fas fa-boxes mr-2"></i>
+                        <span>Laporan Penjualan Per Kategori Barang</span>
+                    </a>
+                    <a href="{{ route('owner.LaporanPenitipanMasaHabis') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-calendar-times"></i>
+                        <span>Laporan Penitipan Habis</span>
+                    </a>
                 </div>
             </nav>
         </div>
