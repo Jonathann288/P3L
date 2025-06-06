@@ -6,10 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReUseMart - Sign Up</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <a href="{{ route('home') }}"
+    <a href="{{ route('shop') }}"
         class="absolute top-4 left-4 bg-white text-blue-600 p-2 rounded-full shadow-md hover:bg-gray-200 flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -29,9 +35,8 @@
             <div class="w-full max-w-md">
                 <h2 class="text-xl font-bold mb-4 text-white">Login</h2>
 
-                <form method="POST" action="{{ route('login') }}" class="space-y-3">
+                <form method="POST" action="{{ route('login.proses') }}" class="space-y-3">
                     @csrf
-
                     <div>
                         <input type="email" name="email" id="email" class="w-full p-2 rounded-lg" placeholder="Email"
                             required>
@@ -50,14 +55,8 @@
                 </form>
 
                 <div class="mt-3 text-center">
-                    <a href="" class="text-black hover:underline text-sm font-bold">Lupa Password ?</a>
-                </div>
-
-                <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
-                    <p class="text-white font-bold">Baru di ReUseMart? </p>
-                    <a href='{{ route('register') }}'
-                        class="bg-transparent border border-white text-white px-3 py-1 rounded-md hover:bg-white hover:text-blue-500">Sign
-                        up</a>
+                    <a href="{{ route('forgotPassword') }}" class="text-black hover:underline text-sm font-bold">Lupa
+                        Password ?</a>
                 </div>
             </div>
         </div>
@@ -75,6 +74,47 @@
             </div>
         </div>
     </div>
+    <div id="toast" class="fixed bottom-4 right-4 hidden p-4 rounded-lg shadow-lg text-white z-50"></div>
+    <script>
+        // Fungsi untuk menampilkan Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+
+            // Set warna berdasarkan tipe
+            if (type === 'success') {
+                toast.classList.add('bg-green-500');
+                toast.classList.remove('bg-red-500');
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-500');
+                toast.classList.remove('bg-green-500');
+            }
+
+            // Tampilkan toast dengan animasi fade-in
+            toast.classList.remove('hidden');
+            toast.classList.add('fade-in');
+
+            // Hilangkan toast setelah 3 detik
+            setTimeout(() => {
+                toast.classList.remove('fade-in');
+                toast.classList.add('fade-out');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 500);
+            }, 3000);
+        }
+
+        // Saat halaman dimuat, cek jika ada session flash
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (session('success'))
+                showToast('{{ session('success') }}', 'success');
+            @endif
+
+            @if (session('error'))
+                showToast('{{ session('error') }}', 'error');
+            @endif
+        });
+    </script>
 </body>
 
 </html>
