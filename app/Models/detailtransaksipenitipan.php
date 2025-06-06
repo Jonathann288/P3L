@@ -26,4 +26,16 @@ class detailtransaksipenitipan extends Model
     {
         return $this->belongsTo(barang::class, 'id_barang');
     }
+
+    public function transaksipenjualan()
+    {
+        return $this->hasOneThrough(
+            TransaksiPenjualan::class,
+            DetailTransaksiPenjualan::class,
+            'id_barang',
+            'id_transaksi_penjualan',
+            'id_barang',
+            'id_transaksi_penjualan'
+        );
+    }
 }

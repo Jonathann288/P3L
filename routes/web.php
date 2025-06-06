@@ -28,6 +28,8 @@ Route::get('/shop/barang/', function () {
     return view('shop.detail_barang');
 })->name('shop.detail_barang');
 
+Route::get('/testing', [TransaksiPenjualanControllers::class, 'showTesting'])->name('testing');
+
 Route::get('/shop', [BarangControllers::class, 'showShop'])->name('shop');
 Route::get('/shop/category/{id}', [KategoriBarangControllers::class, 'filterByCategory'])->name('shop.category');
 Route::get('/shop/barang/{id_barang}', [BarangControllers::class, 'showDetail'])->name('shop.detail_barang');
@@ -210,13 +212,20 @@ Route::middleware(['checkjabatan:Admin'])->group(function () {
 });
 Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::post('/logout-Owner', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
-
     Route::get('/DashboardOwner', [PegawaiControllers::class, 'showLoginOwner'])->name('owner.DashboardOwner');
     Route::get('/DashboardDonasi', [RequestDonasiControllers::class, 'showlistRequestDonasi'])->name('owner.DashboardDonasi');
+    Route::get('/DashboardHistoryDonasi/history-donasi', [DonasiControllers::class, 'historyDonasi'])->name('owner.historyDonasi');
+    Route::get('/DashboardLaporanDonasiBarang', [DonasiControllers::class, 'showLaporanDonasiBarang'])->name('owner.DashboardLaporanDonasiBarang');
+    Route::get('/DashboardLaporanRequestDonasi', [DonasiControllers::class, 'showLaporanRequestDonasi'])->name('owner.DashboardLaporanRequestDonasi');
+    Route::get('/DashboardLaporanTransaksiPenitip', [DonasiControllers::class, 'showLaporanTransaksiPenitip'])->name('owner.DashboardLaporanTransaksiPenitip');
+
+    Route::post('/owner/cetak-laporan-donasi', [DonasiControllers::class, 'cetakLaporanDonasi'])->name('owner.cetak-laporan-donasi');
+
+
     Route::post('/owner/donasi/submit', [DonasiControllers::class, 'submitDonasi'])->name('owner.donasi.submit');
     Route::put('/owner/donasi/reject', [DonasiControllers::class, 'rejectDonasi'])->name('owner.donasi.reject');
 
-    Route::get('/DashboardHistoryDonasi/history-donasi', [DonasiControllers::class, 'historyDonasi'])->name('owner.historyDonasi');
+
     Route::post('/owner/historyDonasi/update/{id_request}', [DonasiControllers::class, 'updateDonasi'])->name('owner.historyDonasi.update');
 
     Route::get('/owner/laporan-penjualan', [PegawaiControllers::class, 'laporanPenjualan'])->name('owner.LaporanPenjualanKategoriBarang');

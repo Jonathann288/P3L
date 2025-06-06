@@ -6,7 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Donasi;
 use App\Models\Requestdonasi;
 use App\Models\Barang;
+use App\Models\TransaksiPenitipan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use PDF;
 
 class DonasiControllers extends Controller
 {
@@ -15,7 +19,7 @@ class DonasiControllers extends Controller
     {
         try {
             \Log::info('⏩ Masuk ke submitDonasi');
-            
+
             // Validasi input
             $validated = $request->validate([
                 'id_request' => 'required|exists:requestdonasi,id_request',
@@ -23,7 +27,7 @@ class DonasiControllers extends Controller
                 'tanggal_donasi' => 'required|date',
                 'nama_penerima' => 'required|string',
             ]);
-            
+
             \Log::info('✅ Validasi Berhasil', $validated);
 
             // Update status request menjadi 'approved'
@@ -71,7 +75,7 @@ class DonasiControllers extends Controller
 
 
     public function historyDonasi()
-    {   
+    {
         $pegawaiLogin = Auth::guard('pegawai')->user();
 
         // Ambil data Donasi yang sudah di-approve
@@ -130,4 +134,41 @@ class DonasiControllers extends Controller
         return redirect()->back()->with('success', 'Data Donasi berhasil diupdate.');
     }
 
+    public function showLaporanDonasiBarang()
+    {
+        $pegawaiLogin = Auth::guard('pegawai')->user();
+
+        $laporanDonasi = Donasi::with(['barang.detailTransaksiPenitipan.transaksiPenitipan.penitip', 'requestdonasi.organisasi'])->get()->map(function ($donasi) {
+        $penitip = $donasi->barang?->penitip_data;
+
+            return [
+                'id_barang' => $donasi->barang->id ?? '-',
+                'nama_barang' => $donasi->barang->nama_barang ?? '-',
+                'id_penitip' => $penitip->id ?? '-',
+                'nama_penitip' => $penitip->nama_penitip ?? '-',
+                'tanggal_donasi' => $donasi->tanggal_donasi ?? '-',
+                'nama_organisasi' => $donasi->requestdonasi->organisasi->nama_organisasi ?? '-',
+                'nama_penerima' => $donasi->nama_penerima ?? '-',
+            ];
+        });
+
+        return view('owner.DashboardLaporanDonasiBarang', compact('laporanDonasi', 'pegawaiLogin'));
+    }
+
+    public function showLaporanRequestDonasi()
+    {
+        $pegawaiLogin = Auth::guard('pegawai')->user();
+
+        $requestdonasi = RequestDonasi::with('organisasi')->where('status_request', 'pending')->get();
+
+        return view('owner.DashboardLaporanRequestDonasi', compact('requestdonasi', 'pegawaiLogin'));
+    }
+
+    public function showLaporanTransaksiPenitip()
+    {
+        $pegawaiLogin = Auth::guard('pegawai')->user();
+        $transaksiPenitipan = transaksipenitipan::with(['detailtransaksipenitipan.barang', 'penitip'])->get()->groupBy('id_penitip');
+
+        return view('owner.DashboardLaporanTransaksiPenitip', compact('pegawaiLogin', 'transaksiPenitipan'));
+    }
 }

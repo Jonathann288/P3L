@@ -281,7 +281,6 @@ class TransaksiPenjualanControllers extends Controller
             // Simpan header transaksi
             $transaksi = transaksipenjualan::create($data);
 
-            // Simpan detail dan update status barang
             foreach ($keranjang as $id_barang => $item) {
                 $barang = Barang::find($id_barang);
                 if (!$barang)
@@ -355,7 +354,7 @@ class TransaksiPenjualanControllers extends Controller
     /**
      * Method untuk membersihkan transaksi yang sudah expired
      */
-     private function cleanupExpiredTransaction($transaksi)
+    private function cleanupExpiredTransaction($transaksi)
     {
         DB::beginTransaction();
         try {
@@ -686,7 +685,7 @@ class TransaksiPenjualanControllers extends Controller
 
 
 
-    public function approveTransaction(Request $request, $id)
+public function approveTransaction(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -702,12 +701,9 @@ class TransaksiPenjualanControllers extends Controller
             // Hitung total transaksi dari detailTransaksi
             // $subtotal = $transaksi->detailTransaksi->sum('total_harga');
             // $totalSetelahDiskon = $subtotal - $transaksi->diskon_poin;
-            
-            $totalHargaBarang = $transaksi->detailTransaksi->sum(function ($detail) {
-                return $detail->barang ? $detail->barang->harga_barang : 0;
-            });
 
-            $poinDidapat = floor($totalHargaBarang / 10000);
+            $totalHarga = $transaksi->detailTransaksi->sum('total_harga');
+            $poinDidapat = floor($totalHarga / 10000);
 
 
             // Hitung poin yang didapat (1 poin per 10.000)
@@ -719,7 +715,7 @@ class TransaksiPenjualanControllers extends Controller
             //     $poinDidapat += $bonusPoin;
             // }
 
-            if ($totalHargaBarang > 500000) {
+            if ($totalHarga > 500000) {
                 $bonus = round($poinDidapat * 0.2);
                 $poinDidapat += $bonus;
             }
@@ -737,8 +733,8 @@ class TransaksiPenjualanControllers extends Controller
                 'transaksi_id' => $transaksi->id,
                 'pembeli_id' => $transaksi->pembeli->id_pembeli,
                 'poin_dapat' => $poinDidapat,
-                'totalHarga' => $totalHargaBarang,
-                'bonus_applicable' => $totalHargaBarang > 500000
+                'totalHarga' => $totalHarga,
+                'bonus_applicable' => $totalHarga > 500000
             ]);
 
             DB::commit();
@@ -761,7 +757,8 @@ class TransaksiPenjualanControllers extends Controller
     }
 
 
-     public function showTransaksiKirim()
+
+    public function showTransaksiKirim()
     {
         try {
             $pegawaiLogin = Auth::guard('pegawai')->user();
@@ -823,7 +820,7 @@ class TransaksiPenjualanControllers extends Controller
             'tanggal_ambil' => 'required|date|after_or_equal:today',
         ]);
 
-            $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $request->transaksi_id)->first();
+        $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $request->transaksi_id)->first();
 
         $transaksi->update([
             'tanggal_ambil' => $request->tanggal_ambil,
@@ -832,77 +829,31 @@ class TransaksiPenjualanControllers extends Controller
         return back()->with('success', 'Tanggal pengambilan berhasil dijadwalkan.');
     }
 
-    public function konfirmasiTerima($id)
+        public function konfirmasiTerima($id)
     {
         DB::beginTransaction();
 
         try {
             $transaksi = TransaksiPenjualan::with([
                 'pembeli',
-                'detailTransaksi.barang.detailTransaksiPenitipan.transaksiPenitipan.penitip',
-                'detailTransaksi.barang.detailTransaksiPenitipan.transaksiPenitipan.pegawai'
+                'detailTransaksi.barang.detailTransaksiPenitipan.transaksiPenitipan.penitip'
             ])
-            ->where('id_transaksi_penjualan', $id)
-            ->firstOrFail();
+                ->where('id_transaksi_penjualan', $id)
+                ->firstOrFail();
 
             foreach ($transaksi->detailTransaksi as $detail) {
                 $barang = $detail->barang;
-                $harga = $detail->total_harga;
 
-                $penitipan = optional($barang->detailTransaksiPenitipan)->transaksiPenitipan;
-                $penitip = optional($penitipan)->penitip;
-                $pegawai = optional($penitipan)->pegawai;
+                // Ambil penitip dari relasi yang benar
+                $penitip = optional($barang->detailTransaksiPenitipan->transaksiPenitipan)->penitip;
 
-                // Cek apakah barang diperpanjang (asumsikan ada field `diperpanjang`)
-                $isDiperpanjang = optional($barang)->diperpanjang == 1;
-
-                // Komisi ReuseMart
-                $komisi_reusemart = $isDiperpanjang ? 0.30 * $harga : 0.20 * $harga;
-
-                // Komisi Hunter
-                $komisi_hunter = $pegawai ? 0.05 * $harga : 0;
-
-                // Jika ada hunter dan diperpanjang, ReuseMart hanya dapat 25%
-                if ($pegawai && $isDiperpanjang) {
-                    $komisi_reusemart = 0.25 * $harga;
-                }
-
-                // Bonus Penitip (barang terjual <= 7 hari sejak penitipan)
-                $bonus_penitip = 0;
-                if ($penitipan && isset($penitipan->tanggal_penitipan, $transaksi->tanggal_transaksi)) {
-                    $tanggal_penitipan = Carbon::parse($penitipan->tanggal_penitipan);
-                    $tanggal_transaksi = Carbon::parse($transaksi->tanggal_transaksi);
-
-                    if ($tanggal_penitipan->diffInDays($tanggal_transaksi) <= 7) {
-                        $bonus_penitip = 0.10 * $komisi_reusemart;
-                    }
-                }
-
-                // Komisi Penitip
-                $komisi_penitip = $harga - $komisi_reusemart - $komisi_hunter + $bonus_penitip;
-
-                // Tambahkan saldo ke penitip
                 if ($penitip) {
-                    $penitip->saldo_penitip += $komisi_penitip;
+                    $penitip->saldo_penitip += $detail->total_harga;
                     $penitip->save();
                 }
-
-                $id_terakhir = Komisi::max('id');
-                $angka_terakhir = (int) filter_var($id_terakhir, FILTER_SANITIZE_NUMBER_INT);
-                $id_baru = 'KMS' . str_pad($angka_terakhir + 1, 4, '0', STR_PAD_LEFT);
-
-                Komisi::create([
-                    'id' => $id_baru, // ini wajib karena tidak ada default value
-                    'id_transaksi_penjualan' => $transaksi->id_transaksi_penjualan,
-                    'id_penitip' => $penitip->id_penitip ?? null,
-                    'id_pegawai' => $pegawai->id_pegawai ?? null,
-                    'komisi_penitip' => $komisi_penitip,
-                    'komisi_reusemart' => $komisi_reusemart,
-                    'komisi_hunter' => $komisi_hunter,
-                ]);
             }
 
-            // Tambahkan poin ke akun pembeli
+            // Tambahkan poin_dapat ke total_poin pembeli
             if ($transaksi->poin_dapat > 0) {
                 $pembeli = $transaksi->pembeli;
                 $pembeli->total_poin += $transaksi->poin_dapat;
@@ -914,7 +865,8 @@ class TransaksiPenjualanControllers extends Controller
             ]);
 
             DB::commit();
-            return back()->with('success', 'Transaksi dikonfirmasi dan semua komisi serta poin berhasil dihitung.');
+
+            return back()->with('success', 'Transaksi dikonfirmasi dan saldo penitip serta poin pembeli diperbarui.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             DB::rollBack();
             return back()->with('error', 'Transaksi tidak ditemukan.');
@@ -923,7 +875,7 @@ class TransaksiPenjualanControllers extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-    
+  
     public function konfirmasiDanCetakNota($id)
     {
         try {
@@ -1080,5 +1032,26 @@ class TransaksiPenjualanControllers extends Controller
 
         return redirect()->back()->with('info', 'Transaksi belum melewati batas waktu 2 hari atau sudah Hangus.');
     }
+
+
+    public function showTesting()
+    {
+        $transaksi = transaksipenjualan::with(['detailtransaksi.barang'])
+            ->where('status_pembayaran', 'Lunas')
+            ->where('status_transaksi', 'Di Siapkan')
+            ->get();
+
+        return view('testing', compact('transaksi'));
+    }
+
+    public function ubahStatus($id)
+    {
+        $transaksi = transaksipenjualan::findOrFail($id);
+        $transaksi->status_transaksi = 'Disiapkan';
+        $transaksi->save();
+
+        return redirect()->back()->with('success', 'Status transaksi berhasil diubah menjadi Disiapkan.');
+    }
+
 
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,12 @@
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-    <script src="https://cdn.tailwindcss.com"></script> 
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="font-sans bg-gray-100 text-gray-800 grid grid-cols-1 md:grid-cols-[250px_1fr] min-h-screen">
 
     <!-- Sidebar Navigation -->
@@ -19,28 +22,42 @@
             <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
             <nav>
                 <div class="space-y-4">
-                    <a href="{{ route('owner.DashboardOwner') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                        <img src="images/fotoprofil.jpg" alt="profile" class="w-8 h-8 rounded-full object-cover">
-                        <span>{{ $pegawai->nama_pegawai }}</span>
+                    <a href="{{ route('owner.DashboardOwner') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-user-circle mr-2"></i>
+                        <span>{{ $pegawaiLogin->nama_pegawai }}</span>
                     </a>
-                    <a href="{{ route('owner.DashboardDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('owner.DashboardDonasi') }}"
+                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
                         <span>Daftar Request Donasi</span>
                     </a>
-                    <a href="{{ route('owner.historyDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('owner.historyDonasi') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>Histroy Request Donasi</span>
                     </a>
-                    <a href = "{{route('owner.LaporanPenjualanKategoriBarang')}}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                        <i class="fa-solid fas fa-boxes mr-2"></i>
-                        <span>Laporan Penjualan Per Kategori Barang</span>
+                    <a href="{{ route('owner.DashboardLaporanDonasiBarang') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-newspaper"></i>
+                        <span>Laporan Donasi Barang</span>
+                    </a>
+                    <a href="{{ route('owner.DashboardLaporanRequestDonasi') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-book"></i>
+                        <span>Laporan RequestDonasi</span>
+                    </a>
+                    <a href="{{ route('owner.DashboardLaporanTransaksiPenitip') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-book"></i>
+                        <span>Laporan Transaksi Penitip</span>
                     </a>
                 </div>
             </nav>
         </div>
         <!-- Bottom buttons -->
         <div class="space-y-4 mt-auto">
-            <form action="{{ route('logout.pegawai') }}"  method="POST">
+            <form action="{{ route('logout.pegawai') }}" method="POST">
                 @csrf
                 <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
                     Keluar
@@ -78,7 +95,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="font-semibold text-gray-600">Jabatan:</span>
-                            <span>{{ $pegawai->Jabatan ->nama_jabatan }}</span>
+                            <span>{{ $pegawai->Jabatan->nama_jabatan }}</span>
                         </div>
                     </div>
                 </div>
@@ -88,4 +105,5 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 </body>
+
 </html>
