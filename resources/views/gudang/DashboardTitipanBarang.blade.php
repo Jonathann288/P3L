@@ -218,9 +218,6 @@
                             <option value="">-- Pilih Status --</option>
                             <option value="tidak laku" {{ old('status_barang') == 'tidak laku' ? 'selected' : '' }}>Tidak
                                 Laku</option>
-                            <option value="di donasikan" {{ old('status_barang') == 'di donasikan' ? 'selected' : '' }}>
-                                Donasi</option>
-
                         </select>
                         @error('status_barang') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -321,16 +318,19 @@
                     class="col-span-1 md:col-span-2 border p-3 rounded-lg w-full" />
 
                 <select name="status" class="border p-3 rounded-lg w-full">
-                    <option value="">Status</option>
-                    <option value="tidak laku" {{ request('status') == 'tidak laku' ? 'selected' : '' }}>tidak laku
+                    <option value="">Semua Status</option>
+                    <option value="tidak_laku" {{ request('status') == 'tidak_laku' ? 'selected' : '' }}>Tidak Laku
                     </option>
-                    <option value="laku" {{ request('status') == 'laku' ? 'selected' : '' }}>laku</option>
-                    <option value="donasi" {{ request('status') == 'donasi' ? 'selected' : '' }}>Donasi</option>
-                    <option value="di donasikan" {{ request('status') == 'di donasikan' ? 'selected' : '' }}>Didonasikan
-                    </option>
-                    <option value="siap_diambil_kembali" {{ request('status') == 'siap_diambil_kembali' ? 'selected' : '' }}>Siap Diambil Kembali</option>
-                    <option value="diambil_kembali" {{ request('status') == 'diambil_kembali' ? 'selected' : '' }}>Diambil
-                        Kembali</option>
+                    <option value="laku" {{ request('status') == 'laku' ? 'selected' : '' }}>Laku</option>
+                    <option value="di_donasikan" {{ request('status') == 'di_donasikan' ? 'selected' : '' }}>Di Donasikan
+                        (Lewat Batas Pengambilan)</option>
+                    <option value="donasikan" {{ request('status') == 'donasikan' ? 'selected' : '' }}>Donasikan (Ada
+                        Request)</option>
+                    <option value="akan_diambil" {{ request('status') == 'akan_diambil' ? 'selected' : '' }}>Akan Diambil
+                        (Pembeli)</option>
+                    <option value="sudah_diambil" {{ request('status') == 'sudah_diambil' ? 'selected' : '' }}>Sudah
+                        Diambil (Pembeli)</option>
+                    <option value="diambil_kembali_penitip" {{ request('status') == 'diambil_kembali_penitip' ? 'selected' : '' }}>Diambil Kembali (Penitip)</option>
                 </select>
 
 
@@ -363,52 +363,108 @@
                             </p>
                         @endif
 
-                        <!-- Status Barang -->
+
                         @php
-                            $status = 'Tidak diketahui';
+                            $status = 'Belum Diketahui';
+                            $badgeClass = 'bg-gray-200 text-gray-800';
+                            $today = \Carbon\Carbon::now(); // [cite: 311]
 
-                            $today = \Carbon\Carbon::now();
-                            $isDiambilKembali = $titipan->tanggal_pengambilan_barang != null;
+                            $barangsInThisTitipan = $titipan->detailTransaksiPenitipan->map(function ($detail) {
+                                return $detail->barang;
+                            })->filter();
 
-                            $detailItems = $titipan->detailTransaksi ?? collect();
-
-                            $sudahDidonasikan = $detailItems->contains(function ($detail) {
-                                return $detail->barang && $detail->barang->donasi && $detail->barang->donasi->id_request !== null;
+                            $isSudahDiambil = $barangsInThisTitipan->contains(function ($barang) {
+                                if ($barang && $barang->detailTransaksiPenjualan && $barang->detailTransaksiPenjualan->transaksipenjualan) {
+                                    $penjualan = $barang->detailTransaksiPenjualan->transaksipenjualan;
+                                    return $penjualan->metode_pengantaran === 'Ambil di Gudang' && $penjualan->status_pembayaran === 'lunas';
+                                }
+                                return false;
                             });
 
-                            $siapDonasi = !$sudahDidonasikan && $titipan->tanggal_akhir_penitipan && $titipan->tanggal_akhir_penitipan->lt($today);
-
-                            $sudahTerjual = $detailItems->contains(function ($detail) {
-                                return $detail->barang && $detail->barang->transaksiPenjualan && $detail->barang->transaksiPenjualan->count() > 0;
-                            });
-
-                            $dalamRentangPenitipan = $titipan->tanggal_penitipan && $titipan->tanggal_akhir_penitipan &&
-                                $titipan->tanggal_penitipan->lte($today) &&
-                                $titipan->tanggal_akhir_penitipan->gte($today);
-
-                            if ($isDiambilKembali) {
-                                $status = 'Diambil kembali';
-                            } elseif ($sudahDidonasikan) {
-                                $status = 'di donasikan';
-                            } elseif ($siapDonasi) {
-                                $status = 'donasi';
-                            } elseif ($sudahTerjual) {
-                                $status = 'laku';
-                            } elseif ($dalamRentangPenitipan) {
-                                $status = 'tidak laku';
-                            } else {
-                                $status = 'Dalam Penitipan';
+                            $isAkanDiambil = false;
+                            if (!$isSudahDiambil) {
+                                $isAkanDiambil = $barangsInThisTitipan->contains(function ($barang) {
+                                    if ($barang && $barang->detailTransaksiPenjualan && $barang->detailTransaksiPenjualan->transaksipenjualan) {
+                                        $penjualan = $barang->detailTransaksiPenjualan->transaksipenjualan;
+                                        return $penjualan->metode_pengantaran === 'Ambil di Gudang' && $penjualan->status_pembayaran !== 'lunas';
+                                    }
+                                    return false;
+                                });
                             }
 
-                            $badgeClass = match ($status) {
-                                'tidak laku' => 'bg-green-100 text-green-800',
-                                'laku' => 'bg-blue-100 text-blue-800',
-                                'donasi' => 'bg-yellow-100 text-yellow-800',
-                                'di donasikan' => 'bg-purple-100 text-purple-800',
-                                'Barang siap diambil kembali' => 'bg-indigo-100 text-indigo-800',
-                                'Diambil kembali' => 'bg-gray-300 text-gray-700',
-                                default => 'bg-red-100 text-red-800',
-                            };
+                            $isLaku = false;
+                            if (!$isSudahDiambil && !$isAkanDiambil) {
+                                $isLaku = $barangsInThisTitipan->contains(function ($barang) {
+                                    // Cek jika ada detail penjualan, dan metode bukan ambil di gudang, atau sudah lunas tapi bukan ambil di gudang
+                                    if ($barang && $barang->detailTransaksiPenjualan && $barang->detailTransaksiPenjualan->transaksipenjualan) {
+                                        $penjualan = $barang->detailTransaksiPenjualan->transaksipenjualan;
+                                        // Dianggap laku jika ada penjualan dan bukan 'Ambil di Gudang' atau sudah lunas tapi bukan 'Ambil di Gudang'
+                                        return $penjualan->id_transaksi_penjualan && $penjualan->metode_pengantaran !== 'Ambil di Gudang';
+                                    }
+                                    return $barang && $barang->detailTransaksiPenjualan && $barang->detailTransaksiPenjualan->id_detail_transaksi_penjualan;
+                                });
+                            }
+
+                            $isDonasikan = false; // Sudah ada id_request di tabel donasi
+                            if (!$isSudahDiambil && !$isAkanDiambil && !$isLaku) {
+                                $isDonasikan = $barangsInThisTitipan->contains(function ($barang) { // [cite: 312]
+                                    return $barang && $barang->donasi && $barang->donasi->id_request !== null; // [cite: 312]
+                                });
+                            }
+
+                            $isDiDonasikan = false; // Sudah lewat tanggal batas pengambilan & belum ada aksi lain
+                            if (!$isSudahDiambil && !$isAkanDiambil && !$isLaku && !$isDonasikan) {
+                                if ($titipan->tanggal_batas_pengambilan && \Carbon\Carbon::parse($titipan->tanggal_batas_pengambilan)->lt($today) && !$titipan->tanggal_pengambilan_barang) { // [cite: 313]
+                                    $isDiDonasikan = true;
+                                }
+                            }
+
+                            $isDiambilKembaliPenitip = $titipan->tanggal_pengambilan_barang != null; // [cite: 311]
+
+                            $isTidakLaku = false;
+                            if (!$isSudahDiambil && !$isAkanDiambil && !$isLaku && !$isDonasikan && !$isDiDonasikan && !$isDiambilKembaliPenitip) {
+                                // Kondisi Tidak Laku:
+                                // 1. status_barang di tabel barang adalah 'tidak laku'
+                                // 2. ATAU barang masih dalam masa penitipan (tanggal_akhir_penitipan >= today)
+                                $isTidakLaku = $barangsInThisTitipan->contains(function ($barang) {
+                                    return $barang && $barang->status_barang === 'tidak laku';
+                                });
+                                if (!$isTidakLaku && $titipan->tanggal_akhir_penitipan && \Carbon\Carbon::parse($titipan->tanggal_akhir_penitipan)->gte($today)) {
+                                    $isTidakLaku = true; // Jika masih dalam masa penitipan dan belum ada status lain, anggap tidak laku (sementara)
+                                }
+                            }
+
+                            if ($isSudahDiambil) {
+                                $status = 'Sudah Diambil (Pembeli)';
+                                $badgeClass = 'bg-red-600 text-white'; // [cite: 322, 324]
+                            } elseif ($isAkanDiambil) {
+                                $status = 'Akan Diambil (Pembeli)';
+                                $badgeClass = 'bg-blue-500 text-white'; // [cite: 322]
+                            } elseif ($isLaku) {
+                                $status = 'Laku, sudah diambil'; // Lebih spesifik untuk membedakan dari Ambil di Gudang
+                                $badgeClass = 'bg-teal-500 text-white'; // [cite: 318, 322]
+                            } elseif ($isDonasikan) {
+                                $status = 'Donasikan (Ada Request)';
+                                $badgeClass = 'bg-purple-600 text-white'; // [cite: 316, 322]
+                            } elseif ($isDiDonasikan) {
+                                $status = 'Di Donasikan (Lewat Batas)';
+                                $badgeClass = 'bg-yellow-500 text-black'; // [cite: 317, 322]
+                            } elseif ($isDiambilKembaliPenitip) {
+                                $status = 'Diambil Kembali (Penitip)'; // [cite: 315]
+                                $badgeClass = 'bg-gray-500 text-white'; // [cite: 323]
+                            } elseif ($isTidakLaku) {
+                                $status = 'Tidak Laku / Tersedia'; // [cite: 319]
+                                $badgeClass = 'bg-green-500 text-white'; // [cite: 321]
+                            } else {
+                                // Fallback jika ada kondisi yang belum tercover (seharusnya tidak banyak)
+                                if ($titipan->tanggal_akhir_penitipan && \Carbon\Carbon::parse($titipan->tanggal_akhir_penitipan)->lt($today) && !$titipan->tanggal_pengambilan_barang) {
+                                    $status = 'Melewati Batas (Belum Ada Keputusan)';
+                                    $badgeClass = 'bg-orange-400 text-white';
+                                } else {
+                                    $status = 'Dalam Proses Gudang';
+                                    $badgeClass = 'bg-indigo-200 text-indigo-800';
+                                }
+                            }
                         @endphp
 
                         <div class="mt-2">
@@ -417,15 +473,17 @@
                             </span>
                         </div>
 
+
                         <!-- Edit Button -->
-                        <button @click="openModal({{ $titipan->id_transaksi_penitipan }}, {
-                                                                                                                nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
-                                                                                                                email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
-                                                                                                                tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
-                                                                                                                tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
-                                                                                                                tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
-                                                                                                                tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
-                                                                                                            })"
+                        <button
+                            @click="openModal({{ $titipan->id_transaksi_penitipan }}, {
+                                                                                                                                    nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
+                                                                                                                                    email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
+                                                                                                                                    tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
+                                                                                                                                    tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
+                                                                                                                                    tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
+                                                                                                                                    tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
+                                                                                                                                })"
                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mt-3 transition-colors">
                             <i class="fas fa-edit mr-1"></i> Edit
                         </button>
@@ -624,7 +682,8 @@
                         <input type="hidden" name="tanggal_akhir_penitipan" x-model="formData.tanggal_akhir_penitipan">
                         <input type="hidden" name="tanggal_batas_pengambilan"
                             x-model="formData.tanggal_batas_pengambilan">
-                        <input type="hidden" name="tanggal_pengambilan_barang" x-model="formData.tanggal_pengambilan_barang">
+                        <input type="hidden" name="tanggal_pengambilan_barang"
+                            x-model="formData.tanggal_pengambilan_barang">
 
 
                         <!-- Tanggal Akhir Penitipan (readonly, untuk display) -->
@@ -674,8 +733,6 @@
                             <select name="status_barang" class="w-full border p-3 rounded-lg" required>
                                 <option value="">-- Pilih Status --</option>
                                 <option value="tidak laku">Tidak Laku</option>
-                                <option value="di donasikan">Donasi</option>
-                                <option value="laku">Laku</option>
                             </select>
                         </div>
 

@@ -32,7 +32,7 @@ class transaksipenitipan extends Model
         return $this->belongsTo(Pegawai::class, 'id_pegawai');
     }
 
-    public function penitip()
+    public function penitip() 
     {
         return $this->belongsTo(Penitip::class, 'id_penitip');
     }

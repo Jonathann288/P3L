@@ -485,97 +485,136 @@ class TransaksiPenitipanControllers extends Controller
     /**
      * Pencarian transaksi dengan berbagai kriteria
      */
+    // Dalam class TransaksiPenitipanControllers
+
+    // Dalam class TransaksiPenitipanControllers
+
     public function searchTitipan(Request $request)
     {
-        $query = transaksipenitipan::with('penitip', 'pegawai');
+        $query = transaksipenitipan::with([
+            'penitip',
+            'pegawai',
+            'detailTransaksiPenitipan.barang.detailTransaksiPenjualan.transaksipenjualan',
+            'detailTransaksiPenitipan.barang.donasi'
+        ]);
 
-        // Search berdasarkan berbagai field
+        // ... (kode search term, tanggal, penitip, pegawai tetap sama) ...
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-
             $query->where(function ($q) use ($searchTerm) {
-                // Search di tabel transaksipenitipan
-                $q->where('id_transaksi_penitipan', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('tanggal_penitipan', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('tanggal_akhir_penitipan', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('tanggal_batas_pengambilan', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('tanggal_pengambilan_barang', 'LIKE', "%{$searchTerm}%")
-                    // Search di tabel penitip
-                    ->orWhereHas('penitip', function ($penitipQuery) use ($searchTerm) {
-                        $penitipQuery->where('nama_penitip', 'LIKE', "%{$searchTerm}%")
-                            ->orWhere('email_penitip', 'LIKE', "%{$searchTerm}%")
-                            ->orWhere('nomor_ktp', 'LIKE', "%{$searchTerm}%")
-                            ->orWhere('nomor_telepon_penitip', 'LIKE', "%{$searchTerm}%");
+                $q->where('id_transaksi_penitipan', 'LIKE', "%{$searchTerm}%") // [cite: 153]
+                    ->orWhere('tanggal_penitipan', 'LIKE', "%{$searchTerm}%") // [cite: 153]
+                    ->orWhere('tanggal_akhir_penitipan', 'LIKE', "%{$searchTerm}%") // [cite: 153]
+                    ->orWhere('tanggal_batas_pengambilan', 'LIKE', "%{$searchTerm}%") // [cite: 154]
+                    ->orWhere('tanggal_pengambilan_barang', 'LIKE', "%{$searchTerm}%") // [cite: 154]
+                    ->orWhereHas('penitip', function ($penitipQuery) use ($searchTerm) { // [cite: 154]
+                        $penitipQuery->where('nama_penitip', 'LIKE', "%{$searchTerm}%") // [cite: 155]
+                            ->orWhere('email_penitip', 'LIKE', "%{$searchTerm}%") // [cite: 155]
+                            ->orWhere('nomor_ktp', 'LIKE', "%{$searchTerm}%") // [cite: 155]
+                            ->orWhere('nomor_telepon_penitip', 'LIKE', "%{$searchTerm}%"); // [cite: 155]
                     })
-                    // Search di tabel pegawai
-                    ->orWhereHas('pegawai', function ($pegawaiQuery) use ($searchTerm) {
-                        $pegawaiQuery->where('nama_pegawai', 'LIKE', "%{$searchTerm}%")
-                            ->orWhere('email_pegawai', 'LIKE', "%{$searchTerm}%");
+                    ->orWhereHas('pegawai', function ($pegawaiQuery) use ($searchTerm) { // [cite: 156]
+                        $pegawaiQuery->where('nama_pegawai', 'LIKE', "%{$searchTerm}%") // [cite: 156]
+                            ->orWhere('email_pegawai', 'LIKE', "%{$searchTerm}%"); // [cite: 157]
+                    })
+                    ->orWhereHas('detailTransaksiPenitipan.barang', function ($barangQuery) use ($searchTerm) {
+                        $barangQuery->where('nama_barang', 'LIKE', "%{$searchTerm}%");
                     });
             });
         }
 
-        // Filter berdasarkan rentang tanggal
         if ($request->filled('tanggal_dari') && $request->filled('tanggal_sampai')) {
             $query->whereBetween('tanggal_penitipan', [
-                $request->tanggal_dari,
-                $request->tanggal_sampai
+                $request->tanggal_dari, // [cite: 158]
+                $request->tanggal_sampai // [cite: 158]
             ]);
         }
 
-        // Filter berdasarkan penitip
         if ($request->filled('id_penitip')) {
-            $query->where('id_penitip', $request->id_penitip);
+            $query->where('id_penitip', $request->id_penitip); // [cite: 159]
         }
 
-        // Filter berdasarkan pegawai QC
         if ($request->filled('id_pegawai')) {
-            $query->where('id_pegawai', $request->id_pegawai);
+            $query->where('id_pegawai', $request->id_pegawai); // [cite: 160]
         }
 
-        // Filter berdasarkan status
+
+        // Filter berdasarkan status BARU
         if ($request->filled('status')) {
             $status = $request->status;
+            $today = \Carbon\Carbon::now(); // [cite: 162, 311]
 
             switch ($status) {
-                case 'tidak laku':
-                    $query->whereNull('tanggal_pengambilan_barang')
-                        ->whereDate('tanggal_penitipan', '<=', now())
-                        ->whereDate('tanggal_akhir_penitipan', '>=', now())
-                        ->whereDoesntHave('detailTransaksi.barang.transaksiPenjualan')
-                        ->whereDoesntHave('detailTransaksi.barang.donasi');
+                case 'tidak_laku':
+                    // Barang dengan status_barang = 'tidak laku' ATAU
+                    // masih dalam masa penitipan & belum laku & belum donasi & belum diambil penitip
+                    $query->where(function ($q) use ($today) {
+                        $q->whereHas('detailTransaksiPenitipan.barang', function ($barangQuery) {
+                            $barangQuery->where('status_barang', 'tidak laku');
+                        })
+                            ->orWhere(function ($q2) use ($today) { // Masih dalam periode, belum ada aksi lain
+                                $q2->where('tanggal_akhir_penitipan', '>=', $today) // Masih dalam masa penitipan
+                                    ->whereNull('tanggal_pengambilan_barang'); // Belum diambil penitip
+                            });
+                    })
+                        ->whereDoesntHave('detailTransaksiPenitipan.barang.detailTransaksiPenjualan') // Belum laku
+                        ->whereDoesntHave('detailTransaksiPenitipan.barang.donasi', function ($donasiQuery) { // Belum ada request donasi aktif
+                            $donasiQuery->whereNotNull('id_request');
+                        });
                     break;
 
                 case 'laku':
-                    $query->whereHas('detailTransaksi.barang.transaksiPenjualan');
+                    $query->whereHas('detailTransaksiPenitipan.barang.detailTransaksiPenjualan.transaksipenjualan', function ($tpQuery) {
+                        // Logika ini bisa disesuaikan jika 'laku' punya definisi lebih spesifik
+                        // selain 'akan diambil' atau 'sudah diambil'
+                        $tpQuery->whereNotNull('id_transaksi_penjualan');
+                    })
+                        // Pastikan tidak tumpang tindih dengan 'akan diambil' atau 'sudah diambil' jika diperlukan pemisahan ketat
+                        ->whereDoesntHave('detailTransaksiPenitipan.barang.detailTransaksiPenjualan.transaksipenjualan', function ($tpQuery) {
+                            $tpQuery->where('metode_pengantaran', 'Ambil di Gudang');
+                        });
                     break;
 
-                case 'donasi':
-                    $query->whereDate('tanggal_akhir_penitipan', '<', now())
-                        ->whereDoesntHave('detailTransaksi.barang.donasi')
-                        ->whereNull('tanggal_pengambilan_barang');
+                case 'di_donasikan': // Sudah melewati tanggal_batas_pengambilan dan belum diambil/laku/donasi aktif
+                    $query->where('tanggal_batas_pengambilan', '<', $today) // [cite: 72, 165]
+                        ->whereNull('tanggal_pengambilan_barang') // Belum diambil penitip [cite: 72]
+                        ->whereDoesntHave('detailTransaksiPenitipan.barang.detailTransaksiPenjualan') // Belum laku [cite: 163]
+                        ->whereDoesntHave('detailTransaksiPenitipan.barang.donasi', function ($donasiQuery) { // Belum ada request donasi aktif [cite: 163, 165]
+                            $donasiQuery->whereNotNull('id_request');
+                        });
                     break;
 
-                case 'di donasikan':
-                    $query->whereHas('detailTransaksi.barang.donasi', function ($q) {
-                        $q->whereNotNull('id_request');
+                case 'donasikan': // Barang yang memiliki id_request pada table donasi
+                    $query->whereHas('detailTransaksiPenitipan.barang.donasi', function ($donasiQuery) {
+                        $donasiQuery->whereNotNull('id_request');
                     });
                     break;
 
-                case 'siap_diambil_kembali':
-                    // Implementasi ini tergantung apakah Anda punya field seperti `status_pengambilan` atau `konfirmasi_pengambilan`
-                    $query->where('status_pengambilan', 'siap_diambil'); // contoh
+                case 'akan_diambil': // metode_pengantaran = Ambil di Gudang, status_pembayaran != lunas
+                    $query->whereHas('detailTransaksiPenitipan.barang.detailTransaksiPenjualan.transaksipenjualan', function ($tpQuery) {
+                        $tpQuery->where('metode_pengantaran', 'Ambil di Gudang')
+                            ->where('status_pembayaran', '!=', 'lunas');
+                    });
                     break;
 
-                case 'diambil_kembali':
+                case 'sudah_diambil': // metode_pengantaran = Ambil di Gudang, status_pembayaran = lunas
+                    $query->whereHas('detailTransaksiPenitipan.barang.detailTransaksiPenjualan.transaksipenjualan', function ($tpQuery) {
+                        $tpQuery->where('metode_pengantaran', 'Ambil di Gudang')
+                            ->where('status_pembayaran', 'lunas');
+                    });
+                    break;
+
+                case 'diambil_kembali_penitip':
                     $query->whereNotNull('tanggal_pengambilan_barang');
                     break;
+
+                // Tidak ada lagi case 'dalam_penitipan'
             }
         }
 
-
         $results = $query->orderBy('tanggal_penitipan', 'desc')->get();
 
+        // ... (sisa kode untuk return view tetap sama) ...
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
@@ -588,10 +627,16 @@ class TransaksiPenitipanControllers extends Controller
             ->orderBy('nama_penitip')
             ->get();
 
+        $kategoris = KategoriBarang::select('id_kategori', 'nama_kategori', 'nama_sub_kategori')
+            ->orderBy('nama_kategori')
+            ->get();
+
         return view('gudang.DashboardTitipanBarang', [
             'titipans' => $results,
             'searchTerm' => $request->search_term,
-            'penitips' => $penitips
+            'penitips' => $penitips,
+            'kategoris' => $kategoris,
+            'request' => $request
         ]);
     }
 
@@ -828,6 +873,55 @@ class TransaksiPenitipanControllers extends Controller
                 ])->get();
 
         return view('gudang.DaftarBarang', compact('pegawai', 'barang'));
+    }
+
+
+
+public function showPerpanjanganPage(Request $request)
+{
+    $transaksis = TransaksiPenitipan::with('penitip')            
+         ->where('tanggal_akhir_penitipan', '2025-06-03') 
+        ->orderBy('tanggal_penitipan', 'desc')
+        ->paginate(10); 
+
+    return view('gudang.perpanjang', compact('transaksis'));
+}
+
+  
+    public function prosesPerpanjangPenitipan(Request $request, $id_transaksi_penitipan)
+    {
+        try {
+            $transaksi = TransaksiPenitipan::findOrFail($id_transaksi_penitipan);
+
+           
+            if ($transaksi->tanggal_pengambilan_barang) {
+                return redirect()->route('gudang.showPerpanjanganPage')
+                                 ->with('error', 'Barang sudah diambil oleh penitip dan tidak bisa diperpanjang lagi.');
+            }
+
+
+            $tanggalAkhirSaatIni = Carbon::parse($transaksi->tanggal_akhir_penitipan);
+            
+        
+            $tanggalAkhirBaru = $tanggalAkhirSaatIni->copy()->addDays(30);
+            $tanggalBatasPengambilanBaru = $tanggalAkhirBaru->copy()->addDays(7);
+
+            $transaksi->tanggal_akhir_penitipan = $tanggalAkhirBaru;
+            $transaksi->tanggal_batas_pengambilan = $tanggalBatasPengambilanBaru;
+            $transaksi->save();
+
+            return redirect()->route('gudang.showPerpanjanganPage')
+                             ->with('success', 'Masa penitipan untuk transaksi ID ' . $transaksi->id_transaksi_penitipan . ' berhasil diperpanjang 30 hari.');
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('gudang.showPerpanjanganPage')
+                             ->with('error', 'Transaksi penitipan tidak ditemukan.');
+        } catch (\Exception $e) {
+            // Log error
+            \Log::error("Error perpanjang penitipan: {$e->getMessage()} in file {$e->getFile()} at line {$e->getLine()}");
+            return redirect()->route('gudang.showPerpanjanganPage')
+                             ->with('error', 'Terjadi kesalahan saat memproses perpanjangan. Silakan coba lagi.');
+        }
     }
 
 

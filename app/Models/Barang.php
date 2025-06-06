@@ -119,10 +119,34 @@ class Barang extends Model
             $this->detailTransaksiPenitipan->transaksiPenitipan &&
             $this->detailTransaksiPenitipan->transaksiPenitipan->penitip) {
             
-            // dd($this->detailTransaksiPenitipan->transaksiPenitipan->penitip->toArray()); // UNCOMMENT UNTUK DEBUG DI SINI
-
-            return $this->detailTransaksiPenitipan->transaksiPenitipan->penitip;
-        }
-        return null;
+            $penitip = $this->detailTransaksiPenitipan->transaksiPenitipan->penitip;
+        
+        // Refresh rating penitip dari database
+        $penitip->refresh();
+        
+        return $penitip;
     }
+    return null;
+}
+
+    public function detailTransaksiPenjualan()
+    {
+        // Nama foreign key 'id_barang' di tabel 'detailtransaksipenjualan'
+        // Nama local key 'id_barang' di tabel 'barang'
+        return $this->hasOne(DetailTransaksiPenjualan::class, 'id_barang', 'id_barang');
+    }
+
+    /**
+     * Mendapatkan data donasi terkait barang ini.
+     * Satu barang diasumsikan hanya bisa didonasikan satu kali.
+     */
+    public function donasi()
+    {
+        // Nama foreign key 'id_barang' di tabel 'donasi'
+        // Nama local key 'id_barang' di tabel 'barang'
+        return $this->hasOne(Donasi::class, 'id_barang', 'id_barang');
+    }
+
+    // Di Model Barang
+
 }

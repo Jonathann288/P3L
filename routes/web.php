@@ -211,6 +211,12 @@ Route::middleware(['checkjabatan:Gudang'])->group(function () {
     Route::get('/EditBarang/{id_barang}', [BarangControllers::class, 'showEditBarang'])->name('gudang.EditBarang');
     Route::put('/UpdateBarang/{id_barang}', [BarangControllers::class, 'updateBarangGudang'])->name('gudang.UpdateBarang');
     // SAMPE INI 
+
+    //ini
+    Route::get('/PerpanjanganMasaPenitipan', [TransaksiPenitipanControllers::class, 'showPerpanjanganPage'])->name('gudang.showPerpanjanganPage');
+    Route::post('/ProsesPerpanjangPenitipan/{id_transaksi_penitipan}', [TransaksiPenitipanControllers::class, 'prosesPerpanjangPenitipan'])->name('gudang.prosesPerpanjangPenitipan');
+    Route::get('/PerpanjanganMasaPenitipan', [TransaksiPenitipanControllers::class, 'showPerpanjanganPage'])->name('gudang.showPerpanjanganPage');
+
 });
 Route::middleware(['checkjabatan:Kurir'])->group(function () {
     Route::get('/DashboardKurir', function () {
@@ -252,3 +258,8 @@ Route::get('/forgotPassword', [AuthController::class, 'forgotPassword'])->name('
 Route::post('/validasiForgotPasswordAct', [AuthController::class, 'validasiForgotPasswordAct'])->name('validasiForgotPasswordAct');
 Route::get('/validasiForgotPassword/{token}', [AuthController::class, 'validasiForgotPassword'])->name('validasiForgotPassword');
 Route::post('/forgotPasswordAct', [AuthController::class, 'forgotPasswordAct'])->name('forgotPasswordAct');
+
+
+
+
+//API

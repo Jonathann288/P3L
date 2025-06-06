@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\DB;
 use App\Models\DetailTransaksiPenjualan;
 use App\Models\TransaksiPenitipan;
 use Illuminate\Support\Facades\Log;
+use Laravel\Sanctum\HasApiTokens;
 
 class Penitip extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'penitip';
     protected $primaryKey = 'id_penitip';

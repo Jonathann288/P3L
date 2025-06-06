@@ -163,23 +163,34 @@
                                 @endif
                                 
                                 <div>
-                                    <h4 class="text-sm font-semibold mb-1 text-gray-700">Beri Rating Penjual:</h4>
-                                    <div class="rating-stars flex items-center space-x-1" 
-                                        data-detail-id="{{ $detail->id_detail_transaksi_penjualan }}"
-                                        data-penitip-id="{{ $penitipInfo ? $penitipInfo->id_penitip : '' }}">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <button
-                                                class="star text-2xl focus:outline-none {{ ($detail->rating_untuk_penitip ?? 0) >= $i ? 'text-yellow-400' : 'text-gray-300' }} hover:text-yellow-400 transition-colors duration-150"
-                                                data-value="{{ $i }}">★</button>
-                                        @endfor
-                                    </div>
-                                    <span class="text-xs text-gray-500 mt-1 block rating-feedback-{{ $detail->id_detail_transaksi_penjualan }}">
-                                        @if($detail->rating_untuk_penitip)
-                                            Anda memberi: {{ $detail->rating_untuk_penitip }} bintang
-                                        @else
-                                            Belum ada rating
-                                        @endif
-                                    </span>
+                                    @if($detail->rating_untuk_penitip)
+                                        {{-- Jika sudah ada rating, tampilkan read-only --}}
+                                        <h4 class="text-sm font-semibold mb-1 text-gray-700">Rating Anda:</h4>
+                                        <div class="flex items-center space-x-1 mb-1">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <span class="star text-2xl {{ $detail->rating_untuk_penitip >= $i ? 'text-yellow-400' : 'text-gray-300' }}">★</span>
+                                            @endfor
+                                        </div> 
+                                        <span class="text-xs text-green-600 font-medium">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Anda telah memberi {{ $detail->rating_untuk_penitip }} bintang
+                                        </span>
+                                    @else
+                                        {{-- Jika belum ada rating, tampilkan form rating --}}
+                                        <h4 class="text-sm font-semibold mb-1 text-gray-700">Beri Rating Penjual:</h4>
+                                        <div class="rating-stars flex items-center space-x-1" 
+                                            data-detail-id="{{ $detail->id_detail_transaksi_penjualan }}"
+                                            data-penitip-id="{{ $penitipInfo ? $penitipInfo->id_penitip : '' }}">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <button
+                                                    class="star text-2xl focus:outline-none text-gray-300 hover:text-yellow-400 transition-colors duration-150"
+                                                    data-value="{{ $i }}">★</button>
+                                            @endfor
+                                        </div>
+                                        <span class="text-xs text-gray-500 mt-1 block rating-feedback-{{ $detail->id_detail_transaksi_penjualan }}">
+                                            Klik bintang untuk memberi rating
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                         </div> {{-- Akhir Card Item --}}
@@ -256,13 +267,23 @@
 
             allRatingStarsContainers.forEach(starsContainer => {
                 const stars = starsContainer.querySelectorAll('.star');
+                let isSubmitting = false; // Flag untuk mencegah submit ganda
+                
                 stars.forEach(star => {
                     star.addEventListener('click', function () {
+                        // Cegah multiple clicks saat proses submit
+                        if (isSubmitting) return;
+                        
                         const detailId = starsContainer.dataset.detailId;
                         const ratingValue = this.dataset.value;
                         const penitipIdFromAttribute = starsContainer.dataset.penitipId;
                         const feedbackSpan = document.querySelector(`.rating-feedback-${detailId}`);
 
+                        // Set flag submit dan disable tombol
+                        isSubmitting = true;
+                        stars.forEach(s => s.style.pointerEvents = 'none');
+
+                        // Update visual stars
                         starsContainer.querySelectorAll('.star').forEach(s => {
                             s.classList.remove('text-yellow-400');
                             s.classList.add('text-gray-300');
@@ -271,7 +292,8 @@
                                 s.classList.add('text-yellow-400');
                             }
                         });
-                        if (feedbackSpan) feedbackSpan.textContent = 'Menyimpan...';
+                        
+                        if (feedbackSpan) feedbackSpan.textContent = 'Menyimpan rating...';
 
                         fetch('{{ route("pembeli.submitRating") }}', {
                             method: 'POST',
@@ -301,7 +323,7 @@
                                             errorDetail = "Sesi Anda mungkin telah berakhir. Silakan login kembali.";
                                         } else if (text.toLowerCase().includes("not found")) {
                                             errorDetail = "Endpoint tidak ditemukan (404).";
-                                        } else if (response.status === 500 || text.toLowerCase().includes("server error")) { // Periksa juga teks untuk "server error"
+                                        } else if (response.status === 500 || text.toLowerCase().includes("server error")) {
                                              errorDetail = "Terjadi error di server ("+response.status+").";
                                          }
                                      }
@@ -311,10 +333,22 @@
                         })
                         .then(data => {
                             if (data.success === true) {
-                                if (feedbackSpan) {
-                                    feedbackSpan.textContent = data.message || ('Rating: ' + data.given_rating + ' bintang. Disimpan!');
-                                }
+                                // Sukses - ganti dengan tampilan read-only
+                                const ratingContainer = starsContainer.parentElement;
+                                ratingContainer.innerHTML = `
+                                    <h4 class="text-sm font-semibold mb-1 text-gray-700">Rating Anda:</h4>
+                                    <div class="flex items-center space-x-1 mb-1">
+                                        ${Array.from({length: 5}, (_, i) => 
+                                            `<span class="star text-2xl ${i < ratingValue ? 'text-yellow-400' : 'text-gray-300'}">★</span>`
+                                        ).join('')}
+                                    </div>
+                                    <span class="text-xs text-green-600 font-medium">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        ${data.message || 'Rating berhasil disimpan! Anda telah memberi ' + ratingValue + ' bintang'}
+                                    </span>
+                                `;
                                 
+                                // Update average rating di UI
                                 const receivedPenitipId = data.penitip_id; 
                                 const newAverageRating = data.new_average_rating;
 
@@ -330,7 +364,10 @@
                                 }
                                 
                             } else {
-                                 if (feedbackSpan) feedbackSpan.textContent = 'Gagal: ' + (data.message || 'Format respons tidak sesuai.');
+                                // Gagal - kembalikan UI dan enable kembali
+                                isSubmitting = false;
+                                stars.forEach(s => s.style.pointerEvents = 'auto');
+                                if (feedbackSpan) feedbackSpan.textContent = 'Gagal: ' + (data.message || 'Format respons tidak sesuai.');
                             }
                         })
                         .catch(error => {
@@ -346,6 +383,10 @@
                                 errorMessage = error.message;
                             }
 
+                            // Error - kembalikan UI dan enable kembali
+                            isSubmitting = false;
+                            stars.forEach(s => s.style.pointerEvents = 'auto');
+                            
                             if (feedbackSpan) {
                                 feedbackSpan.textContent = errorMessage;
                             } else {
