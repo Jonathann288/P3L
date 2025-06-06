@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         integrity="sha512-BxRzY...dllnya..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .rating-stars {
             display: inline-flex;
@@ -221,12 +222,9 @@
 
                 {{-- AWAL BAGIAN INFORMASI PENJUAL (PENITIP) --}}
                 @php
-                    $penitipInfo = null; // Inisialisasi untuk keamanan
-                    // Langsung gunakan variabel $barang yang merupakan objek utama halaman ini
-                    // Asumsikan $barang selalu ada di view ini. Accessor 'penitip_data' akan mengembalikan null jika tidak ada penitip.
-                    if (isset($barang) && $barang) { // Pastikan $barang ada dan tidak null
-                        $penitipInfo = $barang->penitip_data;
-                    }
+                    // Accessor 'penitip_data' akan mengambil data penitip secara otomatis
+                    // jika relasi datanya ada di database.
+                    $penitipInfo = $barang->penitip_data;
                 @endphp
 
                 @if ($penitipInfo)
@@ -244,8 +242,8 @@
                             @endif
                             <div>
                                 <p class="text-lg font-medium text-gray-900">{{ $penitipInfo->nama_penitip }}</p>
-                               
-                                @if (isset($penitipInfo->Rating_penitip))
+
+                                @if (isset($penitipInfo->Rating_penitip) && $penitipInfo->Rating_penitip > 0)
                                     <div class="flex items-center text-sm text-gray-600" title="Rata-rata rating penjual">
                                         <span class="text-yellow-500 mr-1">
                                             @php $roundedRating = round($penitipInfo->Rating_penitip * 2) / 2; @endphp
@@ -275,7 +273,6 @@
                 {{-- AKHIR BAGIAN INFORMASI PENJUAL (PENITIP) --}}
 
                 <!-- Kotak Deskripsi Produk -->
-                <!-- INI JUGA COPY -->
                 <div class="mt-6 border rounded-lg p-4 bg-gray-50 shadow-sm">
                     <h2 class="text-lg font-semibold text-gray-900 mb-3">Deskripsi Produk</h2>
 

@@ -149,8 +149,8 @@
                                     <div class="text-xs text-gray-600 mb-2">
                                         Dijual oleh: <strong class="text-gray-800">{{ $penitipInfo->nama_penitip }}</strong>
                                         <span class="ml-2 text-yellow-500 average-rating-penitip-{{ $penitipInfo->id_penitip }}">
-                                            @if(isset($penitipInfo->rating_penitip) && $penitipInfo->rating_penitip > 0)
-                                                <i class="fas fa-star text-xs"></i> {{ number_format($penitipInfo->rating_penitip, 1) }}/5.0
+                                            @if(isset($penitipInfo->Rating_penitip) && $penitipInfo->Rating_penitip > 0)
+                                                <i class="fas fa-star text-xs"></i> {{ number_format($penitipInfo->Rating_penitip, 1) }}/5.0
                                             @else
                                                 <i class="far fa-star text-xs"></i> <span class="text-gray-500">(Belum ada rating)</span>
                                             @endif
