@@ -13,6 +13,7 @@ class transaksipenitipan extends Model
     protected $fillable = [
         'id',
         'id_pegawai',
+        'id_hunter',
         'id_penitip',
         'tanggal_penitipan',
         'tanggal_akhir_penitipan',
@@ -30,6 +31,11 @@ class transaksipenitipan extends Model
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'id_pegawai');
+    }
+
+     public function hunter()
+    {
+        return $this->belongsTo(Pegawai::class, 'id_hunter');
     }
 
     public function penitip() 

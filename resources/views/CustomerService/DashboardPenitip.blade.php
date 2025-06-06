@@ -30,6 +30,10 @@
                         class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fas fa-user mr-2"></i> <span>Penitip</span> 
                     </a>
+                    <a href="{{ route('CustomerService.DashboardClaimMerchandise') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-gift mr-2"></i>
+                        <span>Klaim Merchandise</span>
+                    </a>
                 </div>
             </nav>
         </div>

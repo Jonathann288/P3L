@@ -15,6 +15,8 @@ use App\Http\Controllers\RequestDonasiControllers;
 use App\Http\Controllers\DiskusiControllers;
 use App\Http\Controllers\DonasiControllers;
 use App\Http\Controllers\TransaksiPenitipanControllers;
+use App\Http\Controllers\ClaimMerchandiseControllers;
+use App\Http\Controllers\LaporanControllers;
 
 Route::get('/', function () {
     return view('beranda');
@@ -160,6 +162,8 @@ Route::middleware(['checkjabatan:Admin'])->group(function () {
 
     Route::put('/DashboardPegawai/reset-password/{id}', [PegawaiControllers::class, 'resetPassword'])->name('admin.pegawai.resetPassword');
 });
+
+//OWNER
 Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::post('/logout-Owner', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
 
@@ -172,8 +176,14 @@ Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::post('/owner/historyDonasi/update/{id_request}', [DonasiControllers::class, 'updateDonasi'])->name('owner.historyDonasi.update');
 
 
+    Route::get('/DashboardLaporan', [LaporanControllers::class, 'showLaporanPage'])->name('owner.DashboardLaporan');
+    Route::get('/laporan/penjualan-bulanan', [LaporanControllers::class, 'laporanPenjualanBulanan'])->name('owner.laporanPenjualanBulanan');
+    Route::get('/laporan/komisi-bulanan', [LaporanControllers::class, 'laporanKomisiBulanan'])->name('owner.laporanKomisiBulanan');
+    Route::get('/laporan/stok-gudang', [LaporanControllers::class, 'laporanStokGudang'])->name('owner.laporanStokGudang');
 
 });
+
+//CS
 Route::middleware(['checkjabatan:Customer Service'])->group(function () {
     Route::post('/logout-CS', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
 
@@ -183,7 +193,13 @@ Route::middleware(['checkjabatan:Customer Service'])->group(function () {
     Route::put('/DashboardPenitip/update/{id}', [PenitipControllrs::class, 'update'])->name('CustomerService.penitip.update');
     Route::delete('/DashboardPenitip/delete/{id}', [PenitipControllrs::class, 'destroy'])->name('CustomerService.penitip.destroy');
     Route::get('/DashboardPenitip/search', [PenitipControllrs::class, 'search'])->name('CustomerService.penitip.search');
+    
+    // Rute untuk Klaim Merchandise
+    Route::get('/DashboardClaimMerchandise', [ClaimMerchandiseControllers::class, 'showClaimMerchandise'])->name('CustomerService.DashboardClaimMerchandise');
+    Route::put('/DashboardClaimMerchandise/update/{id}', [ClaimMerchandiseControllers::class, 'updateClaimStatus'])->name('CustomerService.updateClaimStatus');
 });
+
+//Gudang
 Route::middleware(['checkjabatan:Gudang'])->group(function () {
     // COPY INI 
     Route::get('/DashboardGudang', [PegawaiControllers::class, 'showLoginGudang'])->name('gudang.DashboardGudang');
@@ -210,14 +226,9 @@ Route::middleware(['checkjabatan:Gudang'])->group(function () {
     Route::get('/DetailBarang/{id_barang}', [BarangControllers::class, 'showDetailBarangGudang'])->name('gudang.DetailBarang');
     Route::get('/EditBarang/{id_barang}', [BarangControllers::class, 'showEditBarang'])->name('gudang.EditBarang');
     Route::put('/UpdateBarang/{id_barang}', [BarangControllers::class, 'updateBarangGudang'])->name('gudang.UpdateBarang');
-    // SAMPE INI 
-
-    //ini
-    Route::get('/PerpanjanganMasaPenitipan', [TransaksiPenitipanControllers::class, 'showPerpanjanganPage'])->name('gudang.showPerpanjanganPage');
-    Route::post('/ProsesPerpanjangPenitipan/{id_transaksi_penitipan}', [TransaksiPenitipanControllers::class, 'prosesPerpanjangPenitipan'])->name('gudang.prosesPerpanjangPenitipan');
-    Route::get('/PerpanjanganMasaPenitipan', [TransaksiPenitipanControllers::class, 'showPerpanjanganPage'])->name('gudang.showPerpanjanganPage');
 
 });
+
 Route::middleware(['checkjabatan:Kurir'])->group(function () {
     Route::get('/DashboardKurir', function () {
         return view('kurir.DashboardKurir');

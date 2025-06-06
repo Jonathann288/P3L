@@ -130,6 +130,21 @@
                         </select>
                         @error('id_penitip') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
+                    {{-- Hunter --}}
+                    <div class="mb-4">
+                        <label for="id_hunter" class="block font-semibold mb-2">Pilih Hunter </label>
+                        <select name="id_hunter" id="id_hunter" required  class="w-full border p-3 rounded-lg @error('id_hunter') border-red-500 @enderror">
+                            <option value="">-- Pilih Hunter --</option>
+                            @foreach($hunters ?? [] as $hunter)
+                                @if(is_object($hunter))
+                                    <option value="{{ $hunter->id_pegawai }}" {{ old('id_hunter') == $hunter->id_pegawai ? 'selected' : '' }}>
+                                        {{ $hunter->nama_pegawai }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                        @error('id_hunter') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
 
                     {{-- Kategori Barang --}}
                     <div class="mb-4">
@@ -475,16 +490,26 @@
 
 
                         <!-- Edit Button -->
-                        <button
-                            @click="openModal({{ $titipan->id_transaksi_penitipan }}, {
-                                                                                                                                    nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
-                                                                                                                                    email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
-                                                                                                                                    tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
-                                                                                                                                    tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
-                                                                                                                                    tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
-                                                                                                                                    tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
-                                                                                                                                })"
-                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mt-3 transition-colors">
+                        <button @click="openModal({{ $titipan->id_transaksi_penitipan }}, {
+                            nama_penitip: '{{ addslashes(optional($titipan->penitip)->nama_penitip) }}',
+                            email_penitip: '{{ addslashes(optional($titipan->penitip)->email_penitip) }}',
+                            id_hunter: '{{ $titipan->id_hunter ?? '' }}',
+                            tanggal_penitipan: '{{ optional($titipan->tanggal_penitipan)->format('Y-m-d') }}',
+                            tanggal_akhir_penitipan: '{{ optional($titipan->tanggal_akhir_penitipan)->format('Y-m-d') }}',
+                            tanggal_batas_pengambilan: '{{ optional($titipan->tanggal_batas_pengambilan)->format('Y-m-d') }}',
+                            tanggal_pengambilan_barang: '{{ optional($titipan->tanggal_pengambilan_barang)->format('Y-m-d') }}',
+
+                            // Bagian data barang yang lebih aman
+                            nama_barang: '{{ addslashes(optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->nama_barang) }}',
+                            deskripsi_barang: '{{ addslashes(optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->deskripsi_barang) }}',
+                            harga_barang: '{{ optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->harga_barang }}',
+                            berat_barang: '{{ optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->berat_barang }}',
+                            status_barang: '{{ optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->status_barang }}',
+
+                            // Bagian garansi yang lebih aman
+                            has_garansi: '{{ optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->garansi_barang ? 'ya' : 'tidak' }}',
+                            garansi_barang: '{{ optional(optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->garansi_barang)->format('Y-m-d') }}'
+                        })" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mt-3 transition-colors">
                             <i class="fas fa-edit mr-1"></i> Edit
                         </button>
                         <!--cetakNota -->
@@ -510,6 +535,13 @@
                                         <span
                                             class="text-gray-600">{{ $titipan->penitip ? $titipan->penitip->email_penitip : '-' }}</span>
                                     </div>
+
+                                    @if($titipan->hunter)
+                                        <div>
+                                            <strong class="text-gray-700">Hunter:</strong>
+                                            <span class="text-gray-600 font-medium">{{ $titipan->hunter->nama_pegawai }}</span>
+                                        </div>
+                                    @endif
 
                                     <div>
                                         <strong class="text-gray-700">Tanggal Akhir Penitipan:</strong>
@@ -670,6 +702,21 @@
                                 class="w-full border p-3 rounded-lg" required>
                         </div>
 
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block font-semibold mb-2 text-gray-700">Hunter </label>
+                            <select name="id_hunter" x-model="formData.id_hunter" class="w-full border p-3 rounded-lg" required> <option value="">-- Pilih Hunter --</option>
+                                <option value="">-- Pilih Hunter --</option>
+                                @foreach($hunters ?? [] as $hunter)
+                                    @if(is_object($hunter))
+                                        <option value="{{ $hunter->id_pegawai }}" {{ old('id_hunter') == $hunter->id_pegawai ? 'selected' : '' }}>
+                                            {{ $hunter->nama_pegawai }}
+                                        </option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+
+
                         <!-- Tanggal Titip -->
                         <div class="col-span-1">
                             <label class="block font-semibold mb-2 text-gray-700">Tanggal Titip *</label>
@@ -704,33 +751,36 @@
                         <!-- Nama Barang -->
                         <div class="col-span-1 md:col-span-2">
                             <label class="block font-semibold mb-2 text-gray-700">Nama Barang *</label>
-                            <input type="text" name="nama_barang" class="w-full border p-3 rounded-lg" required>
+                            <input type="text" name="nama_barang" class="w-full border p-3 rounded-lg" required
+                                x-model="formData.nama_barang">
                         </div>
 
                         <!-- Deskripsi -->
                         <div class="col-span-1 md:col-span-2">
                             <label class="block font-semibold mb-2 text-gray-700">Deskripsi Barang *</label>
-                            <textarea name="deskripsi_barang" rows="3" class="w-full border p-3 rounded-lg"
-                                required></textarea>
+                            <textarea name="deskripsi_barang" rows="3" class="w-full border p-3 rounded-lg" required
+                                x-model="formData.deskripsi_barang"></textarea>
                         </div>
 
                         <!-- Harga -->
                         <div>
                             <label class="block font-semibold mb-2 text-gray-700">Harga Barang (Rp) *</label>
-                            <input type="number" name="harga_barang" class="w-full border p-3 rounded-lg" required>
+                            <input type="number" name="harga_barang" class="w-full border p-3 rounded-lg" required
+                                x-model="formData.harga_barang">
                         </div>
 
                         <!-- Berat -->
                         <div>
                             <label class="block font-semibold mb-2 text-gray-700">Berat Barang (gram) *</label>
                             <input type="number" name="berat_barang" class="w-full border p-3 rounded-lg" required
-                                step="0.1" min="0.1">
+                                step="0.1" min="0.1" x-model="formData.berat_barang">
                         </div>
 
                         <!-- Status -->
                         <div class="col-span-1 md:col-span-2">
                             <label class="block font-semibold mb-2 text-gray-700">Status Barang *</label>
-                            <select name="status_barang" class="w-full border p-3 rounded-lg" required>
+                            <select name="status_barang" class="w-full border p-3 rounded-lg" required
+                                x-model="formData.status_barang">
                                 <option value="">-- Pilih Status --</option>
                                 <option value="tidak laku">Tidak Laku</option>
                             </select>
@@ -767,7 +817,7 @@
 
                         <!-- Foto Barang -->
                         <div class="col-span-1 md:col-span-2">
-                            <label class="block font-semibold mb-2 text-gray-700">Foto Barang (Opsional)</label>
+                            <label class="block font-semibold mb-2 text-gray-700">Foto Barang </label>
                             <input type="file" name="foto_barang[]" multiple class="w-full border p-3 rounded-lg"
                                 accept="image/*">
                             <small class="text-gray-500">Boleh upload ulang 1-5 foto. Kosongkan jika tidak ingin
@@ -813,15 +863,23 @@
                 formData: {
                     nama_penitip: '',
                     email_penitip: '',
+                    id_hunter: '',
                     tanggal_penitipan: '',
                     tanggal_akhir_penitipan: '',
                     tanggal_batas_pengambilan: '',
-                    tanggal_pengambilan_barang: ''
+                    tanggal_pengambilan_barang: '',
+                    nama_barang: '',
+                    deskripsi_barang: '',
+                    harga_barang: '',
+                    berat_barang: '',
+                    status_barang: '',
+                    has_garansi: 'tidak',
+                    garansi_barang: ''
                 },
 
                 openModal(id, data) {
                     this.currentId = id;
-                    this.formData = { ...data };
+                    this.formData = { ...this.formData, ...data };
                     this.showModal = true;
                     this.updateDurasi();
                     document.body.style.overflow = 'hidden';

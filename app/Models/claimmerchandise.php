@@ -16,6 +16,7 @@ class claimmerchandise extends Model
         'id',
         'tanggal_claim',
         'tanggal_pengambilan',
+        'status',
     ];
 
     protected $casts = [

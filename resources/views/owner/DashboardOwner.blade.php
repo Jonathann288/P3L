@@ -20,7 +20,7 @@
             <nav>
                 <div class="space-y-4">
                     <a href="{{ route('owner.DashboardOwner') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                        <img src="images/fotoprofil.jpg" alt="profile" class="w-8 h-8 rounded-full object-cover">
+                        <i class="fas fa-user-circle"></i>
                         <span>{{ $pegawai->nama_pegawai }}</span>
                     </a>
                     <a href="{{ route('owner.DashboardDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
@@ -29,7 +29,11 @@
                     </a>
                     <a href="{{ route('owner.historyDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>
-                        <span>Histroy Request Donasi</span>
+                        <span>History Request Donasi</span>
+                    </a>
+                    <a href="{{ route('owner.DashboardLaporan') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Laporan</span>
                     </a>
                 </div>
             </nav>

@@ -89,7 +89,7 @@ class TransaksiPenitipanControllers extends Controller
     // PUNYA MU SOKO KENE DHA LEK PENGEN NGECEK SENG ATAS DEWE PUNYA KU BEDA FUNGSI KARO PUNYA MU
     public function showTitipanBarang(Request $request)
     {
-        $query = TransaksiPenitipan::with('penitip', 'pegawai');  // Gunakan nama class yang benar
+        $query = TransaksiPenitipan::with('penitip', 'pegawai', 'hunter');  // Gunakan nama class yang benar
 
         // Handle search
         if ($request->has('search') && !empty($request->search)) {
@@ -138,10 +138,10 @@ class TransaksiPenitipanControllers extends Controller
         $kategoris = KategoriBarang::select('id_kategori', 'nama_kategori', 'nama_sub_kategori')  // Perbaiki nama class
             ->orderBy('nama_kategori')
             ->get();
+        $hunters = Pegawai::where('id_jabatan', 6)->orderBy('nama_pegawai')->get();
 
 
-
-        return view('gudang.DashboardTitipanBarang', compact('titipans', 'penitips', 'kategoris'));
+        return view('gudang.DashboardTitipanBarang', compact('titipans', 'penitips', 'kategoris', 'hunters'));
     }
 
     public function storeTitipanBarang(Request $request)
@@ -152,6 +152,7 @@ class TransaksiPenitipanControllers extends Controller
         // Improved validation with better error messages
         $validated = $request->validate([
             'id_penitip' => 'required|exists:penitip,id_penitip',
+            'id_hunter' => 'required|exists:pegawai,id_pegawai',
             'id_kategori' => 'required|exists:kategoribarang,id_kategori',
             'tanggal_penitipan' => 'required|date',
             'nama_barang' => 'required|string|max:255',
@@ -166,11 +167,13 @@ class TransaksiPenitipanControllers extends Controller
             'garansi_barang' => 'nullable|date|after:tanggal_penitipan',
         ], [
             'id_penitip.required' => 'Penitip harus dipilih',
+            'id_hunter.required' => 'Hunter harus dipilih.',
             'id_penitip.exists' => 'Penitip tidak ditemukan',
+            'id_hunter.exists' => 'Hunter tidak valid.',
             'id_kategori.required' => 'Kategori barang harus dipilih',
-            'foto_barang.required' => 'Minimal 1 foto barang harus diupload',
+            'foto_barang.required' => 'Minimal 2 foto barang harus diupload',
             'foto_barang.array' => 'Foto barang harus berupa array file',
-            'foto_barang.min' => 'Minimal upload 1 foto',
+            'foto_barang.min' => 'Minimal upload 2 foto',
             'foto_barang.max' => 'Maksimal upload 5 foto',
             'foto_barang.*.required' => 'Setiap file foto harus valid',
             'foto_barang.*.file' => 'Setiap item harus berupa file',
@@ -286,6 +289,7 @@ class TransaksiPenitipanControllers extends Controller
             $titipan->id = $this->generateCustomId();
             $titipan->id_pegawai = $pegawai->id_pegawai;
             $titipan->id_penitip = $validated['id_penitip'];
+            $titipan->id_hunter = $validated['id_hunter'];
             $titipan->tanggal_penitipan = $tanggalPenitipan;
             $titipan->tanggal_akhir_penitipan = $tanggalAkhirPenitipan;
             $titipan->tanggal_batas_pengambilan = $tanggalBatasPengambilan;
@@ -430,7 +434,9 @@ class TransaksiPenitipanControllers extends Controller
             ->orderBy('nama_kategori')
             ->get();
 
-        return view('gudang.DashboardTitipanBarang', compact('titipans', 'penitips', 'kategoris'));
+        $hunters = Pegawai::where('id_jabatan', 6)->orderBy('nama_pegawai')->get();
+
+        return view('gudang.DashboardTitipanBarang', compact('titipans', 'penitips', 'kategoris', 'hunters'));
     }
 
 
@@ -494,6 +500,7 @@ class TransaksiPenitipanControllers extends Controller
         $query = transaksipenitipan::with([
             'penitip',
             'pegawai',
+            'hunter',
             'detailTransaksiPenitipan.barang.detailTransaksiPenjualan.transaksipenjualan',
             'detailTransaksiPenitipan.barang.donasi'
         ]);
@@ -630,12 +637,13 @@ class TransaksiPenitipanControllers extends Controller
         $kategoris = KategoriBarang::select('id_kategori', 'nama_kategori', 'nama_sub_kategori')
             ->orderBy('nama_kategori')
             ->get();
-
+        $hunters = Pegawai::where('id_jabatan', 6)->orderBy('nama_pegawai')->get();
         return view('gudang.DashboardTitipanBarang', [
             'titipans' => $results,
             'searchTerm' => $request->search_term,
             'penitips' => $penitips,
             'kategoris' => $kategoris,
+            'hunters' => $hunters,
             'request' => $request
         ]);
     }
@@ -645,6 +653,7 @@ class TransaksiPenitipanControllers extends Controller
         $validated = $request->validate([
             'nama_penitip' => 'required|string|max:255',
             'email_penitip' => 'required|email|max:255',
+            'id_hunter' => 'required|exists:pegawai,id_pegawai',
             'tanggal_penitipan' => 'required|date',
             'tanggal_akhir_penitipan' => 'nullable|date',
             'tanggal_batas_pengambilan' => 'nullable|date',
@@ -683,7 +692,7 @@ class TransaksiPenitipanControllers extends Controller
                 $titipan->tanggal_akhir_penitipan = $validated['tanggal_akhir_penitipan'];
                 $titipan->tanggal_batas_pengambilan = $validated['tanggal_batas_pengambilan'];
             }
-
+            $titipan->id_hunter = $validated['id_hunter'] ;
             $titipan->tanggal_pengambilan_barang = $validated['tanggal_pengambilan_barang'] ?? null;
 
             $titipan->save();
@@ -876,53 +885,6 @@ class TransaksiPenitipanControllers extends Controller
     }
 
 
-
-public function showPerpanjanganPage(Request $request)
-{
-    $transaksis = TransaksiPenitipan::with('penitip')            
-         ->where('tanggal_akhir_penitipan', '2025-06-03') 
-        ->orderBy('tanggal_penitipan', 'desc')
-        ->paginate(10); 
-
-    return view('gudang.perpanjang', compact('transaksis'));
-}
-
-  
-    public function prosesPerpanjangPenitipan(Request $request, $id_transaksi_penitipan)
-    {
-        try {
-            $transaksi = TransaksiPenitipan::findOrFail($id_transaksi_penitipan);
-
-           
-            if ($transaksi->tanggal_pengambilan_barang) {
-                return redirect()->route('gudang.showPerpanjanganPage')
-                                 ->with('error', 'Barang sudah diambil oleh penitip dan tidak bisa diperpanjang lagi.');
-            }
-
-
-            $tanggalAkhirSaatIni = Carbon::parse($transaksi->tanggal_akhir_penitipan);
-            
-        
-            $tanggalAkhirBaru = $tanggalAkhirSaatIni->copy()->addDays(30);
-            $tanggalBatasPengambilanBaru = $tanggalAkhirBaru->copy()->addDays(7);
-
-            $transaksi->tanggal_akhir_penitipan = $tanggalAkhirBaru;
-            $transaksi->tanggal_batas_pengambilan = $tanggalBatasPengambilanBaru;
-            $transaksi->save();
-
-            return redirect()->route('gudang.showPerpanjanganPage')
-                             ->with('success', 'Masa penitipan untuk transaksi ID ' . $transaksi->id_transaksi_penitipan . ' berhasil diperpanjang 30 hari.');
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->route('gudang.showPerpanjanganPage')
-                             ->with('error', 'Transaksi penitipan tidak ditemukan.');
-        } catch (\Exception $e) {
-            // Log error
-            \Log::error("Error perpanjang penitipan: {$e->getMessage()} in file {$e->getFile()} at line {$e->getLine()}");
-            return redirect()->route('gudang.showPerpanjanganPage')
-                             ->with('error', 'Terjadi kesalahan saat memproses perpanjangan. Silakan coba lagi.');
-        }
-    }
 
 
 }

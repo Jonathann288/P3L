@@ -19,25 +19,38 @@
     <!-- Sidebar Navigation -->
     <div class="bg-gray-800 text-white p-6 flex flex-col justify-between">
         <div>
-            <h2 class="text-xl font-semibold mb-8">Owner</h2>
+            <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
             <nav>
                 <div class="space-y-4">
                     <a href="{{ route('owner.DashboardOwner') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-user-circle mr-2"></i>
+                        <i class="fas fa-user-circle"></i>
                         <span>{{ $pegawaiLogin->nama_pegawai }}</span>
                     </a>
                     <a href="{{ route('owner.DashboardDonasi') }}"
                         class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fa-solid fa-hand-holding-dollar"></i>
-                        <span>Donasi</span>
+                        <span>Daftar Request Donasi</span>
                     </a>
-                    <a  href="{{ route('owner.historyDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('owner.historyDonasi') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-clock-rotate-left"></i>
-                        <span>Histroy Request Donasi</span>
+                        <span>History Request Donasi</span>
+                    </a>
+                    <a href="{{ route('owner.DashboardLaporan') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Laporan</span>
                     </a>
                 </div>
             </nav>
+        </div>
+        <!-- Bottom buttons -->
+        <div class="space-y-4 mt-auto">
+            <form action="{{ route('logout.pegawai') }}"  method="POST">
+                @csrf
+                <button class="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">
+                    Keluar
+                </button>
+            </form>
         </div>
     </div>
 

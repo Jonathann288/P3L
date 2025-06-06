@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <title>Nota Penitipan Barang</title>
     <style>
+        /* Reset dan Pengaturan Dasar Body */
         * {
             margin: 0;
             padding: 0;
@@ -12,210 +13,131 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f0;
+            font-family: 'Courier New', Courier, monospace;
+            /* Font khas untuk nota */
+            font-size: 13px;
+            line-height: 1.5;
+            color: #000;
+            background-color: #fff;
             padding: 20px;
         }
 
+        /* Kontainer Utama Nota */
         .invoice-container {
-            max-width: 800px;
+            max-width: 580px;
+            /* << DILEBARKAN DARI 450px MENJADI 580px */
             margin: 0 auto;
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            border: 1px solid #000;
         }
 
+        /* Bagian Header */
         .header {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .company-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .company-address {
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        /* Bagian Informasi Utama (No Nota, Tanggal, Penitip) */
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-line {
+            display: flex;
+            margin-bottom: 2px;
+            /* Jarak antar baris */
+        }
+
+        .info-line .label {
+            width: 170px;
+            /* Lebar label disesuaikan sedikit */
+            flex-shrink: 0;
+            /* Mencegah label menyusut */
+        }
+
+        .info-line .value {
+            /* Value akan mengisi sisa ruang */
+        }
+
+        /* Penataan Khusus untuk Alamat Penitip */
+        .penitip-address {
+            display: flex;
+        }
+
+        .penitip-address .label {
+            width: 170px;
+            /* Lebar label disesuaikan sedikit */
+            flex-shrink: 0;
+        }
+
+        .penitip-address .value {
+            display: block;
+        }
+
+
+        /* Bagian Daftar Barang */
+        .items-section {
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 1px dashed #000;
+            /* Garis pemisah */
+        }
+
+        .item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
+            /* Mendorong nama dan harga berjauhan */
+            margin-bottom: 5px;
+            /* Jarak antar item utama */
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        .item-details {
+            padding-left: 20px;
+            /* Indentasi untuk detail di bawah item */
+            margin-bottom: 15px;
+            /* Jarak setelah detail item */
         }
 
-
-        .invoice-title {
-            font-size: 36px;
-            font-weight: 300;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #333;
+        /* Bagian Footer (Penerima QC) */
+        .footer-section {
+            margin-top: 30px;
+            /* Memberi jarak dari item terakhir */
         }
 
-        .invoice-info {
-            text-align: right;
-            font-size: 13px;
-            color: #666;
+        .qc-person {
+            margin-top: 60px;
+            /* Memberi jarak vertikal yang signifikan untuk nama */
         }
 
-        .bill-to {
-            margin-bottom: 30px;
-        }
-
-        .bill-to-label {
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            color: #666;
-        }
-
-        .customer-info {
-            font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .details-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px 0;
-            font-size: 13px;
-        }
-
+        /* Modifikasi untuk memberi jarak pada header tabel */
         .details-table th {
-            background-color: #f8f8f8;
-            padding: 12px;
+
+            /* Padding: 12px (atas/bawah), 18px (kiri/kanan) */
+            padding: 12px 18px;
             text-align: left;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 11px;
             letter-spacing: 0.5px;
-            color: #666;
             border-bottom: 1px solid #ddd;
         }
 
+        /* Modifikasi untuk memberi jarak pada sel isi tabel */
         .details-table td {
-            padding: 15px 12px;
+            /* Padding: 15px (atas/bawah), 18px (kiri/kanan) */
+            padding: 15px 18px;
             border-bottom: 1px solid #eee;
-        }
-
-        .details-table tr:hover {
-            background-color: #fafafa;
-        }
-
-        .total-section {
-            margin-top: 30px;
-            text-align: right;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .total-label {
-            width: 120px;
-            text-align: right;
-            padding-right: 20px;
-            color: #666;
-        }
-
-        .total-value {
-            width: 100px;
-            text-align: right;
-            font-weight: 600;
-        }
-
-        .final-total {
-            border-top: 2px solid #333;
-            padding-top: 15px;
-            margin-top: 15px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .final-total .total-label {
-            font-size: 16px;
-            color: #333;
-        }
-
-        .thank-you {
-            margin: 40px 0 30px 0;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #eee;
-        }
-
-        .payment-info {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .payment-info-title {
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .company-info {
-            text-align: right;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .company-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .photo-list {
-            margin-top: 20px;
-        }
-
-        .photo-list ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .photo-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background-color: #e8f5e8;
-            color: #2d5a2d;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        @media print {
-            body {
-                background-color: white;
-                padding: 0;
-            }
-
-            .invoice-container {
-                box-shadow: none;
-                border-radius: 0;
-            }
         }
     </style>
 </head>
@@ -225,11 +147,12 @@
         <!-- Header -->
         <div class="header">
             <div class="logo">
-                <div class="invoice-title">NOTA PENITIPAN</div>
+                <div class="invoice-title">ReUse Mart</div>
             </div>
             <div class="invoice-info">
-                <div><strong>No. Transaksi:</strong> {{ $titipan->id ?? '12345' }}</div>
-                <div>{{ $titipan->tanggal_penitipan->format('d M Y') ?? '26 July 2025' }}</div>
+                <div>Jl. Green Eco Park No. 456 Yogyakarta</div>
+                <div><strong>No. Transaksi:</strong> {{ $titipan->id }}</div>
+                <div>{{ $titipan->tanggal_penitipan->format('d M Y')  }}</div>
             </div>
         </div>
 
@@ -237,9 +160,9 @@
         <div class="bill-to">
             <div class="bill-to-label">PENITIP:</div>
             <div class="customer-info">
-                <div><strong>{{ $titipan->penitip->nama_penitip ?? 'Nama Penitip' }}</strong></div>
-                <div>{{ $titipan->penitip->email_penitip ?? 'email@example.com' }}</div>
-                <div>{{ $titipan->penitip->alamat_penitip ?? 'Alamat Penitip' }}</div>
+                <div><strong>{{ $titipan->penitip->nama_penitip}}</strong></div>
+                <div>{{ $titipan->penitip->email_penitip }}</div>
+                <div>{{ $titipan->penitip->nomor_telepon_penitip  }}</div>
             </div>
         </div>
 
@@ -289,7 +212,7 @@
                     <td>
                         @if($barang)
                             Nama: {{ $barang->nama_barang }}<br>
-                            Kategori: {{ $barang->kategoribarang->nama_kategori ?? '-' }}<br>
+                            Kategori: {{ $barang->kategoribarang->nama_kategori }}<br>
                             Berat: {{ $barang->berat_barang }} kg<br>
                             Harga: Rp {{ number_format($barang->harga_barang, 0, ',', '.') }}
                         @else
@@ -300,11 +223,12 @@
                 </tr>
 
                 <tr>
-                    <td>Penanggung Jawab</td>
+                    <td> QC Penanggung Jawab</td>
                     <td>{{ $titipan->tanggal_penitipan->format('d/m/Y') }}</td>
                     <td>
                         @if($penanggungJawab)
                             {{ $penanggungJawab->nama_pegawai }}<br>
+                            ( {{ $penanggungJawab->id }} )
                             Telepon: {{ $penanggungJawab->nomor_telepon_pegawai }}
                         @else
                             Tidak diketahui
@@ -341,12 +265,7 @@
                 <div>• Harap simpan nota ini sebagai bukti</div>
                 <div>• Untuk pengambilan barang, harap bawa nota ini</div>
             </div>
-            <div class="company-info">
-                <div class="company-name">REUSEMART</div>
-                <div>Jalan Magelang No. 123,Sleman Yogyakarta</div>
-                <div>Telp: (021) 1234-5678</div>
-                <div>Email: reusemart@penitipan.com</div>
-            </div>
+
         </div>
     </div>
 </body>
