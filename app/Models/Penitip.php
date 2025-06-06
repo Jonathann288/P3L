@@ -32,7 +32,7 @@ class Penitip extends Authenticatable
         'badge',
         'jumlah_penjualan',
         'foto_profil',
-        'rating_penitip',
+        'Rating_penitip',
         'foto_ktp'
     ];
 
