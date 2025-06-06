@@ -6,12 +6,135 @@ use Illuminate\Http\Request;
 use App\Models\Pegawai;
 use App\Models\Jabatan;
 use App\Models\Organisasi;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class PegawaiControllers extends Controller
-{
+{   
+
+    public function laporanPenjualan()
+    {
+        $data = DB::table('kategoribarang as kb')
+            ->leftJoin('barang as b', 'b.id_kategori', '=', 'kb.id_kategori')
+            ->leftJoin('detailtransaksipenjualan as dp', 'dp.id_barang', '=', 'b.id_barang')
+            ->leftJoin('transaksipenjualan as tp', 'tp.id_transaksi_penjualan', '=', 'dp.id_transaksi_penjualan')
+            ->select(
+                'kb.nama_kategori',
+                DB::raw("COUNT(CASE WHEN b.status_barang = 'laku' THEN 1 END) as jumlah_terjual"),
+                DB::raw("COUNT(CASE WHEN tp.status_transaksi IN ('hangus', 'dibatalkan') THEN 1 END) as jumlah_gagal")
+            )
+            ->groupBy('kb.id_kategori', 'kb.nama_kategori')
+            ->get();
+
+        return view('owner.LaporanPenjualanKategoriBarang', [
+            'pegawaiLogin' => auth()->guard('pegawai')->user(),
+            'kategori' => $data->pluck('nama_kategori'),
+            'terjual' => $data->pluck('jumlah_terjual'),
+            'gagal' => $data->pluck('jumlah_gagal'),
+        ]);
+    }
+
+    public function laporanPenitipanHabis()
+    {
+        $data = DB::table('detailtransaksipenitipan as d')
+            ->leftJoin('transaksipenitipan as t', 'd.id_transaksi_penitipan', '=', 't.id_transaksi_penitipan')
+            ->leftJoin('penitip as p', 't.id_penitip', '=', 'p.id_penitip')
+            ->leftJoin('barang as b', 'd.id_barang', '=', 'b.id_barang')
+            ->whereDate('t.tanggal_akhir_penitipan', '<=', Carbon::today())
+            ->select(
+                'p.id',
+                'p.nama_penitip',
+                't.tanggal_penitipan',
+                't.tanggal_akhir_penitipan',
+                't.tanggal_batas_pengambilan',
+                'b.id',
+                'b.nama_barang'
+            )
+            ->get();
+
+        return view('owner.LaporanPenitipanMasaHabis', [
+            'pegawaiLogin' => auth()->guard('pegawai')->user(),
+            'data' => $data,
+        ]);
+    }
+
+    public function CetakLaporanPenitipanHabis()
+    {
+        // Ambil data penitipan yang masa habis (tanggal_akhir_penitipan <= hari ini)
+        $data = DB::table('detailtransaksipenitipan as d')
+            ->leftJoin('transaksipenitipan as t', 'd.id_transaksi_penitipan', '=', 't.id_transaksi_penitipan')
+            ->leftJoin('penitip as p', 't.id_penitip', '=', 'p.id_penitip')
+            ->leftJoin('barang as b', 'd.id_barang', '=', 'b.id_barang')
+            ->whereDate('t.tanggal_akhir_penitipan', '<=', Carbon::today())
+            ->select(
+                'p.id',
+                'p.nama_penitip',
+                't.tanggal_penitipan',
+                't.tanggal_akhir_penitipan',
+                't.tanggal_batas_pengambilan',
+                'b.id',
+                'b.nama_barang'
+            )
+            ->get();
+
+        // Siapkan data untuk view PDF
+        $viewData = [
+            'data' => $data,
+            'tanggal_cetak' => Carbon::now()->format('j F Y'),
+            'perusahaan' => [
+                'nama' => 'ReUse Mart',
+                'alamat' => 'Jl. Green Eco Park No. 456 Yogyakarta',
+                'telepon' => '(0274) 123-4567',
+                'email' => 'info@reusermart.com',
+            ],
+        ];
+
+        // Generate PDF dari view blade khusus laporan penitipan habis
+        $pdf = Pdf::loadView('owner.PDF_LaporanPenitipanMasaHabis', $viewData)
+            ->setPaper('a4', 'portrait');
+
+        // Download file PDF dengan nama dinamis timestamp
+        return $pdf->download('Laporan_Penitipan_Masa_Habis_' . Carbon::now()->format('Ymd_His') . '.pdf');
+    }
+
+
+    public function CetakLaporanKategori()
+    {
+        // Ambil data kategori dan hitung jumlah
+        $data = DB::table('kategoribarang as kb')
+            ->leftJoin('barang as b', 'b.id_kategori', '=', 'kb.id_kategori')
+            ->leftJoin('detailtransaksipenjualan as dp', 'dp.id_barang', '=', 'b.id_barang')
+            ->leftJoin('transaksipenjualan as tp', 'tp.id_transaksi_penjualan', '=', 'dp.id_transaksi_penjualan')
+            ->select(
+                'kb.nama_kategori',
+                DB::raw("COUNT(CASE WHEN b.status_barang = 'laku' THEN 1 END) as jumlah_terjual"),
+                DB::raw("COUNT(CASE WHEN tp.status_transaksi IN ('hangus', 'dibatalkan') THEN 1 END) as jumlah_gagal")
+            )
+            ->groupBy('kb.id_kategori', 'kb.nama_kategori')
+            ->get();
+                
+        // Siapkan data untuk Blade
+        $viewData = [
+            'data' => $data,
+            'tahun' => 2025,
+            'tanggal_cetak' => Carbon::now()->format('j F Y'),
+            'perusahaan' => [
+                'nama' => 'ReUse Mart',
+                'alamat' => 'Jl. Green Eco Park No. 456 Yogyakarta',
+                'telepon' => '(0274) 123-4567',
+                'email' => 'info@reusermart.com',
+            ]
+        ];
+
+        // Generate PDF
+        $pdf = PDF::loadView('owner.PDF_LaporanPenjulanKategoriBarang', $viewData)
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('Laporan_Penjualan_Kategori_' . now()->format('Ymd_His') . '.pdf');
+    }
 
     public function showlistPegawai()
     {

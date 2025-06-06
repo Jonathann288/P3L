@@ -92,7 +92,7 @@
             <td><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($transaksi->tanggal_penjualan)->format('d-m-Y H:i') }}</td>
         </tr>
         <tr>
-            <td><strong>Nama Pembeli:</strong> {{ $transaksi->pembeli->nama }}</td>
+            <td><strong>Nama Pembeli:</strong> {{ $transaksi->pembeli->email_pembeli }}/{{ $transaksi->pembeli->nama_pembeli }}</td>
             <td><strong>Deliviry:</strong> Ambil Sendiri</td>
         </tr>
         <tr>
@@ -109,8 +109,10 @@
             <tr>
                 <th>No</th>
                 <th>Nama Barang</th>
-                <th>Qty</th>
-                <th>Harga Satuan</th>
+                <th>Barang Harga</th>
+                <th>potongan poin</th>
+                <th>Poin Yang Didapat</th>
+                <th>Ongkir</th>
                 <th>Subtotal</th>
             </tr>
         </thead>
@@ -121,13 +123,15 @@
                 <tr>
                     <td>{{ $i + 1 }}</td>
                     <td>{{ $detail->barang->nama_barang ?? '-' }}</td>
-                    <td>{{ $detail->jumlah }}</td>
-                    <td class="right">Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}</td>
+                    <td>Rp{{ number_format($detail->barang->harga_barang , 0, ',', '.' )}}</td>
+                    <td>{{ $transaksi->poin }}</td>
+                    <td class="right">{{ $transaksi->poin_dapat }}</td>
+                    <td class="right">{{ $transaksi->ongkir }}</td>
                     <td class="right">Rp {{ number_format($detail->total_harga, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
             <tr>
-                <td colspan="4" class="right total">Total</td>
+                <td colspan="6" class="right total">Total</td>
                 <td class="right total">Rp {{ number_format($total, 0, ',', '.') }}</td>
             </tr>
         </tbody>

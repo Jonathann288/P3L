@@ -161,6 +161,7 @@ Route::middleware(['pembeli'])->group(function () {
         ->name('prosesPembayaran');
 
 
+        
 });
 
 Route::get('/registerOrganisasi', [OrganisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
@@ -218,7 +219,10 @@ Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::get('/DashboardHistoryDonasi/history-donasi', [DonasiControllers::class, 'historyDonasi'])->name('owner.historyDonasi');
     Route::post('/owner/historyDonasi/update/{id_request}', [DonasiControllers::class, 'updateDonasi'])->name('owner.historyDonasi.update');
 
-
+    Route::get('/owner/laporan-penjualan', [PegawaiControllers::class, 'laporanPenjualan'])->name('owner.LaporanPenjualanKategoriBarang');
+    Route::get('/laporan/kategori/cetak', [PegawaiControllers::class, 'CetakLaporanKategori'])->name('laporan.kategori.cetak');
+    Route::get('/laporan-penitipan-habis', [PegawaiControllers::class, 'laporanPenitipanHabis'])->name('owner.LaporanPenitipanMasaHabis');
+    Route::get('/laporan/penitipanHabis/cetak', [PegawaiControllers::class, 'CetakLaporanPenitipanHabis'])->name('laporan.penitipanHabis.cetak');
 
 });
 Route::middleware(['checkjabatan:Customer Service'])->group(function () {
@@ -270,8 +274,7 @@ Route::middleware(['checkjabatan:Gudang'])->group(function () {
     Route::post('/gudang/konfirmasi-terima/{id}', [TransaksiPenjualanControllers::class, 'konfirmasiTerima'])->name('gudang.konfirmasi-terima');
     Route::post('/transaksi/nota-cetak/{id}', [TransaksiPenjualanControllers::class, 'konfirmasiDanCetakNota'])->name('gudang.cetak-nota');
     Route::post('/transaksi/nota-cetakAntar/{id}', [TransaksiPenjualanControllers::class, 'CetakNota'])->name('gudang.cetak-notaKurir');
-
-
+    Route::post('/transaksi/cek-hangus/{id}', [TransaksiPenjualanControllers::class, 'cekStatusHangus'])->name('gudang.cekHangus');
 
 
 });

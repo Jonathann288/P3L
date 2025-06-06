@@ -33,6 +33,10 @@
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>Histroy Request Donasi</span>
                     </a>
+                    <a href = "{{route('owner.LaporanPenjualanKategoriBarang')}}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                        <i class="fa-solid fas fa-boxes mr-2"></i>
+                        <span>Laporan Penjualan Per Kategori Barang</span>
+                    </a>
                 </div>
             </nav>
         </div>
