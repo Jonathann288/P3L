@@ -42,12 +42,12 @@
                         <span>Histroy Request Donasi</span>
                     </a>
                     <a href="{{ route('owner.DashboardLaporanDonasiBarang') }}"
-                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-newspaper"></i>
                         <span>Laporan Donasi Barang</span>
                     </a>
                     <a href="{{ route('owner.DashboardLaporanRequestDonasi') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fa-solid fa-book"></i>
                         <span>Laporan Request Donasi</span>
                     </a>
@@ -63,11 +63,11 @@
 
     <div class="p-8 bg-gray-100">
         <div class="flex justify-between items-center mb-5">
-            <h1 class="text-3xl font-bold">Laporan Donasi Barang</h1>
+            <h1 class="text-3xl font-bold">Laporan Request Donasi</h1>
             <button onclick="generatePDF()"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center">
                 <i class="fas fa-print mr-2"></i>
-                Cetak Laporan Donasi
+                Cetak Laporan Request Donasi
             </button>
         </div>
 
@@ -75,95 +75,40 @@
             <table class="min-w-full bg-white border border-gray-300 text-sm">
                 <thead class="bg-gray-100 text-left">
                     <tr>
-                        <th class="px-4 py-2 border">ID Barang</th>
-                        <th class="px-4 py-2 border">Nama Barang</th>
-                        <th class="px-4 py-2 border">ID Penitip</th>
-                        <th class="px-4 py-2 border">Nama Penitip</th>
-                        <th class="px-4 py-2 border">Tanggal Donasi</th>
+                        <th class="px-4 py-2 border">ID Organisasi</th>
                         <th class="px-4 py-2 border">Nama Organisasi</th>
-                        <th class="px-4 py-2 border">Nama Penerima</th>
+                        <th class="px-4 py-2 border">Alamat Organisasi</th>
+                        <th class="px-4 py-2 border">Deskripsi Request</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($laporanDonasi as $donasi)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 border">{{ $donasi['id_barang'] }}</td>
-                            <td class="px-4 py-2 border">{{ $donasi['nama_barang'] }}</td>
-                            <td class="px-4 py-2 border">{{ $donasi['id_penitip'] }}</td>
-                            <td class="px-4 py-2 border">{{ $donasi['nama_penitip'] }}</td>
-                            <td class="px-4 py-2 border">
-                                {{ \Carbon\Carbon::parse($donasi['tanggal_donasi'])->format('d/m/Y') }}
-                            </td>
-                            <td class="px-4 py-2 border">{{ $donasi['nama_organisasi'] }}</td>
-                            <td class="px-4 py-2 border">{{ $donasi['nama_penerima'] }}</td>
+                    @foreach($requestdonasi as $index => $d)
+                        <tr class="border-t">
+                            <td class="py-3 px-6">{{ $d->organisasi->id }}</td>
+                            <td class="py-3 px-6">{{ $d->organisasi->nama_organisasi }}</td>
+                            <td class="py-3 px-6">{{ $d->organisasi->alamat_organisasi }}</td>
+                            <td class="py-3 px-6">{{ $d->deskripsi_request }}</td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4">Tidak ada data donasi barang.</td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
-            </table>
-        </div>
 
-        <div class="mt-10 bg-white p-6 rounded shadow" id="chart-container">
-            <h2 class="text-xl font-semibold mb-4">Grafik Donasi per Organisasi</h2>
-            <canvas id="donasiChart" height="100"></canvas>
+            </table>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 
     <script>
-        const { jsPDF } = window.jspdf;
+        // Data request donasi di-passing dari Blade ke JS
+        const dataRequestDonasi = {!! json_encode($requestdonasi) !!};
 
-        const chartLabels = {!! json_encode($laporanDonasi->pluck('nama_organisasi')->unique()->values()) !!};
-        const chartData = {!! json_encode(
-    $laporanDonasi->groupBy('nama_organisasi')->map(fn($group) => $group->count())->values()
-) !!};
-
-        const ctx = document.getElementById('donasiChart').getContext('2d');
-        const donasiChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    label: 'Jumlah Donasi',
-                    data: chartData,
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 1,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
-        });
-
-        async function generatePDF() {
-            const doc = new jsPDF('l', 'mm', 'a4');
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
 
             const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
 
-            const data = {!! json_encode($laporanDonasi) !!};
-            const currentDate = new Date();
-            const formattedDate = currentDate.toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
-            const currentYear = currentDate.getFullYear();
-
-            // Header with horizontal line
+            // Header
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
             doc.text('ReUse Mart', pageWidth / 2, 15, { align: 'center' });
@@ -173,46 +118,41 @@
             doc.text('Jl. Green Eco Park No. 456 Yogyakarta', pageWidth / 2, 20, { align: 'center' });
             doc.text('Telp: (0274) 123-4567 | Email: info@reusermart.com', pageWidth / 2, 25, { align: 'center' });
 
-            // Horizontal line
+            // Garis horizontal
             doc.setDrawColor(0, 0, 0);
             doc.setLineWidth(0.5);
-            doc.line(20, 30, pageWidth - 20, 30);
+            doc.line(15, 30, pageWidth - 15, 30);
 
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('LAPORAN DONASI BARANG', pageWidth / 2, 40, { align: 'center' });
+            doc.text('LAPORAN REQUEST DONASI', pageWidth / 2, 40, { align: 'center' });
 
+            // Tanggal cetak
+            const currentDate = new Date();
+            const formattedDate = currentDate.toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            doc.text(`Tahun : ${currentYear}`, 20, 50);
-            doc.text(`Tanggal cetak: ${formattedDate}`, 20, 55);
+            doc.text(`Tanggal cetak: ${formattedDate}`, 15, 50);
 
-            const tableData = data.map(item => [
-                item.id_barang,
-                item.nama_barang,
-                item.id_penitip,
-                item.nama_penitip,
-                formatDate(item.tanggal_donasi),
-                item.nama_organisasi,
-                item.nama_penerima
+            // Data tabel diubah ke array untuk autoTable
+            const tableData = dataRequestDonasi.map(item => [
+                item.organisasi.id,
+                item.organisasi.nama_organisasi,
+                item.organisasi.alamat_organisasi,
+                item.deskripsi_request
             ]);
 
-            function formatDate(dateStr) {
-                const date = new Date(dateStr);
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = date.getFullYear();
-                return `${day}/${month}/${year}`;
-            }
-
-            const columnWidths = [30, 40, 25, 35, 30, 50, 35];
-            const totalTableWidth = columnWidths.reduce((sum, width) => sum + width, 0);
+            // Kolom dan lebar masing-masing kolom
+            const columnWidths = [25, 50, 60, 50];
+            const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
             const startX = (pageWidth - totalTableWidth) / 2;
 
             doc.autoTable({
                 startY: 60,
                 margin: { left: startX, right: startX },
-                head: [['Kode Produk', 'Nama Produk', 'Id Penitip', 'Nama Penitip', 'Tanggal Donasi', 'Organisasi', 'Nama Penerima']],
+                head: [['ID Organisasi', 'Nama Organisasi', 'Alamat Organisasi', 'Deskripsi Request']],
                 body: tableData,
                 styles: {
                     fontSize: 9,
@@ -236,18 +176,16 @@
                     0: { cellWidth: columnWidths[0], halign: 'center' },
                     1: { cellWidth: columnWidths[1], halign: 'center' },
                     2: { cellWidth: columnWidths[2], halign: 'center' },
-                    3: { cellWidth: columnWidths[3], halign: 'center' },
-                    4: { cellWidth: columnWidths[4], halign: 'center' },
-                    5: { cellWidth: columnWidths[5], halign: 'center' },
-                    6: { cellWidth: columnWidths[6], halign: 'center' }
+                    3: { cellWidth: columnWidths[3], halign: 'left' }
                 },
                 theme: 'grid',
                 tableWidth: totalTableWidth
             });
 
-            doc.save(`laporan_donasi_barang_${currentYear}.pdf`);
+            doc.save(`laporan_request_donasi_${currentDate.getFullYear()}.pdf`);
         }
     </script>
+
 </body>
 
 </html>

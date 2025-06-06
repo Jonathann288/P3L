@@ -215,6 +215,8 @@ Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::get('/DashboardDonasi', [RequestDonasiControllers::class, 'showlistRequestDonasi'])->name('owner.DashboardDonasi');
     Route::get('/DashboardHistoryDonasi/history-donasi', [DonasiControllers::class, 'historyDonasi'])->name('owner.historyDonasi');
     Route::get('/DashboardLaporanDonasiBarang', [DonasiControllers::class, 'showLaporanDonasiBarang'])->name('owner.DashboardLaporanDonasiBarang');
+    Route::get('/DashboardLaporanRequestDonasi', [DonasiControllers::class, 'showLaporanRequestDonasi'])->name('owner.DashboardLaporanRequestDonasi');
+    Route::get('/DashboardLaporanTransaksiPenitip', [DonasiControllers::class, 'showLaporanTransaksiPenitip'])->name('owner.DashboardLaporanTransaksiPenitip');
 
     Route::post('/owner/cetak-laporan-donasi', [DonasiControllers::class, 'cetakLaporanDonasi'])->name('owner.cetak-laporan-donasi');
 

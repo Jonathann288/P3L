@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Donasi;
 use App\Models\Requestdonasi;
 use App\Models\Barang;
+use App\Models\TransaksiPenitipan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -138,7 +139,7 @@ class DonasiControllers extends Controller
         $pegawaiLogin = Auth::guard('pegawai')->user();
 
         $laporanDonasi = Donasi::with(['barang.detailTransaksiPenitipan.transaksiPenitipan.penitip', 'requestdonasi.organisasi'])->get()->map(function ($donasi) {
-            $penitip = $donasi->barang?->penitip_data;
+        $penitip = $donasi->barang?->penitip_data;
 
             return [
                 'id_barang' => $donasi->barang->id ?? '-',
@@ -151,7 +152,23 @@ class DonasiControllers extends Controller
             ];
         });
 
-
         return view('owner.DashboardLaporanDonasiBarang', compact('laporanDonasi', 'pegawaiLogin'));
+    }
+
+    public function showLaporanRequestDonasi()
+    {
+        $pegawaiLogin = Auth::guard('pegawai')->user();
+
+        $requestdonasi = RequestDonasi::with('organisasi')->where('status_request', 'pending')->get();
+
+        return view('owner.DashboardLaporanRequestDonasi', compact('requestdonasi', 'pegawaiLogin'));
+    }
+
+    public function showLaporanTransaksiPenitip()
+    {
+        $pegawaiLogin = Auth::guard('pegawai')->user();
+        $transaksiPenitipan = transaksipenitipan::with(['detailtransaksipenitipan.barang', 'penitip'])->get()->groupBy('id_penitip');
+
+        return view('owner.DashboardLaporanTransaksiPenitip', compact('pegawaiLogin', 'transaksiPenitipan'));
     }
 }

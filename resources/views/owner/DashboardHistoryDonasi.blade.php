@@ -43,6 +43,16 @@
                         <i class="fa-solid fa-newspaper"></i>
                         <span>Laporan Donasi Barang</span>
                     </a>
+                    <a href="{{ route('owner.DashboardLaporanRequestDonasi') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-book"></i>
+                        <span>Laporan RequestDonasi</span>
+                    </a>
+                    <a href="{{ route('owner.DashboardLaporanTransaksiPenitip') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-book"></i>
+                        <span>Laporan Transaksi Penitip</span>
+                    </a>
                 </div>
             </nav>
         </div>

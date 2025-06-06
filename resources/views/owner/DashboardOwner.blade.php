@@ -42,6 +42,16 @@
                         <i class="fa-solid fa-newspaper"></i>
                         <span>Laporan Donasi Barang</span>
                     </a>
+                    <a href="{{ route('owner.DashboardLaporanRequestDonasi') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-book"></i>
+                        <span>Laporan RequestDonasi</span>
+                    </a>
+                    <a href="{{ route('owner.DashboardLaporanTransaksiPenitip') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-book"></i>
+                        <span>Laporan Transaksi Penitip</span>
+                    </a>
                 </div>
             </nav>
         </div>
@@ -58,7 +68,7 @@
 
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
-        <div class="flex justify-between items-center mb-8">s
+        <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-semibold text-gray-800">Profil Pembeli</h1>
         </div>
 
