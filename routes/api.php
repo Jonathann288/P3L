@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthControllerAPI;
-
+use App\Http\Controllers\PembeliControllersAPI;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,8 +23,15 @@ Route::prefix('auth')->group(function () {
 });
 
 // Protected Routes (Require authentication)
-Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
-    Route::post('/logout', [AuthControllerAPI::class, 'logout']);
-    Route::post('/logout-all', [AuthControllerAPI::class, 'logoutAll']);
-    Route::get('/me', [AuthControllerAPI::class, 'me']);
+Route::middleware('auth:sanctum')->group(function () {
+
+    // Rute yang berhubungan dengan data pengguna yang login
+    Route::prefix('auth')->group(function () {
+        Route::post('/logout', [AuthControllerAPI::class, 'logout']);
+        Route::post('/logout-all', [AuthControllerAPI::class, 'logoutAll']);
+        Route::get('/me', [AuthControllerAPI::class, 'me']);
+    });
+
+    Route::get('/pembeli/history', [App\Http\Controllers\PembeliControllersAPI::class, 'getHistoryTransaksi']);
+
 });

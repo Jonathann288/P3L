@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Http\JsonResponse;
 
 class AuthControllerAPI extends Controller
-{   
+{
     /**
      * Login API for multiple user types
      *
@@ -247,20 +247,14 @@ class AuthControllerAPI extends Controller
         switch ($role) {
             case 'pembeli':
                 return array_merge($baseData, [
-                    'id_pembeli' => $user->id,
+                    'id_pembeli' => $user->id_pembeli,
                     'nama_pembeli' => $user->nama_pembeli,
                     'email_pembeli' => $user->email_pembeli,
-                    'no_telepon_pembeli' => $user->nomor_telepon_pembeli ?? null,
-                    'tanggal_lahir_pembeli' => $user->tanggal_lahir ?? null,
-                    'poin_pembeli' => $user->poin_pembeli ?? 0,
-                    // Include alamat relationship if loaded
-                    // 'alamat' => $user->alamat ? [
-                    //     'id' =>  $user->alamat->id_alamat,
-                    //     'kabupaten' =>  $user->alamat->kabupaten,
-                    //     'kecamatan' =>  $user->alamat->kecamatan,
-                    //     'deskripsi_alamat' =>  $user->alamat->deskripsi_alamat,
-                    //     'nama_jalan' =>  $user->alamat->nama_jalan,
-                    // ] : null
+                    // Sesuaikan nama key dan properti di sini
+                    'nomor_telepon_pembeli' => $user->nomor_telepon_pembeli,
+                    'tanggal_lahir' => $user->tanggal_lahir,
+                    'total_poin' => $user->total_poin,
+                    'foto_pembeli' => $user->foto_pembeli
                 ]);
 
             case 'penitip':
