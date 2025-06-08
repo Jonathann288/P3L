@@ -210,6 +210,11 @@ class AuthControllerAPI extends Controller
                         'message' => 'Akun anda belum terdaftar'
                     ], 401);
                 }
+
+                if ($namaJabatan === 'hunter') {
+                    $user->load('komisi'); // Pastikan relasi komisi dimuat
+                }
+
             }
 
             $userData = $this->formatUserData($user, $role);
@@ -290,6 +295,22 @@ class AuthControllerAPI extends Controller
                         // Add other jabatan fields as needed
                     ] : null
                 ]);
+                
+                if ($user->jabatan && strtolower($user->jabatan->nama_jabatan) === 'hunter') {
+                    $pegawaiData['total_komisi'] = $user->komisi->sum('komisi_hunter');
+                    $pegawaiData['komisi'] = $user->komisi->map(function($k) {
+                        return [
+                            'id_komisi' => $k->id_komisi,
+                            'id_transaksi_penjualan' => $k->id_transaksi_penjualan,
+                            'id_penitip' => $k->id_penitip,
+                            'id_pegawai' => $k->id_pegawai,
+                            'komisi_penitip' => $k->komisi_penitip,
+                            'komisi_reusemart' => $k->komisi_reusemart,
+                            'komisi_hunter' => $k->komisi_hunter,
+                        ];
+                    })->toArray(); // Sesuaikan nama kolom jika berbeda
+                }
+
                 return $pegawaiData;
 
             default:

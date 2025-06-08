@@ -36,5 +36,10 @@ class Pegawai extends Authenticatable
     {
         return 'pegawai'; // Secara eksplisit mengembalikan nama tabel
     }
+    
+    public function komisi()
+    {
+        return $this->hasMany(Komisi::class, 'id_pegawai','id_pegawai');
+    }
 
 }

@@ -56,6 +56,10 @@ class Barang extends Model
     {
         return $this->hasOne(DetailTransaksiPenitipan::class, 'id_barang');
     }
+    public function detailpenitipan()
+    {
+        return $this->hasOne(DetailTransaksiPenitipan::class, 'id_barang');
+    }
 
 // Accessor untuk foto_barang
     public function getFotoBarangAttribute($value)

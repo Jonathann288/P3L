@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthControllerAPI;
 use App\Http\Controllers\BarangControllersApi;
+use App\Http\Controllers\KomisiControllersAPI;
+use App\Http\Controllers\MerchendiseControllersAPI;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,4 +31,6 @@ Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
     Route::post('/logout', [AuthControllerAPI::class, 'logout']);
     Route::post('/logout-all', [AuthControllerAPI::class, 'logoutAll']);
     Route::get('/me', [AuthControllerAPI::class, 'me']);
+    Route::get('/komisi/history', [KomisiControllersAPI::class, 'getKomisiHistory']);
+    Route::get('/merchandise', [MerchendiseControllersAPI::class, 'index']);
 });
