@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthControllerAPI;
+use App\Http\Controllers\BarangControllersApi;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +17,8 @@ Route::get('/test', function () {
         'timestamp' => now()
     ]);
 });
-
+Route::get('/shop-show', [BarangControllersApi::class, 'apiShowShop']);
+Route::get('/barang/{id_barang}', [BarangControllersApi::class, 'showDetailApi']);
 // Authentication Routes (Public - No middleware)
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthControllerAPI::class, 'login']);
