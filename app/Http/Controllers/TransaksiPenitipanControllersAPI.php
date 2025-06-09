@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DetailTransaksiPenitipan;
+use App\Models\transaksipenitipan;
 use Exception;
 
 class TransaksiPenitipanControllersAPI extends Controller
@@ -27,6 +28,18 @@ class TransaksiPenitipanControllersAPI extends Controller
                     'success' => false,
                     'message' => 'Penitip tidak terautentikasi.'
                 ], 401);
+            }
+            $transaksi = transaksipenitipan::where('id_penitip', $penitip->getKey())
+                // 2. Eager load relasi bertingkat: dari transaksi -> ke detail -> ke barang.
+                ->with(['detailtransaksipenitipan.barang'])
+                ->orderByDesc('tanggal_penitipan') // Urutkan berdasarkan tanggal transaksi terbaru
+                ->get();
+            if ($transaksi->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Tidak ada riwayat barang titipan.',
+                    'data' => []
+                ], 200);
             }
 
             // Ambil semua detail transaksi yang dimiliki oleh penitip tersebut
@@ -53,6 +66,8 @@ class TransaksiPenitipanControllersAPI extends Controller
                 }
 
                 return [
+                    'id' => $detail->transaksipenitipan->getKey(), // KEY SUDAH DIUBAH
+                    'harga_barang' => (float) $detail->barang->harga_barang,
                     'id_barang' => $detail->barang->id_barang,
                     'nama_barang' => $detail->barang->nama_barang,
                     'status_barang' => $detail->barang->status_barang,
@@ -60,6 +75,7 @@ class TransaksiPenitipanControllersAPI extends Controller
                     'foto_barang' => is_array($detail->barang->foto_barang) ? ($detail->barang->foto_barang[0] ?? null) : null,
                     'tanggal_penitipan' => $detail->transaksipenitipan->tanggal_penitipan->toFormattedDateString(),
                     'tanggal_akhir_penitipan' => $detail->transaksipenitipan->tanggal_akhir_penitipan->toFormattedDateString(),
+                    'tanggal_batas_pengambilan' => $detail->transaksipenitipan->tanggal_batas_pengambilan ? \Carbon\Carbon::parse($detail->transaksipenitipan->tanggal_batas_pengambilan)->toDateString() : null,
                 ];
             })->filter()->values(); // Hapus item null dari koleksi
 
