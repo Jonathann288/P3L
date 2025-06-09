@@ -183,7 +183,7 @@ class LaporanControllers extends Controller
         
         // Data komisi bulanan per produk dengan eager loading semua relasi yang dibutuhkan
         $komisi = komisi::with([
-                'barang', 
+                'barang.detailTransaksiPenitipan.transaksiPenitipan', 
                 'penitip', 
                 'pegawai', 
                 'transaksipenjualan'
