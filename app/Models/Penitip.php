@@ -92,4 +92,9 @@ class Penitip extends Authenticatable
             Log::error("Gagal menyimpan rata-rata rating untuk penitip_id " . $this->id_penitip . ": " . $e->getMessage());
         }
     }
+    public function getRatingPenitipAttribute()
+{
+    // Mengambil nilai langsung dari atribut dengan nama kolom yang benar
+    return $this->attributes['Rating_penitip'];
+}
 }

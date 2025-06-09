@@ -213,6 +213,8 @@ class AuthControllerAPI extends Controller
             }
 
             $userData = $this->formatUserData($user, $role);
+            //DEBUGING
+             \Illuminate\Support\Facades\Log::info('Data User untuk /me:', $userData);
 
             return response()->json([
                 'success' => true,
@@ -263,10 +265,11 @@ class AuthControllerAPI extends Controller
                     'nama_penitip' => $user->nama_penitip,
                     'nomor_ktp' => $user->nomor_ktp,
                     'email_penitip' => $user->email_penitip,
+                    'tanggal_lahir' => $user->tanggal_lahir,
                     'no_telepon_penitip' => $user->nomor_telepon_penitip ?? null,
-                    'rating_penitip' => $user->rating_penitip ?? 0,
+                    'rating_penitip' => $user->Rating_penitip ?? 0,
                     'saldo_penitip' => $user->saldo_penitip ?? 0,
-                    'poin_penitip' => $user->poin_penitip ?? 0,
+                    'poin_penitip' => $user->total_poin ?? 0,
                     'jumlah_penjualan' => $user->jumlah_penjualan ?? 0
                 ]);
 

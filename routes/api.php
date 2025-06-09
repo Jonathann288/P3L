@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthControllerAPI;
 use App\Http\Controllers\PembeliControllersAPI;
+use App\Http\Controllers\TransaksiPenitipanControllersAPI;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -31,7 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout-all', [AuthControllerAPI::class, 'logoutAll']);
         Route::get('/me', [AuthControllerAPI::class, 'me']);
     });
-
+    //PEMBELI
     Route::get('/pembeli/history', [App\Http\Controllers\PembeliControllersAPI::class, 'getHistoryTransaksi']);
-
+     //PENITIP
+     Route::get('/penitip/history', [TransaksiPenitipanControllersAPI::class, 'getHistoryForPenitip']);
 });
