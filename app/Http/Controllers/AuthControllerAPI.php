@@ -170,7 +170,7 @@ class AuthControllerAPI extends Controller
         }
     }
 
-    /**
+    /** 
      * Get current authenticated user info
      *
      * @param  \Illuminate\Http\Request  $request
