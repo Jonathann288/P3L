@@ -36,4 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pembeli/history', [App\Http\Controllers\PembeliControllersAPI::class, 'getHistoryTransaksi']);
      //PENITIP
      Route::get('/penitip/history', [TransaksiPenitipanControllersAPI::class, 'getHistoryForPenitip']);
-});
+ // <-- TAMBAHKAN RUTE DI BAWAH INI -->
+    // TOP SELLER
+    Route::get('/topseller', [App\Http\Controllers\TopSellerControllerAPI::class, 'getTopSellers']);
+
+    });

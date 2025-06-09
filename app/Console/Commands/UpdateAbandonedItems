@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use App\Models\Barang;
+use App\Models\transaksipenitipan; 
+use Carbon\Carbon;
+
+class UpdateAbandonedItems extends Command
+{
+    protected $signature = 'items:update-abandoned';
+    protected $description = 'Updates the status of abandoned items to be donated daily based on two conditions.';
+
+    public function handle()
+    {
+        $this->info('Starting daily check for abandoned items...');
+        $this->updateByConsignmentEndDate();
+        $this->updateByPickupDeadline();
+        $this->info('Daily check for abandoned items completed.');
+        return 0;
+    }
+
+    private function updateByConsignmentEndDate()
+    {
+        $this->info('Checking Condition 1: Items left after consignment period ended...');
+        $sevenDaysAgo = Carbon::now()->subDays(7)->toDateString();
+
+        $items = Barang::whereHas('detailTransaksiPenitipan.transaksiPenitipan', function ($query) use ($sevenDaysAgo) {
+            $query->where('tanggal_akhir_penitipan', '<', $sevenDaysAgo)
+                  ->whereNull('tanggal_pengambilan_barang');
+        })
+        ->whereNotIn('status_barang', ['barang untuk donasi', 'laku', 'di donasikan'])
+        ->get();
+
+        if ($items->isEmpty()) {
+            $this->info('No items found for Condition 1.');
+            return;
+        }
+
+        foreach ($items as $barang) {
+            $barang->status_barang = 'barang untuk donasi';
+            $barang->save();
+            // [PERBAIKAN] Mengubah nama properti menjadi 'nama_barang' yang benar
+            $this->warn("Item '{$barang->nama_barang}' (ID: {$barang->id_barang}) status updated based on Condition 1.");
+        }
+        $this->info("Updated {$items->count()} items for Condition 1.");
+    }
+
+    private function updateByPickupDeadline()
+    {
+        $this->info('Checking Condition 2: Items not picked up after pickup deadline...');
+        $today = Carbon::now()->toDateString();
+
+        $transactions = transaksipenitipan::whereNotNull('tanggal_batas_pengambilan')
+            ->where('tanggal_batas_pengambilan', '<', $today)
+            ->whereNull('tanggal_pengambilan_barang')
+            ->with('detailtransaksipenitipan.barang')
+            ->get();
+
+        if ($transactions->isEmpty()) {
+            $this->info('No items found for Condition 2.');
+            return;
+        }
+
+        $updatedCount = 0;
+        foreach ($transactions as $transaction) {
+            foreach ($transaction->detailtransaksipenitipan as $detail) {
+                if ($detail->barang && !in_array($detail->barang->status_barang, ['didonasikan', 'laku', 'barang untuk donasi'])) {
+                    $detail->barang->status_barang = 'didonasikan';
+                    $detail->barang->save();
+                    // [PERBAIKAN] Mengubah nama properti menjadi 'nama_barang' yang benar
+                    $this->warn("Item '{$detail->barang->nama_barang}' (ID: {$detail->barang->id_barang}) status updated to 'didonasikan' based on Condition 2.");
+                    $updatedCount++;
+                }
+            }
+        }
+        $this->info("Updated {$updatedCount} items for Condition 2.");
+    }
+}
