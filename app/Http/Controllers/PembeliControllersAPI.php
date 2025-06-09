@@ -1,84 +1,91 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TransaksiPenjualan;
 use Illuminate\Support\Facades\Auth;
-use App\Models\DetailTransaksiPenitipan;
+use Illuminate\Database\Eloquent\Builder;
 
-class PembeliControllersAPI extends Controller
+/**
+ * Controller untuk menangani logika terkait pembeli via API.
+ * Nama kelas diubah menjadi PembeliApiController untuk mengikuti konvensi Laravel.
+ */class PembeliControllersAPI extends Controller
 {
-    // ... (method-method lainnya)
-
-    // METHOD getHistoryTransaksi YANG DIPERBARUI
+    /**
+     * Mengambil riwayat transaksi untuk pembeli yang sedang terautentikasi.
+     * Mendukung filter berdasarkan rentang tanggal.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getHistoryTransaksi(Request $request)
     {
+        // Langkah 1: Validasi input dari request.
+        // Ini memastikan bahwa 'start_date' dan 'end_date' adalah format tanggal yang valid
+        // dan 'end_date' tidak mendahului 'start_date'.
+        $validatedData = $request->validate([
+            'start_date' => 'nullable|date_format:Y-m-d',
+            'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
+        ]);
 
-        try {
-            $penitip = Auth::user();
+        // Langkah 2: Dapatkan informasi pembeli yang sedang login.
+        $pembeli = Auth::user();
 
-            if (!$penitip) {
-                return response()->json(['success' => false, 'message' => 'User tidak terautentikasi'], 401);
-            }
-
-            // Gunakan getKey() untuk keamanan, ini akan mengambil nilai primary key 'id_penitip'
-            $penitipId = $penitip->getKey();
-
-            $history = DetailTransaksiPenitipan::with(['barang', 'transaksipenitipan'])
-                ->whereHas('transaksipenitipan', function ($query) use ($penitipId) {
-                    $query->where('id_penitip', $penitipId);
-                })
-                ->get();
-
-            // --- INI ADALAH BAGIAN PALING PENTING YANG DIPERBAIKI ---
-            $formattedData = $history->map(function ($detail) {
-
-                // 1. Lakukan pengecekan untuk memastikan relasi tidak null
-                if (!$detail->transaksipenitipan || !$detail->barang) {
-                    return null; // Abaikan data yang tidak lengkap
-                }
-
-                // 2. Ambil foto dengan lebih aman
-                $foto = $detail->barang->foto_barang;
-                $foto_url = null;
-                if (is_array($foto) && count($foto) > 0) {
-                    $foto_url = $foto[0];
-                } elseif (is_string($foto)) {
-                    $foto_url = $foto;
-                }
-
-                return [
-                    // 3. Ambil Primary Key dengan getKey() agar lebih pasti
-                    'id_transaksi_penitipan' => $detail->transaksipenitipan->getKey(),
-                    'harga_barang' => (float) $detail->barang->harga_barang, // Casting ke float untuk konsistensi
-
-                    // Data lain yang sudah ada
-                    'id_barang' => $detail->barang->getKey(),
-                    'nama_barang' => $detail->barang->nama_barang,
-                    'status_barang' => $detail->barang->status_barang,
-                    'foto_barang' => $foto_url,
-
-                    // 4. Format tanggal dengan Carbon untuk hasil yang konsisten
-                    'tanggal_penitipan' => \Carbon\Carbon::parse($detail->transaksipenitipan->tanggal_penitipan)->toDateString(), // Format: YYYY-MM-DD
-                    'tanggal_akhir_penitipan' => \Carbon\Carbon::parse($detail->transaksipenitipan->tanggal_akhir_penitipan)->toDateString(),
-                    'tanggal_batas_pengambilan' => $detail->transaksipenitipan->tanggal_batas_pengambilan ? \Carbon\Carbon::parse($detail->transaksipenitipan->tanggal_batas_pengambilan)->toDateString() : null,
-                ];
-            })->filter()->values(); // 5. Gunakan filter() untuk menghapus null & values() untuk re-index array
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Riwayat berhasil diambil',
-                'data' => $formattedData,
-            ], 200);
-
-        } catch (\Exception $e) {
-            // Tambahkan Log untuk memudahkan debugging di server
-            \Log::error('Error getHistoryTransaksi: ' . $e->getMessage() . ' on line ' . $e->getLine());
+        // Jika tidak ada user yang login, kembalikan response error.
+        if (!$pembeli) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Unauthorized. Silakan login terlebih dahulu.',
+            ], 401);
         }
+
+        // Langkah 3: Bangun query dasar untuk mengambil transaksi.
+        $query = TransaksiPenjualan::query()
+            // Filter transaksi hanya untuk pembeli yang sedang login.
+            ->where('id_pembeli', $pembeli->id_pembeli)
+            // Eager load relasi untuk menghindari N+1 problem.
+            // Ini akan mengambil detail transaksi beserta data barang terkait dalam satu query efisien.
+            ->with(['detailTransaksi.barang'])
+            // Urutkan hasil berdasarkan tanggal transaksi terbaru.
+            ->orderBy('tanggal_transaksi', 'desc');
+
+        // Langkah 4: Terapkan filter tanggal secara kondisional.
+        // Menggunakan metode `when` membuat kode lebih bersih.
+        // Blok kode di dalam `when` hanya akan dieksekusi jika kondisi pertamanya true.
+        $query->when($request->filled(['start_date', 'end_date']), function (Builder $q) use ($validatedData) {
+            $startDate = $validatedData['start_date'];
+            $endDate = $validatedData['end_date'];
+
+            // Kelompokkan kondisi OR menggunakan closure di dalam `where`.
+            // Ini penting agar logika OR tidak mengganggu klausa `where('id_pembeli', ...)` di atas.
+            // Query akan mencari transaksi di mana 'tanggal_transaksi' ATAU 'tanggal_kirim'
+            // berada dalam rentang tanggal yang diberikan.
+            $q->where(function (Builder $subQuery) use ($startDate, $endDate) {
+                $subQuery->whereBetween('tanggal_transaksi', [$startDate, $endDate])
+                         ->orWhereBetween('tanggal_kirim', [$startDate, $endDate]);
+            });
+        });
+
+        // Langkah 5: Eksekusi query dan dapatkan hasilnya.
+        $transaksi = $query->get();
+
+        // Langkah 6: Kembalikan response dalam format JSON.
+        // Memberikan pesan yang jelas jika tidak ada data yang ditemukan.
+        if ($transaksi->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tidak ada riwayat transaksi yang ditemukan.',
+                'data' => [],
+            ], 200);
+        }
+
+        // Jika data ditemukan, kembalikan data tersebut.
+        return response()->json([
+            'success' => true,
+            'message' => 'Riwayat transaksi berhasil diambil.',
+            'data' => $transaksi,
+        ], 200);
     }
 }
