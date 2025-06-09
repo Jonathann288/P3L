@@ -37,6 +37,10 @@
                             class="flex items-center space-x-4 p-3 bg-blue-600 hover:bg-gray-600 rounded-lg">
                             <i class="fa-solid fa-check-to-slot"></i> <span>Verifikasi</span>
                         </a>
+                        <a href="{{ route('CustomerService.DashboardClaimMerchandise') }}"
+                            class="flex items-center space-x-4 p-3 bg-blue-600 hover:bg-gray-600 rounded-lg">
+                            <i class="fa-solid fa-check-to-slot"></i> <span>Klaim Merchandise</span>
+                        </a>
                     </div>
                 </nav>
             </div>

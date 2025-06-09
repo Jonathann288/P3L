@@ -27,16 +27,17 @@
                         class="flex items-center space-x-4 p-3 hover:bg-gray-600 rounded-lg">
                         <i class="text-2xl font-bold"></i> {{$pegawaiLogin->nama_pegawai}}
                     </a>
-
                     <a href="{{ route('CustomerService.DashboardPenitip') }}"
                         class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fas fa-user mr-2"></i> <span>Penitip</span>
                     </a>
-
-
                     <a href="{{ route('CustomerService.DashboardVerifikasiItem') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-600 rounded-lg">
                         <i class="fa-solid fa-check-to-slot"></i> <span>Verifikasi</span>
+                    </a>
+                    <a href="{{ route('CustomerService.DashboardClaimMerchandise') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-600 rounded-lg">
+                        <i class="fa-solid fa-check-to-slot"></i> <span>Klaim Merchandise</span>
                     </a>
                 </div>
             </nav>

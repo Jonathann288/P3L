@@ -38,6 +38,11 @@
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>Histroy Request Donasi</span>
                     </a>
+                    <a href="{{ route('owner.DashboardLaporan') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>Laporan</span>
+                    </a>
                     <a href="{{ route('owner.DashboardLaporanDonasiBarang') }}"
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fa-solid fa-newspaper"></i>

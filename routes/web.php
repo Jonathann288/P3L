@@ -19,6 +19,8 @@ use App\Http\Controllers\DonasiControllers;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\TransaksiPenitipanControllers;
 use App\Http\Controllers\TransaksiPenjualanControllers;
+use App\Http\Controllers\ClaimMerchandiseControllers;
+use App\Http\Controllers\LaporanControllers;
 
 
 Route::get('/', function () {
@@ -233,6 +235,11 @@ Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::get('/laporan-penitipan-habis', [PegawaiControllers::class, 'laporanPenitipanHabis'])->name('owner.LaporanPenitipanMasaHabis');
     Route::get('/laporan/penitipanHabis/cetak', [PegawaiControllers::class, 'CetakLaporanPenitipanHabis'])->name('laporan.penitipanHabis.cetak');
 
+    Route::get('/DashboardLaporan', [LaporanControllers::class, 'showLaporanPage'])->name('owner.DashboardLaporan');
+    Route::get('/laporan/penjualan-bulanan', [LaporanControllers::class, 'laporanPenjualanBulanan'])->name('owner.laporanPenjualanBulanan');
+    Route::get('/laporan/komisi-bulanan', [LaporanControllers::class, 'laporanKomisiBulanan'])->name('owner.laporanKomisiBulanan');
+    Route::get('/laporan/stok-gudang', [LaporanControllers::class, 'laporanStokGudang'])->name('owner.laporanStokGudang');
+
 });
 Route::middleware(['checkjabatan:Customer Service'])->group(function () {
     Route::post('/logout-CS', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
@@ -244,6 +251,9 @@ Route::middleware(['checkjabatan:Customer Service'])->group(function () {
     Route::put('/DashboardPenitip/update/{id}', [PenitipControllrs::class, 'update'])->name('CustomerService.penitip.update');
     Route::delete('/DashboardPenitip/delete/{id}', [PenitipControllrs::class, 'destroy'])->name('CustomerService.penitip.destroy');
     Route::get('/DashboardPenitip/search', [PenitipControllrs::class, 'search'])->name('CustomerService.penitip.search');
+
+     Route::get('/DashboardClaimMerchandise', [ClaimMerchandiseControllers::class, 'showClaimMerchandise'])->name('CustomerService.DashboardClaimMerchandise');
+    Route::put('/DashboardClaimMerchandise/update/{id}', [ClaimMerchandiseControllers::class, 'updateClaimStatus'])->name('CustomerService.updateClaimStatus');
 
 
 });
