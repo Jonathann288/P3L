@@ -216,7 +216,7 @@ class LaporanControllers extends Controller
             ->where('status_barang', 'tidak laku')
             ->get();
             
-        $pdf = PDF::loadView('owner.pdf.laporan_stok_gudang', [
+        $pdf = PDF::loadView('owner.pdf.laporan_stok_bulanan', [
             'barang' => $barang,
             'tanggal_cetak' => Carbon::now()->format('d F Y')
         ]);

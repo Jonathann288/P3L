@@ -119,71 +119,75 @@
                                     <th class="px-4 py-2 border">Pendapatan</th>
                                 </tr>
                             </thead>
-
                             <tbody>
-                                @foreach($transaksiGroup as $transaksi)
-                                    @foreach($transaksi->detailtransaksipenitipan as $detail)
-                                        @php
-                                            // Hitung harga jual bersih (80% dari harga barang)
-                                            $hargaBarang = $detail->barang->harga_barang ?? 0;
-                                            $hargaJualBersih = $hargaBarang - ($hargaBarang * 0.2);
+                            @foreach($transaksiGroup as $transaksi)
+                                @foreach($transaksi->detailtransaksipenitipan as $detail)
+                                    @php
+                                        $hargaBarang = $detail->barang->harga_barang ?? 0;
+                                        $hargaJualBersih = $hargaBarang - ($hargaBarang * 0.2);
+                                        $bonus = 0;
+                                        $tanggalPenitipan = \Carbon\Carbon::parse($transaksi->tanggal_penitipan);
+                                        $tanggalLaku = $detail->transaksipenjualan ? \Carbon\Carbon::parse($detail->transaksipenjualan->tanggal_lunas) : null;
 
-                                            // Hitung bonus jual cepat (10% dari harga jual bersih jika terjual dalam 7 hari)
-                                            $bonus = 0;
-                                            $tanggalPenitipan = \Carbon\Carbon::parse($transaksi->tanggal_penitipan);
-                                            $tanggalLaku = $detail->transaksipenjualan ? \Carbon\Carbon::parse($detail->transaksipenjualan->tanggal_lunas) : null;
-
-                                            if ($tanggalLaku && $tanggalLaku->diffInDays($tanggalPenitipan) <= 7) {
-                                                $bonus = $hargaJualBersih * 0.10;
-                                            }
-
-                                            // Hitung total pendapatan (harga jual bersih + bonus)
-                                            $totalPendapatan = $hargaJualBersih + $bonus;
-                                        @endphp
-                                        <tr>
-                                            <td class="px-4 py-2 border">{{ $detail->barang->id ?? '-' }}</td>
-                                            <td class="px-4 py-2 border">{{ $detail->barang->nama_barang ?? '-' }}</td>
-                                            <td class="px-4 py-2 border">
-                                                {{ $transaksi->tanggal_penitipan ? \Carbon\Carbon::parse($transaksi->tanggal_penitipan)->format('d/m/Y') : '-' }}
-                                            </td>
-                                            <td class="px-4 py-2 border">
-                                                @if($detail->transaksipenjualan)
-                                                    {{ \Carbon\Carbon::parse($detail->transaksipenjualan->tanggal_lunas)->format('d/m/Y') }}
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
-                                            <td class="px-4 py-2 border">Rp {{ number_format($hargaJualBersih, 0, ',', '.') }}</td>
-                                            <td class="px-4 py-2 border">Rp {{ number_format($bonus, 0, ',', '.') }}</td>
-                                            <td class="px-4 py-2 border">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
-                                        </tr>
-                                    @endforeach
+                                        if ($tanggalLaku && $tanggalLaku->diffInDays($tanggalPenitipan) <= 7) {
+                                            $bonus = ($hargaBarang * 0.2) * 0.10;
+                                        }
+                                        $totalPendapatan = $hargaJualBersih + $bonus;
+                                    @endphp
+                                    <tr>
+                                        <td class="px-4 py-2 border">{{ $detail->barang->id ?? '-' }}</td>
+                                        <td class="px-4 py-2 border">{{ $detail->barang->nama_barang ?? '-' }}</td>
+                                        <td class="px-4 py-2 border">
+                                            {{ $transaksi->tanggal_penitipan ? \Carbon\Carbon::parse($transaksi->tanggal_penitipan)->format('d/m/Y') : '-' }}
+                                        </td>
+                                        <td class="px-4 py-2 border">
+                                            @if($detail->transaksipenjualan)
+                                                {{ \Carbon\Carbon::parse($detail->transaksipenjualan->tanggal_lunas)->format('d/m/Y') }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-2 border">Rp {{ number_format($hargaJualBersih, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 border">Rp {{ number_format($bonus, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-2 border">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
+                                    </tr>
                                 @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr class="bg-gray-100 font-semibold">
-                                    <td colspan="7" class="px-4 py-3 border text-right">
-                                        Total Pendapatan: Rp {{ number_format($transaksiGroup->sum(function ($transaksi) {
-                $total = 0;
-                foreach ($transaksi->detailtransaksipenitipan as $detail) {
-                    $hargaBarang = $detail->barang->harga_barang ?? 0;
-                    $hargaJualBersih = $hargaBarang - ($hargaBarang * 0.2);
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            @php
+                                $totalHargaJualBersih = 0;
+                                $totalBonus = 0;
+                                $totalPendapatan = 0;
 
-                    $bonus = 0;
-                    $tanggalPenitipan = \Carbon\Carbon::parse($transaksi->tanggal_penitipan);
-                    $tanggalLaku = $detail->transaksipenjualan ? \Carbon\Carbon::parse($detail->transaksipenjualan->tanggal_lunas) : null;
+                                foreach ($transaksiGroup as $transaksi) {
+                                    foreach ($transaksi->detailtransaksipenitipan as $detail) {
+                                        $hargaBarang = $detail->barang->harga_barang ?? 0;
+                                        $hargaJualBersih = $hargaBarang - ($hargaBarang * 0.2);
+                                        $bonus = 0;
+                                        $tanggalPenitipan = \Carbon\Carbon::parse($transaksi->tanggal_penitipan);
+                                        $tanggalLaku = $detail->transaksipenjualan ? \Carbon\Carbon::parse($detail->transaksipenjualan->tanggal_lunas) : null;
 
-                    if ($tanggalLaku && $tanggalLaku->diffInDays($tanggalPenitipan) <= 7) {
-                        $bonus = $hargaJualBersih * 0.10;
-                    }
+                                        if ($tanggalLaku && $tanggalLaku->diffInDays($tanggalPenitipan) <= 7) {
+                                            $bonus = ($hargaBarang * 0.2) * 0.10;
+                                        }
 
-                    $total += $hargaJualBersih + $bonus;
-                }
-                return $total;
-            }), 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                            </tfoot>
+                                        $totalHargaJualBersih += $hargaJualBersih;
+                                        $totalBonus += $bonus;
+                                        $totalPendapatan += $hargaJualBersih + $bonus;
+                                    }
+                                }
+                            @endphp
+                            <tr class="bg-gray-50 font-semibold">
+                                <td colspan="4" class="px-4 py-2 border text-right">Total</td>
+                                <td class="px-4 py-2 border text-right">Rp
+                                    {{ number_format($totalHargaJualBersih, 0, ',', '.') }}</td>
+                                <td class="px-4 py-2 border text-right">Rp {{ number_format($totalBonus, 0, ',', '.') }}
+                                </td>
+                                <td class="px-4 py-2 border text-right">Rp
+                                    {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
+                            </tr>
+                        </tfoot>
 
                         </table>
                     </div>
@@ -204,13 +208,11 @@
                 return;
             }
 
-            // Ambil data dari atribut data di container
             const idPenitip = container.getAttribute('data-id-penitip') || '-';
             const namaPenitip = container.getAttribute('data-nama-penitip') || '-';
             const bulan = container.getAttribute('data-bulan') || '-';
             const tahun = container.getAttribute('data-tahun') || '-';
 
-            // Konversi angka bulan ke nama bulan
             const namaBulan = [
                 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -220,7 +222,6 @@
                 ? namaBulan[bulanIndex - 1]
                 : '-';
 
-            // Header toko
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
             doc.text('ReUse Mart', pageWidth / 2, 15, { align: 'center' });
@@ -234,7 +235,6 @@
             doc.setLineWidth(0.5);
             doc.line(15, 30, pageWidth - 15, 30);
 
-            // Judul laporan
             const titleElem = container.querySelector('h2');
             const titleText = titleElem ? titleElem.innerText.trim() : 'Laporan Transaksi Penitip';
 
@@ -242,7 +242,6 @@
             doc.setFont('helvetica', 'bold');
             doc.text(titleText.toUpperCase(), pageWidth / 2, 40, { align: 'center' });
 
-            // Info Penitip
             const infoY = 47;
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
@@ -251,43 +250,67 @@
             doc.text(`Bulan : ${bulanHuruf}`, 15, infoY + 12);
             doc.text(`Tahun : ${tahun}`, 15, infoY + 18);
 
-            // Tanggal cetak
             const currentDate = new Date();
             const formattedDate = currentDate.toLocaleDateString('id-ID', {
                 day: 'numeric', month: 'long', year: 'numeric'
             });
             doc.text(`Tanggal cetak: ${formattedDate}`, 15, infoY + 28);
 
-            // Ambil header tabel
             const headers = [];
             container.querySelectorAll('thead th').forEach(th => headers.push(th.innerText.trim()));
 
-            // Ambil data dari tabel
             const rows = container.querySelectorAll('tbody tr');
             const data = [];
+            
+            let totalHargaJualBersih = 0;
+            let totalBonus = 0;
+            let totalPendapatan = 0;
+            
             rows.forEach(row => {
                 const cols = row.querySelectorAll('td');
                 const rowData = [];
-                cols.forEach(col => rowData.push(col.innerText.trim()));
+                
+                cols.forEach((col, colIndex) => {
+                    const cellText = col.innerText.trim();
+                    rowData.push(cellText);
+                    
+                    if (colIndex === 4) { // Harga Jual Bersih
+                        const numericValue = parseFloat(cellText.replace(/[Rp\s.,]/g, '')) || 0;
+                        totalHargaJualBersih += numericValue;
+                    } else if (colIndex === 5) { // Bonus Jual Tercepat
+                        const numericValue = parseFloat(cellText.replace(/[Rp\s.,]/g, '')) || 0;
+                        totalBonus += numericValue;
+                    } else if (colIndex === 6) { // Pendapatan
+                        const numericValue = parseFloat(cellText.replace(/[Rp\s.,]/g, '')) || 0;
+                        totalPendapatan += numericValue;
+                    }
+                });
                 data.push(rowData);
             });
 
-            // Ambil total pendapatan dari footer tabel
-            const totalElem = container.querySelector('tfoot tr td');
-            const totalPendapatan = totalElem ? totalElem.innerText.trim() : 'Total Pendapatan: Rp 0';
+            function formatRupiah(angka) {
+                return 'Rp ' + angka.toLocaleString('id-ID');
+            }
 
-            // Ukuran kolom
+            const totalHargaJualBersihFormatted = formatRupiah(totalHargaJualBersih);
+            const totalBonusFormatted = formatRupiah(totalBonus);
+            const totalPendapatanFormatted = formatRupiah(totalPendapatan);
+
             const columnWidths = [25, 40, 25, 25, 30, 30, 30];
             const totalTableWidth = columnWidths.reduce((a, b) => a + b, 0);
             const startX = (pageWidth - totalTableWidth) / 2;
 
-            // Cetak tabel ke PDF
             doc.autoTable({
                 startY: infoY + 38,
                 margin: { left: startX, right: startX },
                 head: [headers],
                 body: data,
-                foot: [[{ content: totalPendapatan, colSpan: 7, styles: { halign: 'right', fontStyle: 'bold', fillColor: [230, 230, 230] } }]],
+                foot: [[
+                    { content: 'Total', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
+                    totalHargaJualBersihFormatted,
+                    totalBonusFormatted,
+                    totalPendapatanFormatted
+                ]],
                 styles: {
                     fontSize: 9,
                     cellPadding: { top: 3, bottom: 3, left: 2, right: 2 },
@@ -307,7 +330,6 @@
                     fillColor: [230, 230, 230],
                     textColor: [0, 0, 0],
                     fontStyle: 'bold',
-                    halign: 'right',
                     lineWidth: 0.3
                 },
                 alternateRowStyles: {
@@ -342,6 +364,7 @@
                 }
             });
         });
+
     </script>
 
 </body>
