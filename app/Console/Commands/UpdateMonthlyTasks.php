@@ -44,7 +44,7 @@ class UpdateMonthlyTasks extends Command
             )
             ->whereBetween('ts.tanggal_transaksi', [$startDate, $endDate])
 
-            // [BUKTI] Kode ini membuktikan bahwa hanya transaksi dengan status 'Lunas' yang dihitung untuk bonus.
+            
             ->where('ts.status_pembayaran', 'Lunas')
             
             ->groupBy('tp.id_penitip')
@@ -53,7 +53,22 @@ class UpdateMonthlyTasks extends Command
             ->first();
 
         if ($topSellerData) {
-            // ... (logika pemberian bonus tidak berubah) ...
+             $penitip = Penitip::find($topSellerData->id_penitip);
+            if ($penitip) {
+                
+                $bonusPoin = floor($topSellerData->total_penjualan_value * 0.01);
+                $penitip->total_poin += $bonusPoin;
+                $penitip->badge = 'Top Seller ' . $previousMonth->isoFormat('MMMM YYYY');
+                $penitip->save();
+
+                // Simpan ke tabel topseller untuk rekam jejak
+                topseller::updateOrCreate(
+                    ['tanggal_mulai' => $startDate, 'tanggal_selesai' => $endDate],
+                    ['id_penitip' => $penitip->id_penitip]
+                );
+
+                $this->info("Top seller found: {$penitip->nama_penitip}. Awarded {$bonusPoin} points.");
+            }
         } else {
             $this->info('No completed sales recorded in the previous month.');
         }

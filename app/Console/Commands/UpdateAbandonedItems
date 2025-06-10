@@ -77,4 +77,26 @@ class UpdateAbandonedItems extends Command
         }
         $this->info("Updated {$updatedCount} items for Condition 2.");
     }
+
+    private function updateAbandonedItemsStatus()
+    {
+        $this->info('Updating status for abandoned items...');
+        $sevenDaysAgo = Carbon::now()->subDays(7)->toDateString();
+
+        $abandonedItems = Barang::whereHas('detailTransaksiPenitipan.transaksiPenitipan', function ($query) use ($sevenDaysAgo) {
+            $query->where('tanggal_akhir_penitipan', '<', $sevenDaysAgo)
+                  ->whereNull('tanggal_pengambilan_barang');
+        })
+        ->where('status_barang', '!=', 'barang untuk donasi') // Hindari update berulang
+        ->where('status_barang', '!=', 'laku')
+        ->where('status_barang', '!=', 'di donasikan')
+        ->get();
+
+        foreach ($abandonedItems as $barang) {
+            $barang->status_barang = 'barang untuk donasi';
+            $barang->save();
+            $this->warn("Item '{$barang->nama_barang}' (ID: {$barang->id_barang}) status updated to 'barang untuk donasi'.");
+        }
+        $this->info("Found and updated {$abandonedItems->count()} abandoned items.");
+    }
 }
