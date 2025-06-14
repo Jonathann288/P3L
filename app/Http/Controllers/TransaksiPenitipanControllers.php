@@ -544,7 +544,7 @@ class TransaksiPenitipanControllers extends Controller
      * Pencarian transaksi dengan berbagai kriteria
      */
     public function searchTitipan(Request $request)
-    {
+    {   
         $query = transaksipenitipan::with('penitip', 'pegawai');
 
         // Search berdasarkan berbagai field
@@ -645,11 +645,13 @@ class TransaksiPenitipanControllers extends Controller
         $penitips = Penitip::select('id_penitip', 'nama_penitip', 'email_penitip', 'nomor_ktp')
             ->orderBy('nama_penitip')
             ->get();
+        $pegawaiLogin = Auth::guard('pegawai')->user();
 
         return view('gudang.DashboardTitipanBarang', [
             'titipans' => $results,
             'searchTerm' => $request->search_term,
-            'penitips' => $penitips
+            'penitips' => $penitips,
+            'pegawaiLogin' =>$pegawaiLogin
         ]);
     }
 

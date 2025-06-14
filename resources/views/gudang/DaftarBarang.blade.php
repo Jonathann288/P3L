@@ -34,7 +34,7 @@
                         <span>Tambah Titip Barang</span>
                     </a>
                     <a href="{{ route('gudang.DaftarBarang') }}"
-                        class="flex items-center space-x-4 p-3 bg-gray-700 rounded-lg">
+                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fas fa-boxes mr-2"></i>
                         <span>Daftar Barang</span>
                     </a>
@@ -42,6 +42,11 @@
                         class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-boxes mr-2"></i>
                         <span>Catatan Pengembalian Barang</span>
+                    </a>
+                    <a href="{{ route('gudang.DashboardShowTransaksiAntarAmbil') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-truck"></i> 
+                        <span>Daftar Transakasi Kirim dan Ambil sendiri</span>
                     </a>
                 </div>
             </nav>

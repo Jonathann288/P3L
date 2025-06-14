@@ -275,9 +275,9 @@ class AuthControllerAPI extends Controller
                     'nomor_ktp' => $user->nomor_ktp,
                     'email_penitip' => $user->email_penitip,
                     'no_telepon_penitip' => $user->nomor_telepon_penitip ?? null,
-                    'rating_penitip' => $user->rating_penitip ?? 0,
+                    'rating_penitip' => $user->Rating_penitip ?? 0,
                     'saldo_penitip' => $user->saldo_penitip ?? 0,
-                    'poin_penitip' => $user->poin_penitip ?? 0,
+                    'poin_penitip' => $user->total_poin ?? 0,
                     'jumlah_penjualan' => $user->jumlah_penjualan ?? 0
                 ]);
 

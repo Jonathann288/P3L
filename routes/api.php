@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthControllerAPI;
 use App\Http\Controllers\BarangControllersApi;
 use App\Http\Controllers\KomisiControllersAPI;
 use App\Http\Controllers\MerchendiseControllersAPI;
+use App\Http\Controllers\TransaksiPenitipanControllersAPI;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,4 +34,11 @@ Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
     Route::get('/me', [AuthControllerAPI::class, 'me']);
     Route::get('/komisi/history', [KomisiControllersAPI::class, 'getKomisiHistory']);
     Route::get('/merchandise', [MerchendiseControllersAPI::class, 'index']);
+    Route::post('/claim-merchandise', [MerchendiseControllersAPI::class, 'claimMerchandise']);
+    Route::get('/pembeli/history', [App\Http\Controllers\PembeliControllersAPI::class, 'getHistoryTransaksi']);
+     //PENITIP
+     Route::get('/penitip/history', [TransaksiPenitipanControllersAPI::class, 'getHistoryForPenitip']);
+ // <-- TAMBAHKAN RUTE DI BAWAH INI -->
+    // TOP SELLER
+    Route::get('/topseller', [App\Http\Controllers\TopSellerControllerAPI::class, 'getTopSellers']);
 });

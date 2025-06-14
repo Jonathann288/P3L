@@ -50,6 +50,14 @@ class DonasiControllers extends Controller
             ]);
 
             \Log::info('✅ Data Donasi berhasil disimpan', $donasi->toArray());
+             $barang = barang::find($request->id_barang);
+            if ($barang) {
+                $barang->status_barang = 'Sudah diDonasikan'; // atau 'tersedia', 'terpakai', dll sesuai logika kamu
+                $barang->save();
+                \Log::info('✅ Status barang diupdate jadi didonasikan');
+            } else {
+                \Log::warning('⚠️ Barang tidak ditemukan saat update status_barang');
+            }
 
             return redirect()->route('owner.DashboardDonasi')->with('success', 'Donasi berhasil disimpan!');
         } catch (\Exception $e) {

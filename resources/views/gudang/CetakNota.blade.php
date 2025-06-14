@@ -230,7 +230,7 @@
             </div>
             <div class="invoice-info">
                 <div><strong>No. Transaksi:</strong> {{ $titipan->id ?? '12345' }}</div>
-                <div>{{ $titipan->tanggal_penitipan->format('d M Y') ?? '26 July 2025' }}</div>
+                <div>{{ optional($titipan->tanggal_penitipan)->format('d/m/Y') ?? '26/07/2025' }}</div>
             </div>
         </div>
 
@@ -257,25 +257,25 @@
             <tbody>
                 <tr>
                     <td>Tanggal Penitipan</td>
-                    <td>{{ $titipan->tanggal_penitipan->format('d/m/Y') ?? '26/07/2025' }}</td>
+                    <td>{{ optional($titipan->tanggal_penitipan)->format('d/m/Y') ?? '26/07/2025' }}</td>
                     <td>Barang diterima dan dicatat</td>
                     <td><span class="status-badge">Aktif</span></td>
                 </tr>
                 <tr>
                     <td>Tanggal Akhir Penitipan</td>
-                    <td>{{ $titipan->tanggal_akhir_penitipan->format('d/m/Y') ?? '26/08/2025' }}</td>
+                    <td>{{ optional($titipan->tanggal_akhir_penitipan)->format('d/m/Y') ?? '26/08/2025' }}</td>
                     <td>Periode penitipan berakhir</td>
                     <td><span class="status-badge">Terjadwal</span></td>
                 </tr>
                 <tr>
                     <td>Batas Pengambilan</td>
-                    <td>{{ $titipan->tanggal_batas_pengambilan->format('d/m/Y') ?? '02/09/2025' }}</td>
+                    <td>{{optional($titipan->tanggal_batas_pengambilan)->format('d/m/Y') ?? '02/09/2025' }}</td>
                     <td>Batas waktu pengambilan barang</td>
                     <td><span class="status-badge">Terjadwal</span></td>
                 </tr>
                 <tr>
                     <td>Petugas Penerima</td>
-                    <td>{{ $titipan->tanggal_penitipan->format('d/m/Y') ?? '26/07/2025' }}</td>
+                    <td>{{ optional($titipan->tanggal_penitipan)->format('d/m/Y') ?? '26/07/2025' }}</td>
                     <td>{{ $titipan->pegawai->nama_pegawai ?? 'Nama Pegawai' }}</td>
                     <td><span class="status-badge">Verified</span></td>
                 </tr>
@@ -286,7 +286,7 @@
 
                 <tr>
                     <td>Info Barang</td>
-                    <td>{{ $titipan->tanggal_penitipan->format('d/m/Y') }}</td>
+                    <td>{{ optional($titipan->tanggal_penitipan)->format('d/m/Y') ?? '26/07/2025' }}</td>
                     <td>
                         @if($barang)
                             Nama: {{ $barang->nama_barang }}<br>
@@ -302,7 +302,7 @@
 
                 <tr>
                     <td>Penanggung Jawab</td>
-                    <td>{{ $titipan->tanggal_penitipan->format('d/m/Y') }}</td>
+                    <td>{{ optional($titipan->tanggal_penitipan)->format('d/m/Y') ?? '26/07/2025' }}</td>
                     <td>
                         @if($penanggungJawab)
                             {{ $penanggungJawab->nama_pegawai }}<br>

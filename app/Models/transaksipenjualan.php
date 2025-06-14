@@ -52,6 +52,11 @@ class transaksipenjualan extends Model
     {
         return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_penjualan');
     }
+
+    public function detailTransaksiPenjualan()
+    {
+        return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_penjualan');
+    }
     public function detailtrpj()
     {
         return $this->hasOne(DetailTransaksiPenjualan::class, 'id_transaksi_penjualan');

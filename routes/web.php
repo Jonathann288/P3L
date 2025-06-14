@@ -112,6 +112,7 @@ Route::middleware(['pembeli'])->group(function () {
 
     Route::get('/historyPembeli', [PembeliControllrs::class, 'showHistory'])->name('pembeli.historyPembeli');
     Route::get('/history', [PembeliControllrs::class, 'showHistory2'])->name('pembeli.historyPembeli2');
+    Route::post('/pembeli/rating/submit', [PembeliControllrs::class, 'submitRating'])->name('pembeli.submitRating');
     //
 
     Route::post('/diskusi', [DiskusiControllers::class, 'store'])->name('diskusi.store');

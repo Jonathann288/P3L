@@ -14,14 +14,14 @@ class merchandise extends Model
         'id_pegawai',
         'id',
         'nama_merchandise',
+        'harga_merchandise',
         'stok_merchandise',
-        'poin_merchandise',
         'foto_merchandise',
     ];
 
     protected $casts = [
+        'harga_merchandise' => 'integer',
         'stok_merchandise' => 'integer',
-        'poin_merchandise' => 'integer',
     ];
 
     public function pegawai()

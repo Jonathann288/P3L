@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Auth;
 class PegawaiControllers extends Controller
 {   
 
-    public function laporanPenjualan()
-    {
+    public function laporanPenjualan(Request $request)
+    {   
+        $tahun = $request->input('tahun');
+
         $data = DB::table('kategoribarang as kb')
             ->leftJoin('barang as b', 'b.id_kategori', '=', 'kb.id_kategori')
             ->leftJoin('detailtransaksipenjualan as dp', 'dp.id_barang', '=', 'b.id_barang')
@@ -24,8 +26,11 @@ class PegawaiControllers extends Controller
             ->select(
                 'kb.nama_kategori',
                 DB::raw("COUNT(CASE WHEN b.status_barang = 'laku' THEN 1 END) as jumlah_terjual"),
-                DB::raw("COUNT(CASE WHEN tp.status_transaksi IN ('hangus', 'dibatalkan') THEN 1 END) as jumlah_gagal")
+                DB::raw("COUNT(CASE WHEN tp.status_transaksi IN ('Hangus', 'dibatalkan') THEN 1 END) as jumlah_gagal")
             )
+            ->when($tahun, function ($query, $tahun) {
+                $query->whereYear('tp.tanggal_transaksi', $tahun);
+            })
             ->groupBy('kb.id_kategori', 'kb.nama_kategori')
             ->get();
 
@@ -101,19 +106,21 @@ class PegawaiControllers extends Controller
     }
 
 
-    public function CetakLaporanKategori()
+    public function CetakLaporanKategori(Request $request)
     {
+        $tahun = $request->input('tahun');
         // Ambil data kategori dan hitung jumlah
         $data = DB::table('kategoribarang as kb')
             ->leftJoin('barang as b', 'b.id_kategori', '=', 'kb.id_kategori')
             ->leftJoin('detailtransaksipenjualan as dp', 'dp.id_barang', '=', 'b.id_barang')
             ->leftJoin('transaksipenjualan as tp', 'tp.id_transaksi_penjualan', '=', 'dp.id_transaksi_penjualan')
             ->select(
-                'kb.nama_kategori',
-                DB::raw("COUNT(CASE WHEN b.status_barang = 'laku' THEN 1 END) as jumlah_terjual"),
-                DB::raw("COUNT(CASE WHEN tp.status_transaksi IN ('hangus', 'dibatalkan') THEN 1 END) as jumlah_gagal")
+                 'kb.nama_kategori',
+                DB::raw("COUNT(CASE WHEN b.status_barang = 'laku' AND YEAR(tp.tanggal_transaksi) = ? THEN 1 END) as jumlah_terjual", [$tahun]),
+                DB::raw("COUNT(CASE WHEN tp.status_transaksi IN ('Hangus', 'dibatalkan') AND YEAR(tp.tanggal_transaksi) = ? THEN 1 END) as jumlah_gagal", [$tahun])
             )
             ->groupBy('kb.id_kategori', 'kb.nama_kategori')
+            ->setBindings([$tahun,$tahun])
             ->get();
                 
         // Siapkan data untuk Blade

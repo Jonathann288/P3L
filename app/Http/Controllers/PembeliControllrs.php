@@ -7,9 +7,14 @@ use App\Models\Pembeli;
 use App\Models\Barang;
 use App\Models\Keranjang;
 use App\Models\TransaksiPenjualan;
+use App\Models\DetailTransaksiPenitipan;
+use App\Models\DetailTransaksiPenjualan; 
+use App\Models\Penitip;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 class PembeliControllrs extends Controller
 {
     public function showRegisterForm()
@@ -79,7 +84,7 @@ class PembeliControllrs extends Controller
 
             // Ambil transaksi berdasarkan id_pembeli, eager load detail + barang, dan urutkan berdasarkan tanggal
             $transaksiPenjualan = transaksipenjualan::where('id_pembeli', $pembeli->id_pembeli)
-                ->with(['detailTransaksi.barang'])
+                ->with(['detailTransaksiPenjualan.barang.detailtransaksipenitipan.transaksiPenitipan.penitip'])
                 ->orderBy('tanggal_transaksi', 'desc')
                 ->get();
 

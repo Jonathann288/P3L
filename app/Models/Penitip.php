@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB; 
+use App\Models\DetailTransaksiPenjualan;
+use App\Models\TransaksiPenitipan;
+use Illuminate\Support\Facades\Log;
 
 use Laravel\Sanctum\HasApiTokens;
 
@@ -91,5 +95,11 @@ class Penitip extends Authenticatable
         } catch (\Exception $e) {
             Log::error("Gagal menyimpan rata-rata rating untuk penitip_id " . $this->id_penitip . ": " . $e->getMessage());
         }
+    }
+
+    public function getRatingPenitipAttribute()
+    {
+        // Mengambil nilai langsung dari atribut dengan nama kolom yang benar
+        return $this->attributes['Rating_penitip'];
     }
 }

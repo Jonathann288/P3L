@@ -76,8 +76,25 @@
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
         <h2 class="text-2xl font-semibold mb-6">Laporan Penjualan per Kategori Barang</h2>
+        <form method="GET" action="{{ route('owner.LaporanPenjualanKategoriBarang') }}" class="mb-6 flex items-center gap-4">
+            <label for="tahun" class="font-medium">Filter Tahun:</label>
+            <select name="tahun" id="tahun" class="px-4 py-2 rounded border border-gray-300">
+                @php
+                    $tahunSekarang = date('Y');
+                @endphp
+                <option value="">Semua Tahun</option>
+                @for ($i = $tahunSekarang; $i >= $tahunSekarang - 5; $i--)
+                    <option value="{{ $i }}" {{ (request('tahun') == $i) ? 'selected' : '' }}>{{ $i }}</option>
+                @endfor
+            </select>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                Tampilkan
+            </button>
+        </form>
+
+
         <div class="flex justify-end mb-4">
-            <a href="{{ route('laporan.kategori.cetak') }}"
+            <a href="{{ route('laporan.kategori.cetak', ['tahun' => request('tahun')]) }}"
                 class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow transition duration-200">
                 <i class="fa-solid fa-download mr-2"></i>Download PDF
             </a>
