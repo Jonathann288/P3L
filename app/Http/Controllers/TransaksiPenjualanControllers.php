@@ -685,7 +685,7 @@ class TransaksiPenjualanControllers extends Controller
 
 
 
-public function approveTransaction(Request $request, $id)
+    public function approveTransaction(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -829,7 +829,7 @@ public function approveTransaction(Request $request, $id)
         return back()->with('success', 'Tanggal pengambilan berhasil dijadwalkan.');
     }
 
-        public function konfirmasiTerima($id)
+    public function konfirmasiTerima($id)
     {
         DB::beginTransaction();
 
@@ -875,7 +875,7 @@ public function approveTransaction(Request $request, $id)
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-  
+
     public function konfirmasiDanCetakNota($id)
     {
         try {
