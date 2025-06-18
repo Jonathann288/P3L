@@ -72,7 +72,8 @@ class TransaksiPenitipanControllersAPI extends Controller
                     'nama_barang' => $detail->barang->nama_barang,
                     'status_barang' => $detail->barang->status_barang,
                     // Ambil foto pertama dari array foto_barang jika ada
-                    'foto_barang' => is_array($detail->barang->foto_barang) ? ($detail->barang->foto_barang[0] ?? null) : null,
+                    'foto_barang' => is_array($detail->barang->foto_barang)? array_map(function ($foto) { return asset($foto);}, $detail->barang->foto_barang)
+                    : [],
                     'tanggal_penitipan' => $detail->transaksipenitipan->tanggal_penitipan->toFormattedDateString(),
                     'tanggal_akhir_penitipan' => $detail->transaksipenitipan->tanggal_akhir_penitipan->toFormattedDateString(),
                     'tanggal_batas_pengambilan' => $detail->transaksipenitipan->tanggal_batas_pengambilan ? \Carbon\Carbon::parse($detail->transaksipenitipan->tanggal_batas_pengambilan)->toDateString() : null,

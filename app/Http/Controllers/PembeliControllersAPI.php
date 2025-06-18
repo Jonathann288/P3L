@@ -31,13 +31,20 @@ use Illuminate\Database\Eloquent\Builder;
         ]);
 
         // Langkah 2: Dapatkan informasi pembeli yang sedang login.
-        $pembeli = Auth::user();
+        $token = $request->bearerToken();
+        $tokenModel = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+        if (!$tokenModel) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Silakan login terlebih dahulu'
+            ], 401);
+        }
 
-        // Jika tidak ada user yang login, kembalikan response error.
+        $pembeli = $tokenModel->tokenable;
         if (!$pembeli) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized. Silakan login terlebih dahulu.',
+                'message' => 'Unauthorized. Silakan login terlebih dahulu'
             ], 401);
         }
 

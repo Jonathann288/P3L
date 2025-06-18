@@ -255,9 +255,10 @@ class AuthControllerAPI extends Controller
                     'id_pembeli' => $user->id,
                     'nama_pembeli' => $user->nama_pembeli,
                     'email_pembeli' => $user->email_pembeli,
-                    'no_telepon_pembeli' => $user->nomor_telepon_pembeli ?? null,
-                    'tanggal_lahir_pembeli' => $user->tanggal_lahir ?? null,
-                    'poin_pembeli' => $user->poin_pembeli ?? 0,
+                    'nomor_telepon_pembeli' => $user->nomor_telepon_pembeli ?? null,
+                    'tanggal_lahir' => $user->tanggal_lahir ?? null,
+                    'total_poin' => $user->total_poin ?? 0,
+                    'foto_pembeli' => $user->foto_pembeli ?? 0,
                     // Include alamat relationship if loaded
                     // 'alamat' => $user->alamat ? [
                     //     'id' =>  $user->alamat->id_alamat,
@@ -274,10 +275,11 @@ class AuthControllerAPI extends Controller
                     'nama_penitip' => $user->nama_penitip,
                     'nomor_ktp' => $user->nomor_ktp,
                     'email_penitip' => $user->email_penitip,
+                    'tanggal_lahir' => $user->tanggal_lahir,
                     'no_telepon_penitip' => $user->nomor_telepon_penitip ?? null,
-                    'rating_penitip' => $user->Rating_penitip ?? 0,
+                    'Rating_penitip' => $user->Rating_penitip ?? 0,
                     'saldo_penitip' => $user->saldo_penitip ?? 0,
-                    'poin_penitip' => $user->total_poin ?? 0,
+                    'total_poin' => $user->total_poin ?? 0,
                     'jumlah_penjualan' => $user->jumlah_penjualan ?? 0
                 ]);
 

@@ -31,4 +31,10 @@ class donasi extends Model
     {
         return $this->belongsTo(requestdonasi::class, 'id_request');
     }
+
+    public function pegawai()
+    {
+        return $this->belongsTo(Pegawai::class, 'id_pegawai');
+    }
+
 }

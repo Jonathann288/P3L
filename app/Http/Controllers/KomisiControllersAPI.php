@@ -90,6 +90,9 @@ class KomisiControllersAPI extends Controller
                 'komisi_hunter' => $komisi->komisi_hunter,
                 'status_transaksi' => $komisi->transaksipenjualan?->status_transaksi ?? 'Tidak diketahui',
                 'nama_barang' => $komisi-> transaksipenjualan?-> detailtrpj?-> barang?-> nama_barang ?? 'Tidak diketahui',
+                'foto_barang' => $komisi-> transaksipenjualan?-> detailtrpj?-> barang?-> foto_barang ?? 'Tidak diketahui',
+                'harga_barang' => $komisi-> transaksipenjualan?-> detailtrpj?-> barang?-> harga_barang ?? 'Tidak diketahui',
+                'status_barang' => $komisi-> transaksipenjualan?-> detailtrpj?-> barang?-> status_barang ?? 'Tidak diketahui',
             ];
         });
 
