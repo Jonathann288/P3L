@@ -1,4 +1,3 @@
-<!-- COPY SEMUA -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,29 +24,30 @@
             <h2 class="text-xl font-semibold mb-8">Gudang</h2>
             <nav>
                 <div class="space-y-4">
-                        <a href="{{ route('gudang.DashboardGudang') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                            <span  class="text-2xl font-bold">{{ $pegawaiLogin->nama_pegawai }}</span>
-                        </a>
-                        <a href="{{ route('gudang.DashboardTitipanBarang') }}"
-                            class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                            <i class="fas fa-dolly mr-2"></i>
-                            <span>Tambah Titip Barang</span>
-                        </a>
-                        <a href="{{ route('gudang.DaftarBarang') }}"
-                            class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                            <i class="fas fa-boxes mr-2"></i>
-                            <span>Daftar Barang</span>
-                        </a>
-                        <a href="{{ route('gudang.DasboardCatatanPengembalianBarang') }}"
-                            class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                            <i class="fas fa-boxes mr-2"></i>
-                            <span>Catatan Pengembalian Barang</span>
-                        </a>
-                        <a href="{{ route('gudang.DashboardShowTransaksiAntarAmbil') }}"
-                            class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                            <i class="fa-solid fa-truck"></i> 
-                            <span>Daftar Transakasi Kirim dan Ambil sendiri</span>
-                        </a>
+                    <a href="{{ route('gudang.DashboardGudang') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <span class="text-2xl font-bold">{{ $pegawaiLogin->nama_pegawai }}</span>
+                    </a>
+                    <a href="{{ route('gudang.DashboardTitipanBarang') }}"
+                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                        <i class="fas fa-dolly mr-2"></i>
+                        <span>Tambah Titip Barang</span>
+                    </a>
+                    <a href="{{ route('gudang.DaftarBarang') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-boxes mr-2"></i>
+                        <span>Daftar Barang</span>
+                    </a>
+                    <a href="{{ route('gudang.DasboardCatatanPengembalianBarang') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-boxes mr-2"></i>
+                        <span>Catatan Pengembalian Barang</span>
+                    </a>
+                    <a href="{{ route('gudang.DashboardShowTransaksiAntarAmbil') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-truck"></i>
+                        <span>Daftar Transakasi Kirim dan Ambil sendiri</span>
+                    </a>
                 </div>
             </nav>
         </div>
@@ -56,18 +56,11 @@
         </div>
     </div>
 
-    @if($errors->any())
-        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            <ul class="list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+
 
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
+
         <!-- Flash Messages -->
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -78,6 +71,15 @@
         @if(session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {{ session('error') }}
+            </div>
+        @endif
+        @if($errors->any())
+            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
@@ -137,6 +139,22 @@
                         </select>
                         @error('id_penitip') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
+                    {{-- Hunter --}}
+                    <div class="mb-4">
+                        <label for="id_hunter" class="block font-semibold mb-2">Pilih Hunter </label>
+                        <select name="id_hunter" id="id_hunter" required
+                            class="w-full border p-3 rounded-lg @error('id_hunter') border-red-500 @enderror">
+                            <option value="">-- Pilih Hunter --</option>
+                            @foreach($hunters ?? [] as $hunter)
+                                @if(is_object($hunter))
+                                    <option value="{{ $hunter->id_pegawai }}" {{ old('id_hunter') == $hunter->id_pegawai ? 'selected' : '' }}>
+                                        {{ $hunter->nama_pegawai }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                        @error('id_hunter') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
 
                     {{-- Kategori Barang --}}
                     <div class="mb-4">
@@ -145,14 +163,24 @@
                         <select name="id_kategori" id="id_kategori" required
                             class="w-full border p-3 rounded-lg @error('id_kategori') border-red-500 @enderror">
                             <option value="">-- Pilih Kategori --</option>
-                            @foreach($kategoris ?? [] as $kategori)
-                                @if(is_object($kategori))
-                                    <option value="{{ $kategori->id_kategori }}" {{ old('id_kategori') == $kategori->id_kategori ? 'selected' : '' }}>
-                                        {{ $kategori->nama_kategori }}{{ $kategori->nama_sub_kategori ? ' - ' . $kategori->nama_sub_kategori : '' }}
-                                    </option>
-                                @endif
-                            @endforeach
 
+                            {{-- Debug setiap item --}}
+                            @if(isset($kategoris) && count($kategoris) > 0)
+                                @foreach($kategoris as $index => $kategori)
+                                    {{-- Debug item --}}
+                                    <!-- DEBUG Item {{ $index }}: {{ json_encode($kategori) }} -->
+
+                                    @if(isset($kategori->id_kategori) && isset($kategori->nama_kategori))
+                                        <option value="{{ $kategori->id_kategori }}" {{ old('id_kategori') == $kategori->id_kategori ? 'selected' : '' }}>
+                                            {{ $kategori->nama_kategori }}
+                                        </option>
+                                    @else
+                                        <!-- DEBUG: Missing fields in item {{ $index }} -->
+                                    @endif
+                                @endforeach
+                            @else
+                                <option value="" disabled>Tidak ada kategori tersedia</option>
+                            @endif
                         </select>
                         @error('id_kategori') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -213,9 +241,8 @@
                         <select name="status_barang" id="status_barang" required
                             class="w-full border p-3 rounded-lg @error('status_barang') border-red-500 @enderror">
                             <option value="">-- Pilih Status --</option>
-                            <option value="tidak laku" {{ old('status_barang') == 'tidak laku' ? 'selected' : '' }}>Tidak Laku</option>
-                            <option value="di donasikan" {{ old('status_barang') == 'di donasikan' ? 'selected' : '' }}>Donasi</option>
-
+                            <option value="tidak laku" {{ old('status_barang') == 'tidak laku' ? 'selected' : '' }}>Tidak
+                                Laku</option>
                         </select>
                         @error('status_barang') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -316,15 +343,19 @@
                     class="col-span-1 md:col-span-2 border p-3 rounded-lg w-full" />
 
                 <select name="status" class="border p-3 rounded-lg w-full">
-                    <option value="">Status</option>
-                    <option value="tidak laku" {{ request('status') == 'tidak laku' ? 'selected' : '' }}>tidak laku</option>
-                    <option value="laku" {{ request('status') == 'laku' ? 'selected' : '' }}>laku</option>
-                    <option value="donasi" {{ request('status') == 'donasi' ? 'selected' : '' }}>Donasi</option>
-                    <option value="di donasikan" {{ request('status') == 'di donasikan' ? 'selected' : '' }}>Didonasikan
+                    <option value="">Semua Status</option>
+                    <option value="tidak_laku" {{ request('status') == 'tidak_laku' ? 'selected' : '' }}>Tidak Laku
                     </option>
-                    <option value="siap_diambil_kembali" {{ request('status') == 'siap_diambil_kembali' ? 'selected' : '' }}>Siap Diambil Kembali</option>
-                    <option value="diambil_kembali" {{ request('status') == 'diambil_kembali' ? 'selected' : '' }}>Diambil
-                        Kembali</option>
+                    <option value="laku" {{ request('status') == 'laku' ? 'selected' : '' }}>Laku</option>
+                    <option value="di_donasikan" {{ request('status') == 'di_donasikan' ? 'selected' : '' }}>Di Donasikan
+                        (Lewat Batas Pengambilan)</option>
+                    <option value="donasikan" {{ request('status') == 'donasikan' ? 'selected' : '' }}>Donasikan (Ada
+                        Request)</option>
+                    <option value="akan_diambil" {{ request('status') == 'akan_diambil' ? 'selected' : '' }}>Akan Diambil
+                        (Pembeli)</option>
+                    <option value="sudah_diambil" {{ request('status') == 'sudah_diambil' ? 'selected' : '' }}>Sudah
+                        Diambil (Pembeli)</option>
+                    <option value="diambil_kembali_penitip" {{ request('status') == 'diambil_kembali_penitip' ? 'selected' : '' }}>Diambil Kembali (Penitip)</option>
                 </select>
 
 
@@ -357,52 +388,108 @@
                             </p>
                         @endif
 
-                        <!-- Status Barang -->
+
                         @php
-                            $status = 'Tidak diketahui';
+                            $status = 'Belum Diketahui';
+                            $badgeClass = 'bg-gray-200 text-gray-800';
+                            $today = \Carbon\Carbon::now(); // [cite: 311]
 
-                            $today = \Carbon\Carbon::now();
-                            $isDiambilKembali = $titipan->tanggal_pengambilan_barang != null;
+                            $barangsInThisTitipan = $titipan->detailTransaksiPenitipan->map(function ($detail) {
+                                return $detail->barang;
+                            })->filter();
 
-                            $detailItems = $titipan->detailTransaksi ?? collect();
-
-                            $sudahDidonasikan = $detailItems->contains(function ($detail) {
-                                return $detail->barang && $detail->barang->donasi && $detail->barang->donasi->id_request !== null;
+                            $isSudahDiambil = $barangsInThisTitipan->contains(function ($barang) {
+                                if ($barang && $barang->detailTransaksiPenjualan && $barang->detailTransaksiPenjualan->transaksipenjualan) {
+                                    $penjualan = $barang->detailTransaksiPenjualan->transaksipenjualan;
+                                    return $penjualan->metode_pengantaran === 'Ambil di Gudang' && $penjualan->status_pembayaran === 'lunas';
+                                }
+                                return false;
                             });
 
-                            $siapDonasi = !$sudahDidonasikan && $titipan->tanggal_akhir_penitipan && $titipan->tanggal_akhir_penitipan->lt($today);
-
-                            $sudahTerjual = $detailItems->contains(function ($detail) {
-                                return $detail->barang && $detail->barang->transaksiPenjualan && $detail->barang->transaksiPenjualan->count() > 0;
-                            });
-
-                            $dalamRentangPenitipan = $titipan->tanggal_penitipan && $titipan->tanggal_akhir_penitipan &&
-                                $titipan->tanggal_penitipan->lte($today) &&
-                                $titipan->tanggal_akhir_penitipan->gte($today);
-
-                            if ($isDiambilKembali) {
-                                $status = 'Diambil kembali';
-                            } elseif ($sudahDidonasikan) {
-                                $status = 'di donasikan';
-                            } elseif ($siapDonasi) {
-                                $status = 'donasi';
-                            } elseif ($sudahTerjual) {
-                                $status = 'laku';
-                            } elseif ($dalamRentangPenitipan) {
-                                $status = 'tidak laku';
-                            } else {
-                                $status = 'Dalam Penitipan';
+                            $isAkanDiambil = false;
+                            if (!$isSudahDiambil) {
+                                $isAkanDiambil = $barangsInThisTitipan->contains(function ($barang) {
+                                    if ($barang && $barang->detailTransaksiPenjualan && $barang->detailTransaksiPenjualan->transaksipenjualan) {
+                                        $penjualan = $barang->detailTransaksiPenjualan->transaksipenjualan;
+                                        return $penjualan->metode_pengantaran === 'Ambil di Gudang' && $penjualan->status_pembayaran !== 'lunas';
+                                    }
+                                    return false;
+                                });
                             }
 
-                            $badgeClass = match ($status) {
-                                'tidak laku' => 'bg-green-100 text-green-800',
-                                'laku' => 'bg-blue-100 text-blue-800',
-                                'donasi' => 'bg-yellow-100 text-yellow-800',
-                                'di donasikan' => 'bg-purple-100 text-purple-800',
-                                'Barang siap diambil kembali' => 'bg-indigo-100 text-indigo-800',
-                                'Diambil kembali' => 'bg-gray-300 text-gray-700',
-                                default => 'bg-red-100 text-red-800',
-                            };
+                            $isLaku = false;
+                            if (!$isSudahDiambil && !$isAkanDiambil) {
+                                $isLaku = $barangsInThisTitipan->contains(function ($barang) {
+                                    // Cek jika ada detail penjualan, dan metode bukan ambil di gudang, atau sudah lunas tapi bukan ambil di gudang
+                                    if ($barang && $barang->detailTransaksiPenjualan && $barang->detailTransaksiPenjualan->transaksipenjualan) {
+                                        $penjualan = $barang->detailTransaksiPenjualan->transaksipenjualan;
+                                        // Dianggap laku jika ada penjualan dan bukan 'Ambil di Gudang' atau sudah lunas tapi bukan 'Ambil di Gudang'
+                                        return $penjualan->id_transaksi_penjualan && $penjualan->metode_pengantaran !== 'Ambil di Gudang';
+                                    }
+                                    return $barang && $barang->detailTransaksiPenjualan && $barang->detailTransaksiPenjualan->id_detail_transaksi_penjualan;
+                                });
+                            }
+
+                            $isDonasikan = false; // Sudah ada id_request di tabel donasi
+                            if (!$isSudahDiambil && !$isAkanDiambil && !$isLaku) {
+                                $isDonasikan = $barangsInThisTitipan->contains(function ($barang) { // [cite: 312]
+                                    return $barang && $barang->donasi && $barang->donasi->id_request !== null; // [cite: 312]
+                                });
+                            }
+
+                            $isDiDonasikan = false; // Sudah lewat tanggal batas pengambilan & belum ada aksi lain
+                            if (!$isSudahDiambil && !$isAkanDiambil && !$isLaku && !$isDonasikan) {
+                                if ($titipan->tanggal_batas_pengambilan && \Carbon\Carbon::parse($titipan->tanggal_batas_pengambilan)->lt($today) && !$titipan->tanggal_pengambilan_barang) { // [cite: 313]
+                                    $isDiDonasikan = true;
+                                }
+                            }
+
+                            $isDiambilKembaliPenitip = $titipan->tanggal_pengambilan_barang != null; // [cite: 311]
+
+                            $isTidakLaku = false;
+                            if (!$isSudahDiambil && !$isAkanDiambil && !$isLaku && !$isDonasikan && !$isDiDonasikan && !$isDiambilKembaliPenitip) {
+                                // Kondisi Tidak Laku:
+                                // 1. status_barang di tabel barang adalah 'tidak laku'
+                                // 2. ATAU barang masih dalam masa penitipan (tanggal_akhir_penitipan >= today)
+                                $isTidakLaku = $barangsInThisTitipan->contains(function ($barang) {
+                                    return $barang && $barang->status_barang === 'tidak laku';
+                                });
+                                if (!$isTidakLaku && $titipan->tanggal_akhir_penitipan && \Carbon\Carbon::parse($titipan->tanggal_akhir_penitipan)->gte($today)) {
+                                    $isTidakLaku = true; // Jika masih dalam masa penitipan dan belum ada status lain, anggap tidak laku (sementara)
+                                }
+                            }
+
+                            if ($isSudahDiambil) {
+                                $status = 'Sudah Diambil (Pembeli)';
+                                $badgeClass = 'bg-red-600 text-white'; // [cite: 322, 324]
+                            } elseif ($isAkanDiambil) {
+                                $status = 'Akan Diambil (Pembeli)';
+                                $badgeClass = 'bg-blue-500 text-white'; // [cite: 322]
+                            } elseif ($isLaku) {
+                                $status = 'Laku, sudah diambil'; // Lebih spesifik untuk membedakan dari Ambil di Gudang
+                                $badgeClass = 'bg-teal-500 text-white'; // [cite: 318, 322]
+                            } elseif ($isDonasikan) {
+                                $status = 'Donasikan (Ada Request)';
+                                $badgeClass = 'bg-purple-600 text-white'; // [cite: 316, 322]
+                            } elseif ($isDiDonasikan) {
+                                $status = 'Di Donasikan (Lewat Batas)';
+                                $badgeClass = 'bg-yellow-500 text-black'; // [cite: 317, 322]
+                            } elseif ($isDiambilKembaliPenitip) {
+                                $status = 'Diambil Kembali (Penitip)'; // [cite: 315]
+                                $badgeClass = 'bg-gray-500 text-white'; // [cite: 323]
+                            } elseif ($isTidakLaku) {
+                                $status = 'Tidak Laku / Tersedia'; // [cite: 319]
+                                $badgeClass = 'bg-green-500 text-white'; // [cite: 321]
+                            } else {
+                                // Fallback jika ada kondisi yang belum tercover (seharusnya tidak banyak)
+                                if ($titipan->tanggal_akhir_penitipan && \Carbon\Carbon::parse($titipan->tanggal_akhir_penitipan)->lt($today) && !$titipan->tanggal_pengambilan_barang) {
+                                    $status = 'Melewati Batas (Belum Ada Keputusan)';
+                                    $badgeClass = 'bg-orange-400 text-white';
+                                } else {
+                                    $status = 'Dalam Proses Gudang';
+                                    $badgeClass = 'bg-indigo-200 text-indigo-800';
+                                }
+                            }
                         @endphp
 
                         <div class="mt-2">
@@ -411,15 +498,28 @@
                             </span>
                         </div>
 
+
                         <!-- Edit Button -->
                         <button @click="openModal({{ $titipan->id_transaksi_penitipan }}, {
-                                                                                    nama_penitip: '{{ $titipan->penitip ? $titipan->penitip->nama_penitip : '' }}',
-                                                                                    email_penitip: '{{ $titipan->penitip ? $titipan->penitip->email_penitip : '' }}',
-                                                                                    tanggal_penitipan: '{{ $titipan->tanggal_penitipan ? $titipan->tanggal_penitipan->format('Y-m-d') : '' }}',
-                                                                                    tanggal_akhir_penitipan: '{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('Y-m-d') : '' }}',
-                                                                                    tanggal_batas_pengambilan: '{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('Y-m-d') : '' }}',
-                                                                                    tanggal_pengambilan_barang: '{{ $titipan->tanggal_pengambilan_barang ? $titipan->tanggal_pengambilan_barang->format('Y-m-d') : '' }}'
-                                                                                })"
+                                nama_penitip: '{{ addslashes(optional($titipan->penitip)->nama_penitip) }}',
+                                email_penitip: '{{ addslashes(optional($titipan->penitip)->email_penitip) }}',
+                                id_hunter: '{{ $titipan->id_hunter ?? '' }}',
+                                tanggal_penitipan: '{{ optional($titipan->tanggal_penitipan)->format('Y-m-d') }}',
+                                tanggal_akhir_penitipan: '{{ optional($titipan->tanggal_akhir_penitipan)->format('Y-m-d') }}',
+                                tanggal_batas_pengambilan: '{{ optional($titipan->tanggal_batas_pengambilan)->format('Y-m-d') }}',
+                                tanggal_pengambilan_barang: '{{ optional($titipan->tanggal_pengambilan_barang)->format('Y-m-d') }}',
+
+                                // Bagian data barang yang lebih aman
+                                nama_barang: '{{ addslashes(optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->nama_barang) }}',
+                                deskripsi_barang: '{{ addslashes(optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->deskripsi_barang) }}',
+                                harga_barang: '{{ optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->harga_barang }}',
+                                berat_barang: '{{ optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->berat_barang }}',
+                                status_barang: '{{ optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->status_barang }}',
+
+                                // Bagian garansi yang lebih aman
+                                has_garansi: '{{ optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->garansi_barang ? 'ya' : 'tidak' }}',
+                                garansi_barang: '{{ optional(optional(optional($titipan->detailTransaksiPenitipan->first())->barang)->garansi_barang)->format('Y-m-d') }}'
+                            })"
                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mt-3 transition-colors">
                             <i class="fas fa-edit mr-1"></i> Edit
                         </button>
@@ -447,10 +547,23 @@
                                             class="text-gray-600">{{ $titipan->penitip ? $titipan->penitip->email_penitip : '-' }}</span>
                                     </div>
 
+                                    @if($titipan->hunter)
+                                        <div>
+                                            <strong class="text-gray-700">Hunter:</strong>
+                                            <span class="text-gray-600 font-medium">{{ $titipan->hunter->nama_pegawai }}</span>
+                                        </div>
+                                    @endif
+
                                     <div>
                                         <strong class="text-gray-700">Tanggal Akhir Penitipan:</strong>
                                         <span
                                             class="text-gray-600">{{ $titipan->tanggal_akhir_penitipan ? $titipan->tanggal_akhir_penitipan->format('d M Y') : '-' }}</span>
+                                    </div>
+
+                                    <div>
+                                        <strong class="text-gray-700">Tanggal Batas Pengambilan:</strong>
+                                        <span
+                                            class="text-gray-600">{{ $titipan->tanggal_batas_pengambilan ? $titipan->tanggal_batas_pengambilan->format('d M Y') : '-' }}</span>
                                     </div>
 
                                     <div>
@@ -461,22 +574,34 @@
                                 </div>
 
 
-                                <!-- Foto Barang Section -->
+                                <!-- Foto Barang Section - FIXED VERSION -->
                                 <div class="mt-4">
                                     <strong class="text-gray-700 block mb-2">Foto Barang:</strong>
 
                                     @php
-                                        $fotoBarang = $titipan->foto_barang;
+                                        // Ambil foto dari tabel barang melalui relasi
+                                        $fotoBarang = [];
 
-                                        if (empty($fotoBarang)) {
-                                            $fotoBarang = [];
-                                        } elseif (is_string($fotoBarang)) {
-                                            $decoded = json_decode($fotoBarang, true);
-                                            $fotoBarang = is_array($decoded) ? $decoded : [];
-                                        } elseif (!is_array($fotoBarang)) {
-                                            $fotoBarang = [];
+                                        // Ambil semua detail transaksi untuk mendapatkan barang-barang
+                                        foreach ($titipan->detailTransaksiPenitipan ?? [] as $detail) {
+                                            if ($detail->barang && $detail->barang->foto_barang) {
+                                                $barangFoto = $detail->barang->foto_barang;
+
+                                                // Handle foto_barang yang bisa berupa string JSON atau array
+                                                if (is_string($barangFoto)) {
+                                                    $decoded = json_decode($barangFoto, true);
+                                                    if (is_array($decoded)) {
+                                                        $fotoBarang = array_merge($fotoBarang, $decoded);
+                                                    } else {
+                                                        $fotoBarang[] = $barangFoto; // single string path
+                                                    }
+                                                } elseif (is_array($barangFoto)) {
+                                                    $fotoBarang = array_merge($fotoBarang, $barangFoto);
+                                                }
+                                            }
                                         }
 
+                                        // Filter foto yang kosong
                                         $fotoBarang = array_filter($fotoBarang, fn($foto) => !empty($foto));
                                     @endphp
 
@@ -485,7 +610,12 @@
                                             @foreach($fotoBarang as $index => $foto)
                                                 @php
                                                     $cleanFoto = trim($foto);
-                                                    $fullPath = asset('storage/' . $cleanFoto);
+                                                    // Periksa apakah path sudah include 'storage' atau tidak
+                                                    if (strpos($cleanFoto, 'storage/') === false && strpos($cleanFoto, 'images/') === 0) {
+                                                        $fullPath = asset($cleanFoto); // langsung dari public/images/
+                                                    } else {
+                                                        $fullPath = asset('storage/' . $cleanFoto);
+                                                    }
                                                     $altText = $titipan->penitip?->nama_penitip ?? 'Foto Barang';
                                                 @endphp
 
@@ -569,56 +699,144 @@
                     @method('PUT')
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Nama Penitip -->
                         <div class="col-span-1 md:col-span-2">
                             <label class="block font-semibold mb-2 text-gray-700">Nama Penitip *</label>
                             <input type="text" name="nama_penitip" x-model="formData.nama_penitip"
-                                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                required>
+                                class="w-full border p-3 rounded-lg" required>
                         </div>
 
+                        <!-- Email Penitip -->
                         <div class="col-span-1 md:col-span-2">
                             <label class="block font-semibold mb-2 text-gray-700">Email Penitip *</label>
                             <input type="email" name="email_penitip" x-model="formData.email_penitip"
-                                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                required>
-                        </div>
-
-                        <div>
-                            <label class="block font-semibold mb-2 text-gray-700">Tanggal Penitipan *</label>
-                            <input type="date" name="tanggal_penitipan" x-model="formData.tanggal_penitipan"
-                                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                required>
-                        </div>
-
-                        <div>
-                            <label class="block font-semibold mb-2 text-gray-700">Tanggal Akhir Penitipan</label>
-                            <input type="date" name="tanggal_akhir_penitipan" x-model="formData.tanggal_akhir_penitipan"
-                                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-
-                        <div>
-                            <label class="block font-semibold mb-2 text-gray-700">Tanggal Pengambilan Barang</label>
-                            <input type="date" name="tanggal_pengambilan_barang"
-                                x-model="formData.tanggal_pengambilan_barang"
-                                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="w-full border p-3 rounded-lg" required>
                         </div>
 
                         <div class="col-span-1 md:col-span-2">
-                            <label class="block font-semibold mb-2 text-gray-700">Upload Foto Barang</label>
-                            <input type="file" name="foto_barang[]" multiple accept="image/*"
-                                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                onchange="previewImages(this)">
-                            <p class="text-sm text-gray-500 mt-1">Dapat memilih beberapa foto sekaligus. Format: JPG,
-                                PNG, GIF. Maksimal 2MB per foto.</p>
+                            <label class="block font-semibold mb-2 text-gray-700">Hunter </label>
+                            <select name="id_hunter" x-model="formData.id_hunter" class="w-full border p-3 rounded-lg"
+                                required>
+                                <option value="">-- Pilih Hunter --</option>
+                                <option value="">-- Pilih Hunter --</option>
+                                @foreach($hunters ?? [] as $hunter)
+                                    @if(is_object($hunter))
+                                        <option value="{{ $hunter->id_pegawai }}" {{ old('id_hunter') == $hunter->id_pegawai ? 'selected' : '' }}>
+                                            {{ $hunter->nama_pegawai }}
+                                        </option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
 
-                            <!-- Preview container -->
-                            <div id="image-preview" class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2"
-                                style="display: none;">
-                                <!-- Preview images will be inserted here -->
+
+                        <!-- Tanggal Titip -->
+                        <div class="col-span-1">
+                            <label class="block font-semibold mb-2 text-gray-700">Tanggal Titip *</label>
+                            <input type="date" name="tanggal_penitipan" x-model="formData.tanggal_penitipan"
+                                @change="updateDurasi(); updateEditGaransiDate();" class="w-full border p-3 rounded-lg"
+                                required>
+                        </div>
+
+                        <!-- Hidden fields untuk memastikan data tetap terkirim -->
+                        <input type="hidden" name="tanggal_akhir_penitipan" x-model="formData.tanggal_akhir_penitipan">
+                        <input type="hidden" name="tanggal_batas_pengambilan"
+                            x-model="formData.tanggal_batas_pengambilan">
+                        <input type="hidden" name="tanggal_pengambilan_barang"
+                            x-model="formData.tanggal_pengambilan_barang">
+
+
+                        <!-- Tanggal Akhir Penitipan (readonly, untuk display) -->
+                        <div class="col-span-1">
+                            <label class="block font-semibold mb-2 text-gray-700">Tanggal Akhir Penitipan</label>
+                            <input type="date" :value="formData . tanggal_akhir_penitipan"
+                                class="w-full border p-3 rounded-lg bg-gray-100" readonly>
+                        </div>
+
+                        <!-- Tanggal Batas Pengambilan (readonly, untuk display) -->
+                        <div class="col-span-1">
+                            <label class="block font-semibold mb-2 text-gray-700">Tanggal Batas Pengambilan</label>
+                            <input type="date" :value="formData . tanggal_batas_pengambilan"
+                                class="w-full border p-3 rounded-lg bg-gray-100" readonly>
+                        </div>
+
+
+                        <!-- Nama Barang -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block font-semibold mb-2 text-gray-700">Nama Barang *</label>
+                            <input type="text" name="nama_barang" class="w-full border p-3 rounded-lg" required
+                                x-model="formData.nama_barang">
+                        </div>
+
+                        <!-- Deskripsi -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block font-semibold mb-2 text-gray-700">Deskripsi Barang *</label>
+                            <textarea name="deskripsi_barang" rows="3" class="w-full border p-3 rounded-lg" required
+                                x-model="formData.deskripsi_barang"></textarea>
+                        </div>
+
+                        <!-- Harga -->
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-700">Harga Barang (Rp) *</label>
+                            <input type="number" name="harga_barang" class="w-full border p-3 rounded-lg" required
+                                x-model="formData.harga_barang">
+                        </div>
+
+                        <!-- Berat -->
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-700">Berat Barang (gram) *</label>
+                            <input type="number" name="berat_barang" class="w-full border p-3 rounded-lg" required
+                                step="0.1" min="0.1" x-model="formData.berat_barang">
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block font-semibold mb-2 text-gray-700">Status Barang *</label>
+                            <select name="status_barang" class="w-full border p-3 rounded-lg" required
+                                x-model="formData.status_barang">
+                                <option value="">-- Pilih Status --</option>
+                                <option value="tidak laku">Tidak Laku</option>
+                            </select>
+                        </div>
+
+                        <!-- Garansi -->
+                        <div class="col-span-1 md:col-span-2 bg-blue-50 p-4 rounded border border-blue-200">
+                            <label class="block font-semibold mb-2 text-blue-800">Garansi Barang</label>
+
+                            <div class="mb-3">
+                                <label class="text-sm font-medium block mb-1">Memiliki Garansi?</label>
+                                <div class="flex gap-4">
+                                    <label><input type="radio" name="has_garansi" value="ya" class="mr-1">Ya</label>
+                                    <label><input type="radio" name="has_garansi" value="tidak" class="mr-1"
+                                            checked>Tidak</label>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm mb-1">Jenis Garansi</label>
+                                    <select name="garansi_type" class="w-full border p-3 rounded-lg">
+                                        <option value="1_tahun">1 Tahun (default)</option>
+                                        <option value="6_bulan">6 Bulan</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Tanggal Berakhir Garansi</label>
+                                    <input type="date" name="garansi_barang" class="w-full border p-3 rounded-lg">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
+                        <!-- Foto Barang -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block font-semibold mb-2 text-gray-700">Foto Barang </label>
+                            <input type="file" name="foto_barang[]" multiple class="w-full border p-3 rounded-lg"
+                                accept="image/*">
+                            <small class="text-gray-500">Boleh upload ulang 1-5 foto. Kosongkan jika tidak ingin
+                                diubah.</small>
+                        </div>
+                    </div>
                     <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
                         <button type="button" @click="closeModal()"
                             class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-colors">
@@ -649,6 +867,7 @@
 
     <!-- Alpine.js Logic -->
     <script>
+        // Tambahkan dalam bagian Alpine.js function titipanHandler()
         function titipanHandler() {
             return {
                 showModal: false,
@@ -657,17 +876,108 @@
                 formData: {
                     nama_penitip: '',
                     email_penitip: '',
+                    id_hunter: '',
                     tanggal_penitipan: '',
                     tanggal_akhir_penitipan: '',
                     tanggal_batas_pengambilan: '',
-                    tanggal_pengambilan_barang: ''
+                    tanggal_pengambilan_barang: '',
+                    nama_barang: '',
+                    deskripsi_barang: '',
+                    harga_barang: '',
+                    berat_barang: '',
+                    status_barang: '',
+                    has_garansi: 'tidak',
+                    garansi_barang: ''
                 },
+
                 openModal(id, data) {
                     this.currentId = id;
-                    this.formData = { ...data };
+                    this.formData = { ...this.formData, ...data };
                     this.showModal = true;
+                    this.updateDurasi();
                     document.body.style.overflow = 'hidden';
+
+                    // Setup garansi handlers untuk edit form setelah modal terbuka
+                    this.$nextTick(() => {
+                        this.setupEditGaransiHandlers();
+                    });
                 },
+
+                setupEditGaransiHandlers() {
+                    // Setup event listeners untuk garansi di form edit
+                    const editGaransiRadios = document.querySelectorAll('#edit-form input[name="has_garansi"]');
+                    const editGaransiType = document.querySelector('#edit-form select[name="garansi_type"]');
+                    const editGaransiDate = document.querySelector('#edit-form input[name="garansi_barang"]');
+                    const editGaransiSection = document.querySelector('#edit-form .garansi-section');
+
+                    if (editGaransiRadios.length > 0) {
+                        editGaransiRadios.forEach(radio => {
+                            radio.addEventListener('change', () => {
+                                this.toggleEditGaransi();
+                            });
+                        });
+                    }
+
+                    if (editGaransiType) {
+                        editGaransiType.addEventListener('change', () => {
+                            this.updateEditGaransiDate();
+                        });
+                    }
+                },
+
+                toggleEditGaransi() {
+                    const hasGaransi = document.querySelector('#edit-form input[name="has_garansi"]:checked')?.value;
+                    const garansiInputs = document.querySelectorAll('#edit-form select[name="garansi_type"], #edit-form input[name="garansi_barang"]');
+
+                    if (hasGaransi === 'ya') {
+                        garansiInputs.forEach(input => {
+                            input.style.display = 'block';
+                            input.disabled = false;
+                        });
+                        this.updateEditGaransiDate();
+                    } else {
+                        garansiInputs.forEach(input => {
+                            input.style.display = 'none';
+                            input.disabled = true;
+                        });
+                        document.querySelector('#edit-form input[name="garansi_barang"]').value = '';
+                    }
+                },
+
+                updateEditGaransiDate() {
+                    const tanggalPenitipan = this.formData.tanggal_penitipan;
+                    const garansiType = document.querySelector('#edit-form select[name="garansi_type"]')?.value;
+                    const garansiInput = document.querySelector('#edit-form input[name="garansi_barang"]');
+                    const hasGaransi = document.querySelector('#edit-form input[name="has_garansi"]:checked')?.value;
+
+                    if (!tanggalPenitipan || hasGaransi === 'tidak' || !garansiInput) {
+                        return;
+                    }
+
+                    const tanggalMulai = new Date(tanggalPenitipan);
+                    let tanggalAkhir = new Date(tanggalMulai);
+
+                    switch (garansiType) {
+                        case '6_bulan':
+                            tanggalAkhir.setMonth(tanggalAkhir.getMonth() + 6);
+                            garansiInput.readOnly = true;
+                            break;
+                        case '1_tahun':
+                            tanggalAkhir.setFullYear(tanggalAkhir.getFullYear() + 1);
+                            garansiInput.readOnly = true;
+                            break;
+                        case 'custom':
+                            garansiInput.readOnly = false;
+                            return;
+                        default:
+                            tanggalAkhir.setFullYear(tanggalAkhir.getFullYear() + 1);
+                            garansiInput.readOnly = true;
+                    }
+
+                    const formattedDate = tanggalAkhir.toISOString().split('T')[0];
+                    garansiInput.value = formattedDate;
+                },
+
                 closeModal() {
                     this.showModal = false;
                     this.currentId = null;
@@ -680,16 +990,38 @@
                         tanggal_pengambilan_barang: ''
                     };
                     document.body.style.overflow = 'auto';
+
                     // Clear image preview
                     const preview = document.getElementById('image-preview');
-                    preview.innerHTML = '';
-                    preview.style.display = 'none';
+                    if (preview) {
+                        preview.innerHTML = '';
+                        preview.style.display = 'none';
+                    }
                 },
+
                 getFormAction() {
                     return `/UpdateTitipanBarang/${this.currentId}`;
+                },
+
+                updateDurasi() {
+                    const input = this.formData.tanggal_penitipan;
+                    if (input) {
+                        const tgl = new Date(input);
+                        const akhir = new Date(tgl);
+                        const batas = new Date(tgl);
+
+                        akhir.setDate(akhir.getDate() + 30);
+                        batas.setDate(akhir.getDate() + 30 + 7);
+
+                        const formatDate = (dateObj) => dateObj.toISOString().split('T')[0];
+
+                        this.formData.tanggal_akhir_penitipan = formatDate(akhir);
+                        this.formData.tanggal_batas_pengambilan = formatDate(batas);
+                    }
                 }
             }
         }
+
 
         // Toggle garansi section visibility
         function toggleGaransi() {
@@ -874,7 +1206,6 @@
                 closeImageModal();
             }
         });
-
 
     </script>
 

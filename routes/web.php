@@ -213,6 +213,8 @@ Route::middleware(['checkjabatan:Admin'])->group(function () {
 
     Route::put('/DashboardPegawai/reset-password/{id}', [PegawaiControllers::class, 'resetPassword'])->name('admin.pegawai.resetPassword');
 });
+
+//Owner
 Route::middleware(['checkjabatan:Owner'])->group(function () {
     Route::post('/logout-Owner', [AuthController::class, 'logoutPegawai'])->name('logout.pegawai');
     Route::get('/DashboardOwner', [PegawaiControllers::class, 'showLoginOwner'])->name('owner.DashboardOwner');
