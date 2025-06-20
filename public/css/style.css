@@ -72,3 +72,29 @@ swiper-container {
   swiper-slide:nth-child(10n) {
     background-color: rgb(59, 130, 246);
   }
+
+  footer {
+    padding: 10px 0; /* Mengurangi padding atas dan bawah */
+    font-size: 14px; /* Mengecilkan ukuran font */
+}
+
+footer .p-4 {
+    padding: 10px; /* Mengurangi padding dalam */
+}
+
+footer .py-6, footer .lg\:py-8 {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+footer img {
+    height: 120px; /* Mengecilkan logo dan ikon */
+}
+
+footer h2 {
+    font-size: 12px; /* Mengecilkan heading */
+}
+
+footer ul {
+    gap: 4px; /* Mengurangi jarak antar elemen dalam list */
+}
