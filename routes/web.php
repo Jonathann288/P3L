@@ -21,6 +21,7 @@ use App\Http\Controllers\TransaksiPenitipanControllers;
 use App\Http\Controllers\TransaksiPenjualanControllers;
 use App\Http\Controllers\ClaimMerchandiseControllers;
 use App\Http\Controllers\LaporanControllers;
+use App\Http\Controllers\PenarikanSaldoController; 
 
 
 Route::get('/', function () {
@@ -77,6 +78,9 @@ Route::middleware(['penitip'])->group(function () {
 
     Route::post('/penitipan/atur-pengambilan/{id}', [TransaksiPenitipanControllers::class, 'aturTanggalPengambilan'])->name('penitipan.aturPengambilan');
 
+    // Route untuk Penarikan Saldo
+    Route::get('/penitip/penarikan-saldo', [PenarikanSaldoController::class, 'showPenarikanForm'])->name('penitip.penarikan.form');
+    Route::post('/penitip/penarikan-saldo', [PenarikanSaldoController::class, 'prosesPenarikan'])->name('penitip.penarikan.proses');
     // logout
     Route::post('/logout-penitip', [AuthController::class, 'logoutPenitip'])->name('logout.penitip');
 });

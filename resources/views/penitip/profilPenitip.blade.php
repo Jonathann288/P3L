@@ -16,71 +16,50 @@
 
 <body class="font-sans bg-gray-100 text-gray-800 min-h-screen">
 
-    <!-- Sidebar Navigation (Mobile) -->
-    <div class="md:hidden bg-gray-800 text-white p-4 flex justify-between items-center">
-        <h2 class="text-xl font-semibold">MyAccount</h2>
-        <button id="mobile-menu-toggle" class="text-white focus:outline-none">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
-                </path>
-            </svg>
-        </button>
+   <div class="bg-gray-800 text-white p-6 w-64 flex flex-col h-screen justify-between">
+    <div>
+        <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
+        <nav>
+            <div class="space-y-4">
+                <div class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                    <span>{{ ($penitip->nama_penitip) }}</span>
+                </div>
+
+                <a href="{{ route('penitip.barang-titipan') }}"
+                   class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <i class="fa-solid fa-box w-6 text-center"></i>
+                    <span>Titipan</span>
+                </a>
+
+                <a href="{{ route('penitip.penarikan.form') }}"
+                   class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <i class="fa-solid fa-money-bill-wave w-6 text-center"></i>
+                    <span>Penarikan Saldo</span>
+                </a>
+            </div>
+        </nav>
     </div>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden md:hidden bg-gray-800 text-white p-4">
-        <div class="space-y-4">
-            <div class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                <span>{{ ($penitip->nama_penitip) }}</span>
-            </div>
-            <a href="{{ route('penitip.barang-titipan') }}"
-                class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                <i class="fa-solid fa-box"></i>
-                <span>Titipan</span>
-            </a>
+    <div class="mt-auto">
+        <a href="{{ route('penitip.Shop-Penitip') }}" class="block w-full">
             <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
-                <a href="{{ route('penitip.Shop-Penitip') }}">Kembali</a>
+                Kembali
             </button>
-        </div>
+        </a>
     </div>
+</div>
+    
 
-    <div class="flex flex-col md:flex-row min-h-screen">
-        <!-- Sidebar Navigation (Desktop) -->
-        <div class="hidden md:block bg-gray-800 text-white p-6 w-64 flex-shrink-0">
-            <div class="flex flex-col h-full">
-                <div>
-                    <h2 class="text-xl font-semibold mb-8">MyAccount</h2>
-                    <nav>
-                        <div class="space-y-4">
-                            <div class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                                <span>{{ ($penitip->nama_penitip) }}</span>
-                            </div>
-                            <a href="{{ route('penitip.barang-titipan') }}"
-                                class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                                <i class="fa-solid fa-box"></i>
-                                <span>Titipan</span>
-                            </a>
-                        </div>
-                    </nav>
-                </div>
-                <div class="mt-auto">
-                    <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
-                        <a href="{{ route('penitip.Shop-Penitip') }}">Kembali</a>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
+      
         <div class="flex-1 p-4 md:p-8 bg-gray-100">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-2xl md:text-3xl font-semibold text-gray-800">Profil Penitip</h1>
             </div>
 
-            <!-- Profile Header -->
+            <!-- Profile nya bre-->
             <div class="bg-white p-6 rounded-lg shadow-md text-center mb-6">
                 <div class="flex flex-col items-center">
-                    <!-- Placeholder for photo or initials -->
+                    
                     <div class="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                         <span class="text-4xl font-bold text-blue-600">
                             {{ substr($penitip->nama_penitip, 0, 1) }}
@@ -148,7 +127,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
     <script>
-        // Mobile menu toggle
+      
         document.getElementById('mobile-menu-toggle').addEventListener('click', function () {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
