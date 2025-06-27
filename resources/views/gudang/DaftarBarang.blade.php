@@ -1,4 +1,3 @@
-<!-- COPY SEMUA -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,19 +33,9 @@
                         <span>Tambah Titip Barang</span>
                     </a>
                     <a href="{{ route('gudang.DaftarBarang') }}"
-                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                        class="flex items-center space-x-4 p-3 bg-gray-700 rounded-lg">
                         <i class="fas fa-boxes mr-2"></i>
                         <span>Daftar Barang</span>
-                    </a>
-                    <a href="{{ route('gudang.DasboardCatatanPengembalianBarang') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fas fa-boxes mr-2"></i>
-                        <span>Catatan Pengembalian Barang</span>
-                    </a>
-                    <a href="{{ route('gudang.DashboardShowTransaksiAntarAmbil') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fa-solid fa-truck"></i> 
-                        <span>Daftar Transakasi Kirim dan Ambil sendiri</span>
                     </a>
                 </div>
             </nav>
@@ -78,6 +67,17 @@
 
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-semibold text-gray-800">Daftar Barang</h1>
         </div>
@@ -153,9 +153,11 @@
                                                 {{ $item->pegawai_penanggungjawab->nama_pegawai ?? 'Belum ada penanggung jawab' }}
                                             </div>
                                             <div class="text-gray-500">
-                                                {{ $item->pegawai_penanggungjawab->email_pegawai ?? '-' }}</div>
+                                                {{ $item->pegawai_penanggungjawab->email_pegawai ?? '-' }}
+                                            </div>
                                             <div class="text-gray-500">
-                                                {{ $item->pegawai_penanggungjawab->nomor_telepon_pegawai ?? '-' }}</div>
+                                                {{ $item->pegawai_penanggungjawab->nomor_telepon_pegawai ?? '-' }}
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3 text-center">
@@ -213,7 +215,7 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            <form id="editForm" method="POST" class="space-y-4">
+            <form id="editForm" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 @method('PUT')
                 <div class="grid md:grid-cols-2 gap-4">
@@ -280,10 +282,15 @@
                     <textarea id="edit_deskripsi_barang" name="deskripsi_barang" rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
+                <!-- Ganti bagian foto di edit modal dengan kode ini -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Foto Barang (URL)</label>
-                    <input type="text" id="edit_foto_barang" name="foto_barang"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Foto Barang</label>
+                    <input type="file" id="edit_foto_barang" name="foto_barang[]" multiple accept="image/*"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <small class="text-gray-500">Maksimal 5 foto, format: jpeg, png, jpg, gif, webp (max 2MB per
+                        file)</small>
+                    <!-- Container untuk menampilkan foto yang sudah ada -->
+                    <div id="existing-photos-container"></div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
@@ -407,69 +414,182 @@
             }
         });
 
+        // Perbaikan untuk fungsi openDetailModal dalam DaftarBarang.blade.php
+
         function openDetailModal(barang) {
             const modal = document.getElementById('detailModal');
             const content = document.getElementById('detailContent');
 
-            content.innerHTML = `
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Kode Barang</label>
-                            <p class="text-gray-900 font-semibold">${barang.id}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Nama Barang</label>
-                            <p class="text-gray-900 font-semibold">${barang.nama_barang}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Kategori</label>
-                            <p class="text-gray-900">${barang.kategoribarang ? barang.kategoribarang.nama_kategori : 'N/A'}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Harga</label>
-                            <p class="text-gray-900 font-semibold">Rp ${new Intl.NumberFormat('id-ID').format(barang.harga_barang)}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Status</label>
-                            <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(barang.status_barang)}">
-                                ${barang.status_barang || 'N/A'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Masa Penitipan</label>
-                            <p class="text-gray-900">${barang.masa_penitipan || 'N/A'} hari</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Berat Barang</label>
-                            <p class="text-gray-900">${barang.berat_barang || 'N/A'} kg</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Rating</label>
-                            <p class="text-gray-900">★ ${barang.rating_barang || '0'}/5</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Garansi</label>
-                            <p class="text-gray-900">${barang.garansi_barang ? new Date(barang.garansi_barang).toLocaleDateString('id-ID') : 'N/A'}</p>
-                        </div>
-                    </div>
+            // Function untuk menangani foto barang
+            function getFotoBarangHTML(fotoBarang) {
+                if (!fotoBarang) {
+                    return '<p class="text-gray-500">Tidak ada foto</p>';
+                }
+
+                let fotos = [];
+
+                // Handle jika foto_barang adalah string JSON
+                if (typeof fotoBarang === 'string') {
+                    try {
+                        fotos = JSON.parse(fotoBarang);
+                    } catch (e) {
+                        // Jika bukan JSON, anggap sebagai path tunggal
+                        fotos = [fotoBarang];
+                    }
+                }
+                // Handle jika foto_barang sudah array
+                else if (Array.isArray(fotoBarang)) {
+                    fotos = fotoBarang;
+                }
+                // Handle jika foto_barang adalah object atau tipe lain
+                else {
+                    fotos = [fotoBarang];
+                }
+
+                // Filter foto yang valid
+                fotos = fotos.filter(foto => foto && foto.trim() !== '');
+
+                if (fotos.length === 0) {
+                    return '<p class="text-gray-500">Tidak ada foto</p>';
+                }
+
+                // Generate HTML untuk foto
+                let fotoHTML = '<div class="grid grid-cols-2 gap-2">';
+                fotos.forEach((foto, index) => {
+                    // Pastikan path foto benar
+                    let fotoPath = foto;
+                    if (!foto.startsWith('http') && !foto.startsWith('/')) {
+                        // Jika path relatif, tambahkan base URL Laravel
+                        fotoPath = `{{ asset('') }}${foto}`;
+                    }
+
+                    fotoHTML += `
+                <div class="relative">
+                    <img src="${fotoPath}" 
+                         alt="Foto Barang ${index + 1}" 
+                         class="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                         onclick="openImagePreview('${fotoPath}')"
+                         onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;">
+                    <span class="absolute top-1 right-1 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        ${index + 1}/${fotos.length}
+                    </span>
                 </div>
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-600">Deskripsi Barang</label>
-                    <p class="text-gray-900 mt-2">${barang.deskripsi_barang || 'Tidak ada deskripsi'}</p>
-                </div>
-                ${barang.foto_barang ? `
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-600">Foto Barang</label>
-                    <img src="${barang.foto_barang}" alt="Foto Barang" class="mt-2 max-w-full h-48 object-cover rounded-lg">
-                </div>
-                ` : ''}
             `;
+                });
+                fotoHTML += '</div>';
+
+                return fotoHTML;
+            }
+
+            content.innerHTML = `
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Kode Barang</label>
+                    <p class="text-gray-900 font-semibold">${barang.id || 'N/A'}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Nama Barang</label>
+                    <p class="text-gray-900 font-semibold">${barang.nama_barang || 'N/A'}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Kategori</label>
+                    <p class="text-gray-900">${barang.kategoribarang ? barang.kategoribarang.nama_kategori : 'N/A'}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Harga</label>
+                    <p class="text-gray-900 font-semibold">Rp ${barang.harga_barang ? new Intl.NumberFormat('id-ID').format(barang.harga_barang) : '0'}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Status</label>
+                    <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(barang.status_barang)}">
+                        ${barang.status_barang || 'N/A'}
+                    </span>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Masa Penitipan</label>
+                    <p class="text-gray-900">${barang.masa_penitipan || 'N/A'} hari</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Berat Barang</label>
+                    <p class="text-gray-900">${barang.berat_barang || 'N/A'} kg</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Rating</label>
+                    <p class="text-gray-900">★ ${barang.rating_barang || '0'}/5</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Garansi</label>
+                    <p class="text-gray-900">${barang.garansi_barang ? new Date(barang.garansi_barang).toLocaleDateString('id-ID') : 'N/A'}</p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-600">Deskripsi Barang</label>
+            <p class="text-gray-900 mt-2 p-3 bg-gray-50 rounded-lg">${barang.deskripsi_barang || 'Tidak ada deskripsi'}</p>
+        </div>
+        <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-600 mb-3">Foto Barang</label>
+            ${getFotoBarangHTML(barang.foto_barang)}
+        </div>
+    `;
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+        }
+
+        // Function untuk preview gambar full size
+        function openImagePreview(imageSrc) {
+            // Buat modal preview image
+            const previewModal = document.createElement('div');
+            previewModal.id = 'imagePreviewModal';
+            previewModal.className = 'fixed inset-0 bg-black bg-opacity-90 z-[60] flex items-center justify-center';
+            previewModal.innerHTML = `
+        <div class="relative max-w-4xl max-h-full p-4">
+            <button onclick="closeImagePreview()" class="absolute top-2 right-2 text-white hover:text-gray-300 text-2xl z-10">
+                <i class="fas fa-times"></i>
+            </button>
+            <img src="${imageSrc}" alt="Preview" class="max-w-full max-h-full object-contain rounded-lg">
+        </div>
+    `;
+
+            document.body.appendChild(previewModal);
+
+            // Close on click outside
+            previewModal.addEventListener('click', function (e) {
+                if (e.target === previewModal) {
+                    closeImagePreview();
+                }
+            });
+        }
+
+        function closeImagePreview() {
+            const previewModal = document.getElementById('imagePreviewModal');
+            if (previewModal) {
+                previewModal.remove();
+            }
+        }
+
+        // Debug function untuk cek data barang
+        function debugBarangData(barang) {
+            console.log('Debug Barang Data:');
+            console.log('- ID:', barang.id);
+            console.log('- Nama:', barang.nama_barang);
+            console.log('- Foto Barang:', barang.foto_barang);
+            console.log('- Foto Type:', typeof barang.foto_barang);
+
+            if (barang.foto_barang) {
+                if (typeof barang.foto_barang === 'string') {
+                    try {
+                        const parsed = JSON.parse(barang.foto_barang);
+                        console.log('- Parsed Foto:', parsed);
+                    } catch (e) {
+                        console.log('- Foto is not JSON, treating as single path');
+                    }
+                }
+            }
         }
 
         function closeDetailModal() {
@@ -479,6 +599,7 @@
         }
 
         // Edit Modal Functions
+        // Edit Modal Functions - PERBAIKAN
         function openEditModal(barang) {
             const modal = document.getElementById('editModal');
             const form = document.getElementById('editForm');
@@ -495,12 +616,78 @@
             document.getElementById('edit_status_barang').value = barang.status_barang || 'Tersedia';
             document.getElementById('edit_masa_penitipan').value = barang.masa_penitipan || '';
             document.getElementById('edit_deskripsi_barang').value = barang.deskripsi_barang || '';
-            document.getElementById('edit_foto_barang').value = barang.foto_barang || '';
             document.getElementById('edit_rating_barang').value = barang.rating_barang || '';
             document.getElementById('edit_garansi_barang').value = barang.garansi_barang ? barang.garansi_barang.split(' ')[0] : '';
 
+            // HAPUS BARIS INI - TIDAK BISA SET VALUE UNTUK INPUT FILE
+            // document.getElementById('edit_foto_barang').value = barang.foto_barang || '';
+
+            // TAMBAHKAN: Reset input file dan tampilkan preview foto yang sudah ada
+            document.getElementById('edit_foto_barang').value = ''; // Reset file input
+            showExistingPhotos(barang.foto_barang); // Tampilkan foto yang sudah ada
+
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+        }
+
+        // Fungsi untuk menampilkan foto yang sudah ada di edit modal
+        function showExistingPhotos(fotoBarang) {
+            const container = document.getElementById('existing-photos-container');
+
+            if (!container) {
+                // Jika container belum ada, buat container baru
+                const photoContainer = document.createElement('div');
+                photoContainer.id = 'existing-photos-container';
+                photoContainer.className = 'mt-2';
+
+                // Insert setelah input file
+                const fileInput = document.getElementById('edit_foto_barang');
+                fileInput.parentNode.insertBefore(photoContainer, fileInput.nextSibling);
+            }
+
+            let fotos = [];
+
+            if (fotoBarang) {
+                if (typeof fotoBarang === 'string') {
+                    try {
+                        fotos = JSON.parse(fotoBarang);
+                    } catch (e) {
+                        fotos = [fotoBarang];
+                    }
+                } else if (Array.isArray(fotoBarang)) {
+                    fotos = fotoBarang;
+                }
+            }
+
+            fotos = fotos.filter(foto => foto && foto.trim() !== '');
+
+            if (fotos.length > 0) {
+                document.getElementById('existing-photos-container').innerHTML = `
+            <div class="mt-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Foto Saat Ini:</label>
+                <div class="grid grid-cols-3 gap-2">
+                    ${fotos.map((foto, index) => {
+                    let fotoPath = foto.startsWith('http') || foto.startsWith('/') ? foto : `{{ asset('') }}${foto}`;
+                    return `
+                            <div class="relative group">
+                                <img src="${fotoPath}" 
+                                     alt="Foto ${index + 1}" 
+                                     class="w-full h-20 object-cover rounded border cursor-pointer hover:opacity-80"
+                                     onclick="openImagePreview('${fotoPath}')"
+                                     onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded"></div>
+                            </div>
+                        `;
+                }).join('')}
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Pilih file baru untuk mengganti foto yang sudah ada</p>
+            </div>
+        `;
+            } else {
+                document.getElementById('existing-photos-container').innerHTML = `
+            <p class="text-sm text-gray-500 mt-2">Belum ada foto</p>
+        `;
+            }
         }
 
         function closeEditModal() {
