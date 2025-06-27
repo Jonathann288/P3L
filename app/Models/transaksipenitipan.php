@@ -13,6 +13,7 @@ class transaksipenitipan extends Model
     protected $fillable = [
         'id',
         'id_pegawai',
+        'id_hunter',
         'id_penitip',
         'tanggal_penitipan',
         'tanggal_akhir_penitipan',
@@ -46,4 +47,8 @@ class transaksipenitipan extends Model
         return $this->hasMany(DetailTransaksiPenitipan::class, 'id_transaksi_penitipan');
     }
 
+    public function hunter()
+    {
+        return $this->belongsTo(Pegawai::class, 'id_hunter');
+    }
 }

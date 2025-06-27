@@ -33,6 +33,11 @@
                         <i class="fas fa-cog"></i>
                         <span>Alamat</span>
                     </a>
+                    <a href="{{ route('pembeli.pembatalanTransaksiValid') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-ban"></i>
+                        <span>Pembatalan Transaksi</span>
+                    </a>
                 </div>
             </nav>
         </div>

@@ -25,12 +25,12 @@
                     <a href="{{ route('penitip.profilPenitip') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg cursor-pointer">
                         <span>{{ $penitip->nama_penitip }}</span>
                     </a>
-                    <a href="{{ route('penitip.barang-titipan') }}" class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
+                    <a href="{{ route('penitip.barang-titipan') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg cursor-pointer">
                         <i class="fa-solid fa-box"></i>
                         <span>Titipan</span>
                     </a>
                     <a href="{{ route('penitip.Perpanjangan_penitipan_lanjutan') }}"
-                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
                         <i class="fa-solid fa-box"></i>
                         <span>Barang Titipan Lanjut</span>
                     </a>
@@ -63,10 +63,12 @@
                 <thead class="bg-blue-600 text-white">
                     <tr>
                         <th class="py-3 px-6 text-left">No</th>
+                        <th class="py-3 px-6 text-left">ID Barang</th>
                         <th class="py-3 px-6 text-left">Nama Barang</th>
                         <th class="py-3 px-6 text-left">Tanggal Titipan</th>
                         <th class="py-3 px-6 text-left">Tanggal Akhir Titipan</th>
                         <th class="py-3 px-6 text-left">Status Barang</th>
+                        <th class="py-3 px-6 text-left">Status Perpanjangan</th>
                         <th class="py-3 px-6 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -74,6 +76,7 @@
                     @foreach ($detailBarang as $index => $item)
                         <tr class="border-b hover:bg-gray-100">
                             <td class="py-4 px-6">{{ $index + 1 }}</td>
+                            <td class="py-4 px-6">{{ $item->barang->id }}</td>
                             <td class="py-4 px-6">{{ $item->barang->nama_barang }}</td>
                             <td class="py-4 px-6">
                                 {{ \Carbon\Carbon::parse($item->transaksipenitipan->tanggal_penitipan)->format('d M Y') }}
@@ -82,49 +85,28 @@
                                 {{ \Carbon\Carbon::parse($item->transaksipenitipan->tanggal_akhir_penitipan)->format('d M Y') }}
                             </td>
                             <td class="py-4 px-6">{{ $item->barang->status_barang }}</td>
+                            <td class="py-4 px-6">{{ $item->status_perpanjangan }}</td>
                             <td class="py-4 px-6 text-center">
-                                <div class="flex justify-center gap-2">
-                                    <button
-                                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                                        onclick="showDetail('{{ $item->barang->id_barang }}')"
-                                    >
-                                        Detail
-                                    </button>
-
                                     @php
                                         $tanggalAkhir = \Carbon\Carbon::parse($item->transaksipenitipan->tanggal_akhir_penitipan);
                                         $tanggalSekarang = \Carbon\Carbon::now();
                                         $masaAktif = $tanggalAkhir->greaterThanOrEqualTo($tanggalSekarang);
                                     @endphp
-
-                                    <form method="POST" action="{{ route('penitip.barang.perpanjang', $item->id_detail_transaksi_penitipan) }}">
+                                    <form method="POST" 
+                                        action="{{ route('penitip.barang.perpanjang.lanjutan', $item->id_detail_transaksi_penitipan) }}" 
+                                        class="form-perpanjangan"
+                                        data-nama="{{ $item->barang->nama_barang }}"
+                                        data-harga="{{ $item->barang->harga_barang }}"
+                                        data-biaya="{{ $item->barang->harga_barang * 0.05 }}">
                                         @csrf
                                         <button type="submit" 
                                             class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700
-                                                @if($masaAktif) opacity-50 cursor-not-allowed @endif"
+                                            @if($masaAktif) opacity-50 cursor-not-allowed @endif"
                                             @if($masaAktif) disabled @endif>
                                             Perpanjang 30 Hari
                                         </button>
                                     </form>
-                                    @php
-                                        $tanggalAkhir = \Carbon\Carbon::parse($item->transaksipenitipan->tanggal_akhir_penitipan);
-                                        $tanggalSekarang = \Carbon\Carbon::now();
-                                        $bolehAmbil = $tanggalAkhir->lessThanOrEqualTo($tanggalSekarang);
-                                    @endphp
 
-                                    @if ($item->barang->status_barang === 'tidak laku')
-                                        <form method="POST" action="{{ route('penitipan.aturPengambilan', $item->id_detail_transaksi_penitipan) }}">
-                                            @csrf
-                                            <button type="submit"
-                                                class="px-4 py-2 rounded text-white
-                                                    @if($bolehAmbil) bg-purple-600 hover:bg-purple-700
-                                                    @else bg-purple-300 cursor-not-allowed @endif"
-                                                @if(!$bolehAmbil) disabled @endif>
-                                                Atur Pengambilan
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -262,8 +244,26 @@
                 }, 3000);
             @endif
         });
-    </script>
 
+            document.querySelectorAll('.form-perpanjangan').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // cegah langsung submit
+
+            const namaBarang = this.dataset.nama;
+            const harga = parseInt(this.dataset.harga);
+            const biaya = parseFloat(this.dataset.biaya);
+
+            const hargaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(harga);
+            const biayaFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(biaya);
+
+            const konfirmasi = confirm(`Apakah Anda yakin ingin memperpanjang barang "${namaBarang}" dengan harga ${hargaFormatted}?\nSaldo Anda akan dipotong sebesar ${biayaFormatted}.`);
+
+            if (konfirmasi) {
+                this.submit(); // jika user setuju, lanjut submit
+            }
+        });
+    });
+    </script>
 </body>
 
 </html>

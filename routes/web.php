@@ -72,8 +72,10 @@ Route::middleware(['penitip'])->group(function () {
     //
 
     Route::get('/Penitip/barang-titipan', [TransaksiPenitipanControllers::class, 'showBarangTitipan'])->name('penitip.barang-titipan');
+    Route::get('/Penitip/Perpanjang_penitipan_lanjutan', [TransaksiPenitipanControllers::class, 'showBarangTitipanLanjutan'])->name('penitip.Perpanjangan_penitipan_lanjutan');
     Route::get('/penitip/barang/search', [TransaksiPenitipanControllers::class, 'search'])->name('penitip.barang.search');
     Route::post('/barang-titipan/perpanjang/{id}', [TransaksiPenitipanControllers::class, 'perpanjangMasaPenitipan'])->name('penitip.barang.perpanjang');
+    Route::post('/barang-titipan-lanjutan/perpanjang/{id}', [TransaksiPenitipanControllers::class, 'perpanjangMasaPenitipanlanjutan'])->name('penitip.barang.perpanjang.lanjutan');
 
     Route::post('/penitipan/atur-pengambilan/{id}', [TransaksiPenitipanControllers::class, 'aturTanggalPengambilan'])->name('penitipan.aturPengambilan');
 
@@ -139,33 +141,27 @@ Route::middleware(['pembeli'])->group(function () {
     Route::post('/pembeli/checkout', [TransaksiPenjualanControllers::class, 'showCheckout'])->name('pembeli.checkOutPembeli');
 
 
-    Route::get('/checkout', [TransaksiPenjualanControllers::class, 'checkOutPembeli'])
-        ->name('pembeli.checkout');
+    Route::get('/checkout', [TransaksiPenjualanControllers::class, 'checkOutPembeli'])->name('pembeli.checkout');
 
-    Route::post('/checkout/proses', [TransaksiPenjualanControllers::class, 'prosesCheckout'])
-        ->name('pembeli.checkout.proses');
+    Route::post('/checkout/proses', [TransaksiPenjualanControllers::class, 'prosesCheckout'])->name('pembeli.checkout.proses');
 
     Route::get('/cart/count', [TransaksiPenjualanControllers::class, 'getCartCount'])->name('cart.count');
 
-    // Route untuk AJAX add to cart
     Route::post('/keranjang/tambah-ajax/{id}', [TransaksiPenjualanControllers::class, 'tambahKeranjangAjax'])->name('keranjang.tambah.ajax');
 
-    // Update route yang sudah ada untuk handle AJAX
-// Route::post('/keranjang/tambah/{id}', [TransaksiPenjualanControllers::class, 'tambahKeranjang'])->name('keranjang.tambah');
-// Ubah menjadi:
+
     Route::post('/keranjang/tambah/{id}', [TransaksiPenjualanControllers::class, 'tambahKeranjangAjax'])->name('keranjang.tambah');
 
 
     Route::get('/pembayaran/{id}', [TransaksiPenjualanControllers::class, 'showPembayaran'])->name('pembayaranPembeli');
 
-
-    // Proses konfirmasi pembayaran lunas
     Route::post('/pembayaran/{id}/bayar', [TransaksiPenjualanControllers::class, 'prosesPembayaran'])->name('prosesPembayaran');
 
     Route::post('/pembayaran/proses/{id}', [TransaksiPenjualanControllers::class, 'prosesPembayaran'])
         ->name('prosesPembayaran');
 
-
+    Route::get('/pembeli/pembatalan-transaksi', [PembeliControllrs::class, 'showPembatalanTransaksi'])->name('pembeli.pembatalanTransaksiValid');
+    Route::delete('/pembeli/pembatalan-transaksi/{id}', [PembeliControllrs::class, 'batalkanTransaksi'])->name('pembeli.batalkanTransaksi');
         
 });
 
@@ -313,31 +309,6 @@ Route::patch('/approve-transaction/{id}', [TransaksiPenjualanControllers::class,
     ->name('approve.transaction');
 
 Route::patch('/transaksi/reject/{id}', [TransaksiPenjualanControllers::class, 'rejectTransaction'])->name('reject.transaction');
-
-// Route::get('/resetPasswordOrganisasi', function () {
-//     return view('LupaPasswordOrg.resetPasswordOrganisasi');
-// })->name('LupaPasswordOrg.resetPasswordOrganisasi');
-
-// Route::get('/resetPasswordPembeli', function () {
-//     return view('LupaPasswordPembeli.resetPasswordPembeli');
-// })->name('LupaPasswordPembeli.resetPasswordPembeli');
-
-
-
-// Route::get('/lupaPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'showLinkForm'])->name('LupaPasswordOrg.lupaPasswordOrganisasi');
-// Route::post('/lupaPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'lupaPasswordOrganisasiPost'])->name('LupaPasswordOrg.lupaPasswordOrganisasi.post');
-// Route::get('/pesanLupaPasswordOrganisasi/{token}', [lupaPasswordOrganisasiControllers::class, 'showLinkForm'])->name('password.forgot.link');
-
-// Route::get('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('LupaPasswordPembeli.lupaPasswordPembeli');
-// Route::post('/lupaPasswordPembeli', [lupaPasswordPembeliControllers::class, 'lupaPasswordPembeliPost'])->name('LupaPasswordPembeli.lupaPasswordPembeli.post');
-// Route::get('/pesanLupaPasswordPembeli/{token}', [lupaPasswordPembeliControllers::class, 'showLinkFormPembeli'])->name('password.forgot.link');
-
-// // Menampilkan form reset password
-// Route::get('/resetPasswordOrganisasi/{token}', [lupaPasswordOrganisasiControllers::class, 'showResetPasswordForm'])->name('resetPasswordOrganisasi');
-
-
-// // Menangani form reset password
-// Route::post('/resetPasswordOrganisasi', [lupaPasswordOrganisasiControllers::class, 'resetPasswordOrganisasi'])->name('resetPasswordOrganisasi.post');
 
 Route::get('/forgotPassword', [AuthController::class, 'forgotPassword'])->name('forgotPassword');
 Route::post('/validasiForgotPasswordAct', [AuthController::class, 'validasiForgotPasswordAct'])->name('validasiForgotPasswordAct');
