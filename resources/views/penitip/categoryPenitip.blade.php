@@ -61,7 +61,7 @@
         </div>
     </nav>
 
-    <div class="mt-24 px-4 pt-20">
+   <div class="mt-24 px-4 pt-20">
         <div class="bg-blue-600 rounded-lg p-4 w-full max-w-6xl mx-auto">
             <!-- Wrapper Scroll untuk Mobile -->
             <div class="overflow-x-auto md:overflow-hidden pl-4 pr-4">
@@ -69,7 +69,7 @@
                     
                     <!-- Kategori -->
                     @foreach ($kategoris as $index => $kategori)
-                    <a href="{{ route('penitip.categoryPenitip', $kategori->id_kategori) }}" class="cursor-pointer">
+                    <a href="{{ route('shop.category', $kategori->id_kategori) }}" class="cursor-pointer">
                         <div class="flex flex-col items-center min-w-[25%] md:min-w-0 transition-all">
                             <div class="w-16 h-16 bg-white rounded-md flex items-center justify-center">
                                 <img src="{{ $images[$index] ?? 'images/default.png' }}" alt="Icon {{ $index + 1 }}" class="w-12 h-12">
@@ -98,8 +98,12 @@
         <div class="py-2 max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             @foreach ($barang as $item)
                 <div class="group flex w-full max-w-[450px] flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-md p-3 h-full">
-                    <a class="relative flex h-36 overflow-hidden rounded-xl" href="{{ route('penitip.detail_barangPenitip', $item->id_barang) }}">
-                        <img class="absolute top-0 right-0 h-full w-full object-cover" src="{{ asset($item->foto_barang) }}" alt="product image" />
+                    <a class="relative flex h-36 overflow-hidden rounded-xl" href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}">
+                                                <img 
+                            class="absolute top-0 right-0 h-full w-full object-cover" 
+                            src="{{ asset($item->foto_barang[0] ?? 'default.jpg') }}" 
+                            alt="{{ $item->nama_barang }}"
+                        >
                     </a>
                     <div class="flex flex-col flex-grow mt-2 px-2 pb-2">
                         <a href="{{ route('pembeli.detail_barangPembeli', $item->id_barang) }}">
@@ -118,7 +122,6 @@
                     </div>
                 </div>
             @endforeach
-            
         </div>
     </div>
     
