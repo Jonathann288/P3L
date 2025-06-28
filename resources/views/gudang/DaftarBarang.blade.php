@@ -460,10 +460,14 @@
                     <label class="block text-sm font-medium text-gray-600">Deskripsi Barang</label>
                     <p class="text-gray-900 mt-2">${barang.deskripsi_barang || 'Tidak ada deskripsi'}</p>
                 </div>
-                ${barang.foto_barang ? `
+                ${Array.isArray(barang.foto_barang) ? `
                 <div class="mt-6">
                     <label class="block text-sm font-medium text-gray-600">Foto Barang</label>
-                    <img src="${barang.foto_barang}" alt="Foto Barang" class="mt-2 max-w-full h-48 object-cover rounded-lg">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                        ${barang.foto_barang.map(foto => `
+                            <img src="${foto}" alt="Foto Barang" class="w-full h-40 object-cover rounded-lg">
+                        `).join('')}
+                    </div>
                 </div>
                 ` : ''}
             `;

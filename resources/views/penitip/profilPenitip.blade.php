@@ -38,6 +38,11 @@
                 <i class="fa-solid fa-box"></i>
                 <span>Titipan</span>
             </a>
+            <a href="{{ route('penitip.Perpanjangan_penitipan_lanjutan') }}"
+                class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                <i class="fa-solid fa-box"></i>
+                <span>Barang Titipan Lanjut</span>
+            </a>
             <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
                 <a href="{{ route('penitip.Shop-Penitip') }}">Kembali</a>
             </button>
@@ -59,6 +64,11 @@
                                 class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                                 <i class="fa-solid fa-box"></i>
                                 <span>Titipan</span>
+                            </a>
+                            <a href="{{ route('penitip.Perpanjangan_penitipan_lanjutan') }}"
+                                class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                                <i class="fa-solid fa-box"></i>
+                                <span>Barang Titipan Lanjut</span>
                             </a>
                         </div>
                     </nav>

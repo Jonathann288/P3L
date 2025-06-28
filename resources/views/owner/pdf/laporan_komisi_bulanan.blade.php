@@ -87,7 +87,9 @@
                 <td>{{ optional($k->barang->first())->kode_barang ?? 'N/A' }}</td>
                 <td>{{ optional($k->barang->first())->nama_barang ?? 'N/A' }}</td>
                 <td>Rp {{ number_format(optional($k->barang->first())->harga_barang ?? 0, 0, ',', '.') }}</td>
-                <td>{{ optional($k->barang->first())->tanggal_masuk ? \Carbon\Carbon::parse($k->barang->first()->tanggal_masuk)->format('d/m/Y') : 'N/A' }}</td>
+                <td>{{optional(optional($k->barang->first())->detailtransaksipenitipan->transaksipenitipan)->tanggal_penitipan 
+                        ? \Carbon\Carbon::parse($k->barang->first()->detailtransaksipenitipan->transaksipenitipan->tanggal_penitipan)->format('d/m/Y') : 'N/A'}}
+                </td>
                 <td>{{ $k->transaksipenjualan ? \Carbon\Carbon::parse($k->transaksipenjualan->tanggal_transaksi)->format('d/m/Y') : 'N/A' }}</td>
                 <td>Rp {{ number_format($k->komisi_hunter ?? 0, 0, ',', '.') }}</td>
                 <td>Rp {{ number_format($k->komisi_reusemart ?? 0, 0, ',', '.') }}</td>

@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <link rel="stylesheet" href="{{asset('css/style.css')}}"> 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Tambahkan ini di head -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         .rating-stars {
             display: inline-flex;
@@ -96,8 +98,8 @@
     <!-- Main Content -->
     <main class="pb-12 px-4 max-w-6xl mx-auto">
         <!-- Product Section -->
-        <div class="flex flex-col md:flex-row gap-8 pt-8">
-             <!-- Product Images Section -->
+         <div class="flex flex-col md:flex-row gap-8 pt-8">
+            <!-- Product Images Section -->
             @php
                 $fotos = $barang->foto_barang;
                 $mainImage = $fotos[0] ?? null; // Ambil gambar pertama sebagai default
@@ -105,9 +107,10 @@
 
             <div class="w-full md:w-1/2 bg-white p-4 rounded-lg shadow-sm">
                 <!-- Gambar Utama Besar -->
-                <div class="bg-white-100 rounded-lg h-96 flex items-center justify-center mb-4">
+                <div class="bg-gray-100 rounded-lg h-96 flex items-center justify-center mb-4">
                     @if ($mainImage)
-                        <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama" class="max-h-full max-w-full object-contain">
+                        <img id="main-image" src="{{ asset($mainImage) }}" alt="Foto Utama"
+                            class="max-h-full max-w-full object-contain">
                     @else
                         <span class="text-gray-400">Tidak ada gambar</span>
                     @endif
@@ -117,48 +120,102 @@
                 <div class="flex gap-2 overflow-x-auto py-2">
                     @foreach ($fotos as $index => $foto)
                         <div class="flex-shrink-0">
-                            <img src="{{ asset($foto) }}" alt="Thumbnail {{ $index + 1 }}" 
+                            <img src="{{ asset($foto) }}" alt="Thumbnail {{ $index + 1 }}"
                                 class="w-20 h-20 object-cover rounded border {{ $index === 0 ? 'border-blue-500' : 'border-gray-300 hover:border-blue-300' }} cursor-pointer"
                                 onclick="changeMainImage(this)">
                         </div>
                     @endforeach
                 </div>
             </div>
-
             <!-- Product Details -->
             <div class="w-full md:w-1/2">
                 <!-- Nama Barang -->
                 <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ $barang->nama_barang }}</h1>
-                
+
+                <div class="mb-6">
+                    <p class="text-3xl font-bold text-red-600">Rp{{ number_format($barang->harga_barang, 0, ',', '.') }}
+                    </p>
+                    @if($barang->harga_asli)
+                        <div class="flex items-center mt-1">
+                            <p class="text-lg text-gray-500 line-through mr-2">
+                                Rp{{ number_format($barang->harga_asli, 0, ',', '.') }}</p>
+                            @php
+                                $diskon = (($barang->harga_asli - $barang->harga_barang) / $barang->harga_asli) * 100;
+                            @endphp
+                            <span
+                                class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-sm font-medium">-{{ floor($diskon) }}%</span>
+                        </div>
+                    @endif
+                </div>
+
                 <!-- Rating -->
                 <div class="flex items-center mb-4">
-                    <div class="flex items-center">
-                        <div class="rating-stars">
-                            <span>★★★★★</span>
-                            <!-- Hitung persentase rating -->
-                            <span class="filled" style="width: {{ ($barang->rating_barang / 5) * 100 }}%">★★★★★</span>
-                        </div>
-                        <span class="ml-1 text-gray-700">{{ number_format($barang->rating_barang, 1) }}</span>
+                    <div id="rating-stars-container" data-rating="{{ $barang->rating_barang }}">
                     </div>
+                    <span class="ml-2 text-gray-700">{{ number_format($barang->rating_barang, 1) }}</span>
                     <span class="mx-2 text-gray-400">|</span>
                     <span class="text-gray-600">{{ $barang->jumlah_penilaian }} Penilaian</span>
                     <span class="mx-2 text-gray-400">|</span>
                     <span class="text-gray-600">{{ $barang->jumlah_terjual }} Terjual</span>
                 </div>
 
-                <!-- Price -->
-                <div class="mb-6">
-                    <p class="text-3xl font-bold text-red-600">Rp{{ number_format($barang->harga_barang, 0, ',', '.') }}</p>
-                    @if($barang->harga_asli)
-                    <div class="flex items-center mt-1">
-                        <p class="text-lg text-gray-500 line-through mr-2">Rp{{ number_format($barang->harga_asli, 0, ',', '.') }}</p>
-                        @php
-                            $diskon = (($barang->harga_asli - $barang->harga_barang) / $barang->harga_asli) * 100;
-                        @endphp
-                        <span class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-sm font-medium">-{{ floor($diskon) }}%</span>
+                {{-- AWAL BAGIAN INFORMASI PENJUAL (PENITIP) --}}
+                @php
+                    $penitipInfo = null; // Inisialisasi untuk keamanan
+                    // Langsung gunakan variabel $barang yang merupakan objek utama halaman ini
+                    // Asumsikan $barang selalu ada di view ini. Accessor 'penitip_data' akan mengembalikan null jika tidak ada penitip.
+                    if (isset($barang) && $barang) { // Pastikan $barang ada dan tidak null
+                        $penitipInfo = $barang->penitip_data;
+                    }
+                @endphp
+
+                @if ($penitipInfo)
+                    <div class="mb-6 pt-4 border-t border-gray-200">
+                        <h3 class="text-md font-semibold text-gray-800 mb-2">Informasi Penjual:</h3>
+                        <div class="flex items-center">
+                            @if(isset($penitipInfo->foto_profil) && $penitipInfo->foto_profil)
+                                <img src="{{ asset($penitipInfo->foto_profil) }}" alt="{{ $penitipInfo->nama_penitip }}"
+                                    class="w-10 h-10 rounded-full mr-3 object-cover border">
+                            @else
+                                <div
+                                    class="w-10 h-10 rounded-full mr-3 bg-gray-200 flex items-center justify-center text-gray-500 border">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            @endif
+                            <div>
+                                <p class="text-lg font-medium text-gray-900">{{ $penitipInfo->nama_penitip }}</p>
+                               
+                                @if (isset($penitipInfo->Rating_penitip))
+                                    <div class="flex items-center text-sm text-gray-600" title="Rata-rata rating penjual">
+                                        <span class="text-yellow-500 mr-1">
+                                            @php $roundedRating = round($penitipInfo->Rating_penitip * 2) / 2; @endphp
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $roundedRating)
+                                                    <i class="fas fa-star"></i>
+                                                @elseif ($i - 0.5 <= $roundedRating)
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                @else
+                                                    <i class="far fa-star"></i>
+                                                @endif
+                                            @endfor
+                                        </span>
+                                        <span>{{ number_format($penitipInfo->Rating_penitip, 1) }}/5.0</span>
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-500">Belum ada rating untuk penjual ini.</p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                    @endif
-                </div>
+                @else
+                    <div class="mb-6 pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-500">Informasi penjual tidak tersedia.</p>
+                    </div>
+                @endif
+                {{-- AKHIR BAGIAN INFORMASI PENJUAL (PENITIP) --}}
+
+                <!-- Kotak Deskripsi Produk -->
+                <!-- INI JUGA COPY -->
                 <div class="mt-6 border rounded-lg p-4 bg-gray-50 shadow-sm">
                     <h2 class="text-lg font-semibold text-gray-900 mb-3">Deskripsi Produk</h2>
 
@@ -171,13 +228,14 @@
                     </p>
                     @if($isElektronik)
                         <p class="text-gray-800 font-medium mt-2">
-                            Garansi Hingga: 
+                            Garansi Hingga:
                             <span class="font-normal">
                                 {{ \Carbon\Carbon::parse($barang->tanggal_garansi)->translatedFormat('d F Y') }}
                             </span>
                         </p>
                     @endif
                 </div>
+                <!--SAMPE INI -->
             </div>
         </div>
     </main>
@@ -218,6 +276,46 @@
         window.addEventListener('click', (e) => {
             if (!toggle.contains(e.target) && !menu.contains(e.target)) {
                 menu.classList.add('hidden');
+            }
+        });
+        function changeMainImage(element) {
+            const mainImage = document.getElementById('main-image');
+            mainImage.src = element.src;
+
+            // Optional: atur border aktif
+            document.querySelectorAll('.flex-shrink-0 img').forEach(img => {
+                img.classList.remove('border-blue-500');
+                img.classList.add('border-gray-300');
+            });
+            element.classList.remove('border-gray-300');
+            element.classList.add('border-blue-500');
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            const ratingContainer = document.getElementById('rating-stars-container');
+            if (!ratingContainer) return;
+
+            const rating = parseFloat(ratingContainer.dataset.rating) || 0;
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const totalStars = 5;
+
+            for (let i = 0; i < fullStars; i++) {
+                const star = document.createElement('i');
+                star.className = 'fas fa-star text-yellow-400';
+                ratingContainer.appendChild(star);
+            }
+
+            if (halfStar) {
+                const half = document.createElement('i');
+                half.className = 'fas fa-star-half-alt text-yellow-400';
+                ratingContainer.appendChild(half);
+            }
+
+            const emptyStars = totalStars - fullStars - (halfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                const star = document.createElement('i');
+                star.className = 'far fa-star text-yellow-400';
+                ratingContainer.appendChild(star);
             }
         });
         function changeMainImage(element) {
