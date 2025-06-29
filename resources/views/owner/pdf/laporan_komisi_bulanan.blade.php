@@ -1,55 +1,92 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Laporan Komisi Bulanan</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 11px;
         }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .header h1 {
             margin: 0;
             font-size: 18px;
             font-weight: bold;
         }
+
+        .header h2 {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
         .header p {
             margin: 5px 0;
+            font-size: 12px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid #ddd;
         }
-        th, td {
+
+        th,
+        td {
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
         .total-row {
             font-weight: bold;
         }
+
         .footer {
             margin-top: 30px;
             text-align: right;
+            font-size: 10px;
         }
+
         .info-box {
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             padding: 10px;
             margin-bottom: 20px;
             background-color: #f9f9f9;
         }
+        .info-box h3 {
+            margin-top: 0;
+            font-size: 12px;
+        }
+        .info-box ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        .info-box li {
+            margin-bottom: 4px;
+        }
+
+        .text-right {
+            text-align: right;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>ReUse Mart</h1>
@@ -60,11 +97,13 @@
     </div>
 
     <div class="info-box">
-        <p>Kompor laku < 7 hari, sehingga penitip mendapat bonus.</p>
-        <p>Komisi ReUseMart: 20% = 400.000</p>
-        <p>Tapi diberikan ke hunter 5% (100.000), sehingga sisa untuk ReUseMart: 300.000.</p>
-        <p>Bonus untuk penitip: 10% dari 400.000 = 40.000, sehingga sisa untuk ReUseMart: 260.000.</p>
-        <p>Rak buku laku > 1 bulan, sehingga barang ini sudah ada perpanjangan penitipan. Sehingga, komisi 30%, komisi hunter 0 berarti barang ini bukan barang hasil hunting.</p>
+        <h3>Aturan Perhitungan Komisi:</h3>
+        <ul>
+            <li><b>Total Komisi:</b> 20% dari harga jual. Jika penjualan > 30 hari sejak tanggal masuk, komisi menjadi 30%.</li>
+            <li><b>Komisi Hunter:</b> 5% dari harga jual, jika produk merupakan hasil hunting (ada pegawai terkait).</li>
+            <li><b>Bonus Penitip:</b> 10% dari <u>Total Komisi</u>, jika produk terjual dalam 7 hari sejak tanggal masuk.</li>
+            <li><b>Komisi ReUse Mart:</b> Sisa dari Total Komisi setelah dikurangi Komisi Hunter dan Bonus Penitip.</li>
+        </ul>
     </div>
 
     <table>
@@ -73,39 +112,91 @@
                 <th>Kode Produk</th>
                 <th>Nama Produk</th>
                 <th>Harga Jual</th>
-                <th>Tanggal Masuk</th>
-                <th>Tanggal Laku</th>
+                <th>Tgl Masuk</th>
+                <th>Tgl Laku</th>
                 <th>Komisi Hunter</th>
                 <th>Komisi ReUse Mart</th>
                 <th>Bonus Penitip</th>
             </tr>
         </thead>
         <tbody>
-            @php $totalKomisiHunter = 0; $totalKomisiReUseMart = 0; $totalBonusPenitip = 0; @endphp
-            @foreach($komisi as $k)
-            <tr>
-                <td>{{ optional($k->barang->first())->kode_barang ?? 'N/A' }}</td>
-                <td>{{ optional($k->barang->first())->nama_barang ?? 'N/A' }}</td>
-                <td>Rp {{ number_format(optional($k->barang->first())->harga_barang ?? 0, 0, ',', '.') }}</td>
-                <td>{{optional(optional($k->barang->first())->detailtransaksipenitipan->transaksipenitipan)->tanggal_penitipan 
-                        ? \Carbon\Carbon::parse($k->barang->first()->detailtransaksipenitipan->transaksipenitipan->tanggal_penitipan)->format('d/m/Y') : 'N/A'}}
-                </td>
-                <td>{{ $k->transaksipenjualan ? \Carbon\Carbon::parse($k->transaksipenjualan->tanggal_transaksi)->format('d/m/Y') : 'N/A' }}</td>
-                <td>Rp {{ number_format($k->komisi_hunter ?? 0, 0, ',', '.') }}</td>
-                <td>Rp {{ number_format($k->komisi_reusemart ?? 0, 0, ',', '.') }}</td>
-                <td>Rp {{ number_format($k->komisi_penitip ?? 0, 0, ',', '.') }}</td>
-            </tr>
-            @php 
-                $totalKomisiHunter += $k->komisi_hunter ?? 0;
-                $totalKomisiReUseMart += $k->komisi_reusemart ?? 0;
-                $totalBonusPenitip += $k->komisi_penitip ?? 0;
+            @php
+                $grandTotalKomisiHunter = 0;
+                $grandTotalKomisiReUseMart = 0;
+                $grandTotalBonusPenitip = 0;
             @endphp
-            @endforeach
+
+            @forelse($komisi as $k)
+                @php
+                    // --- Inisialisasi variabel ---
+                    $komisiHunter = 0;
+                    $komisiReUseMart = 0;
+                    $bonusPenitip = 0;
+                    $totalKomisi = 0;
+                    
+                    // --- Mengambil data penting ---
+                    // CATATAN: Relasi komisi->barang seharusnya 'belongsTo'. Penggunaan ->first() mengindikasikan relasi 'hasMany'.
+                    // Kode ini mengasumsikan bisa mendapatkan satu barang. Jika tidak, data tidak akan muncul.
+                    $barang = $k->barang->first() ?? $k->barang; // Penyesuaian untuk menangani kedua jenis relasi
+                    $transaksiPenjualan = $k->transaksipenjualan;
+                    $transaksiPenitipan = optional(optional($barang)->detailTransaksiPenitipan)->transaksiPenitipan;
+                    
+                    // --- Lakukan perhitungan hanya jika semua data yang dibutuhkan ada ---
+                    if ($barang && $transaksiPenjualan && $transaksiPenitipan) {
+                        $hargaJual = $barang->harga_barang;
+                        $tanggalMasuk = \Carbon\Carbon::parse($transaksiPenitipan->tanggal_penitipan);
+                        $tanggalLaku = \Carbon\Carbon::parse($transaksiPenjualan->tanggal_transaksi);
+                        
+                        // Hitung lama penitipan dalam hari
+                        $lamaPenitipanHari = $tanggalLaku->diffInDays($tanggalMasuk);
+                        
+                        // 1. Tentukan persentase komisi total (20% atau 30%)
+                        $persentaseKomisiTotal = ($lamaPenitipanHari > 30) ? 0.30 : 0.20;
+                        $totalKomisi = $hargaJual * $persentaseKomisiTotal;
+
+                        // 2. Hitung Komisi Hunter (jika ada pegawai/hunter terkait)
+                        if ($k->pegawai) {
+                            $komisiHunter = $hargaJual * 0.05; // 5% dari harga jual
+                        }
+                        
+                        // 3. Hitung Bonus Penitip (jika laku <= 7 hari)
+                        if ($lamaPenitipanHari <= 7) {
+                            $bonusPenitip = $totalKomisi * 0.10; // 10% dari total komisi
+                        }
+                        
+                        // 4. Hitung Komisi ReUse Mart
+                        $komisiReUseMart = $totalKomisi - $komisiHunter - $bonusPenitip;
+
+                        // Akumulasi total untuk footer tabel
+                        $grandTotalKomisiHunter += $komisiHunter;
+                        $grandTotalKomisiReUseMart += $komisiReUseMart;
+                        $grandTotalBonusPenitip += $bonusPenitip;
+                    }
+                @endphp
+                
+                @if ($barang && $transaksiPenjualan && $transaksiPenitipan)
+                    <tr>
+                         <td>{{ optional($barang)->id ?? '2025.06.10' }}</td>
+                        <td>{{ $barang->nama_barang ?? 'N/A' }}</td>
+                        <td class="text-right">Rp {{ number_format($barang->harga_barang ?? 0, 0, ',', '.') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($transaksiPenitipan->tanggal_penitipan)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($transaksiPenjualan->tanggal_transaksi)->format('d/m/Y') }}</td>
+                        <td class="text-right">Rp {{ number_format($komisiHunter, 0, ',', '.') }}</td>
+                        <td class="text-right">Rp {{ number_format($komisiReUseMart, 0, ',', '.') }}</td>
+                        <td class="text-right">Rp {{ number_format($bonusPenitip, 0, ',', '.') }}</td>
+                    </tr>
+                @endif
+            @empty
+                <tr>
+                    <td colspan="8" style="text-align: center;">Tidak ada data komisi untuk bulan dan tahun ini.</td>
+                </tr>
+            @endforelse
+
             <tr class="total-row">
                 <td colspan="5">Total</td>
-                <td>Rp {{ number_format($totalKomisiHunter, 0, ',', '.') }}</td>
-                <td>Rp {{ number_format($totalKomisiReUseMart, 0, ',', '.') }}</td>
-                <td>Rp {{ number_format($totalBonusPenitip, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($grandTotalKomisiHunter, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($grandTotalKomisiReUseMart, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($grandTotalBonusPenitip, 0, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
@@ -114,4 +205,4 @@
         <p>Dokumen ini dicetak secara otomatis oleh sistem ReUse Mart</p>
     </div>
 </body>
-</html> 
+</html>
