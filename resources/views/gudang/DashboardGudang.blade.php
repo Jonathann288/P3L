@@ -63,7 +63,7 @@
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-semibold text-gray-800">Profil Pembeli</h1>
+            <h1 class="text-3xl font-semibold text-gray-800">Profil Gudang</h1>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
