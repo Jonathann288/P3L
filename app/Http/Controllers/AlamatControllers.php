@@ -146,7 +146,7 @@ class AlamatControllers extends Controller
 
         $pembeli = Auth::guard('pembeli')->user();
         // Redirect ke view dengan hasil pencarian
-        return view('pembeli.Alamatpembeli', compact('alamat', 'pembeli'));
+        return view('pembeli.AlamatPembeli', compact('alamat', 'pembeli'));
     }
 
 
