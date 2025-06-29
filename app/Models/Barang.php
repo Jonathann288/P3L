@@ -132,4 +132,17 @@ class Barang extends Model
         }
         return null;
     }
+    public function detailTransaksiPenjualan()
+    {
+        // Nama foreign key 'id_barang' di tabel 'detailtransaksipenjualan'
+        // Nama local key 'id_barang' di tabel 'barang'
+        return $this->hasOne(DetailTransaksiPenjualan::class, 'id_barang', 'id_barang');
+    }
+     public function donasi()
+    {
+        // Nama foreign key 'id_barang' di tabel 'donasi'
+        // Nama local key 'id_barang' di tabel 'barang'
+        return $this->hasOne(Donasi::class, 'id_barang', 'id_barang');
+    }
+
 }

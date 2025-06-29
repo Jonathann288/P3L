@@ -55,7 +55,7 @@ class TransaksiPenitipanControllers extends Controller
         $search = $request->input('search');
 
         if($search){
-            $detailBarang = detailtransaksipenitipan::whereHas('barang', function ($query) use ($search) {
+            $detailBarang = DetailTransaksiPenitipan::whereHas('barang', function ($query) use ($search) {
                 $query->where('nama_barang', 'like', "%{$search}%");
             })
             ->orWhereHas('transaksipenitipan', function ($query) use ($search) {
@@ -71,7 +71,7 @@ class TransaksiPenitipanControllers extends Controller
             })
             ->get();
         }else{
-            $detailBarang = detailtransaksipenitipan::whereHas('transaksipenitipan', function ($query) use ($penitip) {
+            $detailBarang = DetailTransaksiPenitipan::whereHas('transaksipenitipan', function ($query) use ($penitip) {
                 $query->where('id_penitip', $penitip->id_penitip);
             })->get();
         }
@@ -80,7 +80,7 @@ class TransaksiPenitipanControllers extends Controller
 
     public function perpanjangMasaPenitipan($id)
     {
-        $detail = detailtransaksipenitipan::with('transaksipenitipan')->findOrFail($id);
+        $detail = DetailTransaksiPenitipan::with('transaksipenitipan')->findOrFail($id);
         $tanggalAkhir =  \Carbon\Carbon::parse($detail->transaksipenitipan->tanggal_akhir_penitipan);
         $sekarang = Carbon::now();
 
@@ -774,13 +774,15 @@ class TransaksiPenitipanControllers extends Controller
             ->orderBy('nama_kategori')
             ->get();
         $hunters = Pegawai::where('id_jabatan', 6)->orderBy('nama_pegawai')->get();
+        $pegawaiLogin = Auth::guard('pegawai')->user();
         return view('gudang.DashboardTitipanBarang', [
             'titipans' => $results,
             'searchTerm' => $request->search_term,
             'penitips' => $penitips,
             'kategoris' => $kategoris,
             'hunters' => $hunters,
-            'request' => $request
+            'request' => $request,
+            'pegawaiLogin'=> $pegawaiLogin
         ]);
     }
 

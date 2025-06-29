@@ -502,11 +502,68 @@
             document.getElementById('edit_foto_barang').value = barang.foto_barang || '';
             document.getElementById('edit_rating_barang').value = barang.rating_barang || '';
             document.getElementById('edit_garansi_barang').value = barang.garansi_barang ? barang.garansi_barang.split(' ')[0] : '';
-
+            showExistingPhotos(barang.foto_barang);
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }
+        function showExistingPhotos(fotoBarang) {
+            const container = document.getElementById('existing-photos-container');
 
+            if (!container) {
+                // Jika container belum ada, buat container baru
+                const photoContainer = document.createElement('div');
+                photoContainer.id = 'existing-photos-container';
+                photoContainer.className = 'mt-2';
+
+                // Insert setelah input file
+                const fileInput = document.getElementById('edit_foto_barang');
+                fileInput.parentNode.insertBefore(photoContainer, fileInput.nextSibling);
+            }
+
+            let fotos = [];
+
+            if (fotoBarang) {
+                if (typeof fotoBarang === 'string') {
+                    try {
+                        fotos = JSON.parse(fotoBarang);
+                    } catch (e) {
+                        fotos = [fotoBarang];
+                    }
+                } else if (Array.isArray(fotoBarang)) {
+                    fotos = fotoBarang;
+                }
+            }
+
+            fotos = fotos.filter(foto => foto && foto.trim() !== '');
+
+            if (fotos.length > 0) {
+                document.getElementById('existing-photos-container').innerHTML = `
+            <div class="mt-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Foto Saat Ini:</label>
+                <div class="grid grid-cols-3 gap-2">
+                    ${fotos.map((foto, index) => {
+                    let fotoPath = foto.startsWith('http') || foto.startsWith('/') ? foto : `{{ asset('') }}${foto}`;
+                    return `
+                            <div class="relative group">
+                                <img src="${fotoPath}" 
+                                     alt="Foto ${index + 1}" 
+                                     class="w-full h-20 object-cover rounded border cursor-pointer hover:opacity-80"
+                                     onclick="openImagePreview('${fotoPath}')"
+                                     onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded"></div>
+                            </div>
+                        `;
+                }).join('')}
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Pilih file baru untuk mengganti foto yang sudah ada</p>
+            </div>
+        `;
+            } else {
+                document.getElementById('existing-photos-container').innerHTML = `
+            <p class="text-sm text-gray-500 mt-2">Belum ada foto</p>
+        `;
+            }
+        }
         function closeEditModal() {
             const modal = document.getElementById('editModal');
             modal.classList.add('hidden');
