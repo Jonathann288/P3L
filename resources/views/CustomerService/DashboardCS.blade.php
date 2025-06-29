@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
+    <title>Dashboard CS</title>
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,7 +58,7 @@
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-semibold text-gray-800">Profil Pembeli</h1>
+            <h1 class="text-3xl font-semibold text-gray-800">Profil CS</h1>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8">
