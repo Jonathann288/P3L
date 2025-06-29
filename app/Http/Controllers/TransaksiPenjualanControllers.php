@@ -327,7 +327,7 @@ class TransaksiPenjualanControllers extends Controller
                 return redirect()->route('login');
             }
 
-            $transaksi = transaksipenjualan::with(['detailTransaksi', 'pembeli'])
+            $transaksi = Transaksipenjualan::with(['detailTransaksi', 'pembeli'])
                 ->where('id', $id)
                 ->first();
 
@@ -411,7 +411,7 @@ class TransaksiPenjualanControllers extends Controller
             }
 
             // Cari transaksi
-            $transaksi = transaksipenjualan::where('id', $id)
+            $transaksi = Transaksipenjualan::where('id', $id)
                 ->where('id_pembeli', $pembeli->id_pembeli)
                 ->first();
             if (!$transaksi) {
@@ -493,7 +493,7 @@ class TransaksiPenjualanControllers extends Controller
                 return redirect()->route('login');
             }
 
-            $transaksi = transaksipenjualan::where('id', $id)
+            $transaksi = Transaksipenjualan::where('id', $id)
                 ->where('id_pembeli', $pembeli->id_pembeli)
                 ->first();
 
@@ -802,7 +802,7 @@ public function approveTransaction(Request $request, $id)
             $tanggalKirim = Carbon::tomorrow($timezone)->setHour(8)->setMinute(0)->setSecond(0);
         }
 
-        $transaksi = transaksipenjualan::findOrFail($request->id_transaksi_penjualan);
+        $transaksi = Transaksipenjualan::findOrFail($request->id_transaksi_penjualan);
 
         $transaksi->update([
             'id_pegawai' => $request->id_pegawai,
@@ -880,7 +880,7 @@ public function approveTransaction(Request $request, $id)
     {
         try {
             // Ambil data transaksi beserta relasi
-            $transaksi = transaksipenjualan::with(['pembeli', 'pegawai', 'kurir', 'detailTransaksi.barang'])->findOrFail($id);
+            $transaksi = Transaksipenjualan::with(['pembeli', 'pegawai', 'kurir', 'detailTransaksi.barang'])->findOrFail($id);
 
             // Cek apakah no_nota sudah ada, kalau belum generate dan simpan
             if (empty($transaksi->no_nota)) {
@@ -937,7 +937,7 @@ public function approveTransaction(Request $request, $id)
     {
         try {
             // Ambil data transaksi beserta relasi
-            $transaksi = transaksipenjualan::with(['pembeli', 'pegawai', 'kurir', 'detailTransaksi.barang'])->findOrFail($id);
+            $transaksi = Transaksipenjualan::with(['pembeli', 'pegawai', 'kurir', 'detailTransaksi.barang'])->findOrFail($id);
 
             // Cek apakah no_nota sudah ada, kalau belum generate dan simpan
             if (empty($transaksi->no_nota)) {
@@ -1036,7 +1036,7 @@ public function approveTransaction(Request $request, $id)
 
     public function showTesting()
     {
-        $transaksi = transaksipenjualan::with(['detailtransaksi.barang'])
+        $transaksi = Transaksipenjualan::with(['detailtransaksi.barang'])
             ->where('status_pembayaran', 'Lunas')
             ->where('status_transaksi', 'Di Siapkan')
             ->get();
@@ -1046,7 +1046,7 @@ public function approveTransaction(Request $request, $id)
 
     public function ubahStatus($id)
     {
-        $transaksi = transaksipenjualan::findOrFail($id);
+        $transaksi = Transaksipenjualan::findOrFail($id);
         $transaksi->status_transaksi = 'Disiapkan';
         $transaksi->save();
 

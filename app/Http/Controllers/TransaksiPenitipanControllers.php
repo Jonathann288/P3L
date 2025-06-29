@@ -159,7 +159,7 @@ class TransaksiPenitipanControllers extends Controller
 
     public function aturTanggalPengambilan($id)
     {
-        $detail = detailtransaksipenitipan::with('transaksipenitipan', 'barang')->findOrFail($id);
+        $detail = Detailtransaksipenitipan::with('transaksipenitipan', 'barang')->findOrFail($id);
 
         $tanggalSekarang = Carbon::now();
         $tanggalBatasPengambilan = $tanggalSekarang->copy()->addDays(7);
@@ -927,7 +927,7 @@ class TransaksiPenitipanControllers extends Controller
     public function deleteTitipanBarang($id)
     {
         try {
-            $titipan = transaksipenitipan::findOrFail($id);
+            $titipan = Transaksipenitipan::findOrFail($id);
 
             // Hapus foto-foto terkait
             $this->deleteOldPhotos($titipan);
@@ -946,7 +946,7 @@ class TransaksiPenitipanControllers extends Controller
     {
         try {
             // Ambil data transaksi dengan relasi
-            $titipan = transaksipenitipan::with(['penitip', 'pegawai'])->findOrFail($id);
+            $titipan = Transaksipenitipan::with(['penitip', 'pegawai'])->findOrFail($id);
 
             // Data untuk PDF
             $data = [
