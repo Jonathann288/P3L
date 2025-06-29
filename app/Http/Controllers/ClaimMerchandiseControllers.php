@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\claimmerchandise;
+use App\Models\Claimmerchandise;
 use App\Models\merchandise;
 use App\Models\Pembeli;
 

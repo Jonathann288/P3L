@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
-use App\Models\transaksipenitipan;
+use App\Models\Transaksipenitipan;
 use App\Models\DetailTransaksiPenitipan;
 use App\Models\KategoriBarang;
 use Illuminate\Support\Facades\Auth;

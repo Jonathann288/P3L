@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\transaksipenjualan;
-use App\Models\detailtransaksipenjualan;
-use App\Models\transaksipenitipan;
-use App\Models\detailtransaksipenitipan;
+use App\Models\Transaksipenjualan;
+use App\Models\Detailtransaksipenjualan;
+use App\Models\Transaksipenitipan;
+use App\Models\Detailtransaksipenitipan;
 use App\Models\Barang;
-use App\Models\komisi;
+use App\Models\Komisi;
 use Carbon\Carbon;
 use DB;
 use Intervention\Image\ImageManager;
@@ -29,7 +29,7 @@ class LaporanControllers extends Controller
         $bulanIni = date('m');
         
         // Data penjualan bulanan dengan join ke detailtransaksipenjualan untuk mendapatkan total_harga
-        $penjualanBulanan = transaksipenjualan::join('detailtransaksipenjualan', 'transaksipenjualan.id_transaksi_penjualan', '=', 'detailtransaksipenjualan.id_transaksi_penjualan')
+        $penjualanBulanan = Transaksipenjualan::join('detailtransaksipenjualan', 'transaksipenjualan.id_transaksi_penjualan', '=', 'detailtransaksipenjualan.id_transaksi_penjualan')
             ->selectRaw('MONTH(tanggal_transaksi) as bulan, COUNT(DISTINCT transaksipenjualan.id_transaksi_penjualan) as jumlah_terjual, SUM(detailtransaksipenjualan.total_harga) as total_penjualan')
             ->whereYear('tanggal_transaksi', $tahun)
             ->groupBy('bulan')
@@ -182,7 +182,7 @@ class LaporanControllers extends Controller
         $namabulan = Carbon::create()->month($bulan)->format('F');
         
         // Data komisi bulanan per produk dengan eager loading semua relasi yang dibutuhkan
-        $komisi = komisi::with([
+        $komisi = Komisi::with([
                 'barang', 
                 'penitip', 
                 'pegawai', 

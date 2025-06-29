@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\transaksipenitipan;
+use App\Models\Transaksipenitipan;
 use App\Models\DetailTransaksiPenitipan;
 use App\Models\Barang;
 use App\Models\Penitip;

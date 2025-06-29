@@ -235,7 +235,7 @@ class PegawaiControllers extends Controller
         $pegawai = Auth::guard('pegawai')->user();
 
         // Passing data ke view
-        return view('admin.dashboard', compact('pegawai'));
+        return view('admin.Dashboard', compact('pegawai'));
     }
 
     public function showLoginPegawai()

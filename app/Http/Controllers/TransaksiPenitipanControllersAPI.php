@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DetailTransaksiPenitipan;
-use App\Models\transaksipenitipan;
+use App\Models\Transaksipenitipan;
 use Exception;
 
 class TransaksiPenitipanControllersAPI extends Controller
@@ -29,7 +29,7 @@ class TransaksiPenitipanControllersAPI extends Controller
                     'message' => 'Penitip tidak terautentikasi.'
                 ], 401);
             }
-            $transaksi = transaksipenitipan::where('id_penitip', $penitip->getKey())
+            $transaksi = Transaksipenitipan::where('id_penitip', $penitip->getKey())
                 // 2. Eager load relasi bertingkat: dari transaksi -> ke detail -> ke barang.
                 ->with(['detailtransaksipenitipan.barang'])
                 ->orderByDesc('tanggal_penitipan') // Urutkan berdasarkan tanggal transaksi terbaru

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\Keranjang;
 use App\Models\Alamat;
-use App\Models\transaksipenjualan;
+use App\Models\Transaksipenjualan;
 use App\Models\Pegawai;
 use App\Models\Komisi;
 use Illuminate\Support\Facades\DB;

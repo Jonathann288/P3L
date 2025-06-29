@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
-use App\Models\transaksipenitipan;
+use App\Models\Transaksipenitipan;
 use App\Models\DetailTransaksiPenitipan;
 use App\Models\KategoriBarang;
 use Illuminate\Support\Facades\Auth;
@@ -309,7 +309,7 @@ class BarangControllers extends Controller
         // Untuk setiap barang, cari pegawai yang bertanggung jawab melalui transaksi penitipan
         $barang = $barang->map(function ($item) {
             // Cari transaksi penitipan terbaru untuk barang ini
-            $transaksi = transaksipenitipan::whereHas('DetailTransaksiPenitipan', function ($query) use ($item) {
+            $transaksi = Transaksipenitipan::whereHas('DetailTransaksiPenitipan', function ($query) use ($item) {
                 $query->where('id_barang', $item->id_barang);
             })->with('pegawai')->latest('tanggal_penitipan')->first();
 

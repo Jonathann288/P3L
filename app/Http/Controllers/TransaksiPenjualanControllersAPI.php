@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\transaksipenjualan;
+use App\Models\Transaksipenjualan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
