@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\merchandise;
-use App\Models\ClaimMerchandise;
+use App\Models\Claimmerchandise;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -66,7 +66,7 @@ class MerchendiseControllersAPI extends Controller
                 ], 401);
             }
 
-            $merchandise = Merchandise::find($request->id_merchandise);
+            $merchandise = merchandise::find($request->id_merchandise);
             if (!$merchandise) {
                 DB::rollBack();
                 return response()->json([
