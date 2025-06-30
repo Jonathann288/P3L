@@ -51,7 +51,7 @@ class Pembeli extends Authenticatable
     }
     public function transaksiPenjualan()
     {
-        return $this->hasMany(transaksipenjualan::class, 'pembeli_id', 'pembeli_id');
+        return $this->hasMany(TransaksiPenjualan::class, 'pembeli_id', 'pembeli_id');
     }
 
     

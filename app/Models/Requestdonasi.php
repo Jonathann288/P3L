@@ -30,6 +30,6 @@ class Requestdonasi extends Model
 
     public function pegawai()
     {
-        return $this->belongsTo(pegawai::class, 'id_pegawai');
+        return $this->belongsTo(Pegawai::class, 'id_pegawai');
     }
 }

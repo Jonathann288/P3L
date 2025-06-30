@@ -164,10 +164,10 @@ class RequestDonasiControllers extends Controller
     {
         try {
             $pegawaiLogin = Auth::guard('pegawai')->user();
-            $requestdonasi = requestdonasi::where('status_request', 'pending')->get();
+            $requestdonasi = RequestDonasi::where('status_request', 'pending')->get();
             
             // Ambil barang yang statusnya "tersedia" (atau status lain yang diinginkan)
-            $barangs = barang::where('status_barang', 'di donasikan')->get();
+            $barangs = Barang::where('status_barang', 'di donasikan')->get();
 
             return view('owner.DashboardDonasi', compact('requestdonasi', 'pegawaiLogin', 'barangs'));
         } catch (\Exception $e) {

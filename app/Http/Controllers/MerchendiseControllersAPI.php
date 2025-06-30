@@ -105,7 +105,7 @@ class MerchendiseControllersAPI extends Controller
             $newId = $this->generateClaimMerchandiseId();
 
             // Simpan transaksi klaim merchandise dengan id yang sudah digenerate
-            $transaksi = ClaimMerchandise::create([
+            $transaksi = Claimmerchandise::create([
                 'id' => $newId,
                 'id_pembeli' => $pembeli->id_pembeli,
                 'id_merchandise' => $merchandise->id_merchandise,
@@ -148,7 +148,7 @@ class MerchendiseControllersAPI extends Controller
     // Fungsi generate ID unik CMxx
     private function generateClaimMerchandiseId()
     {
-        $last = ClaimMerchandise::orderBy('id', 'desc')->first();
+        $last = Claimmerchandise::orderBy('id', 'desc')->first();
 
         if (!$last) {
             return 'CM01';

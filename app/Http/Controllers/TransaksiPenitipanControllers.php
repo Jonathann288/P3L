@@ -22,7 +22,7 @@ class TransaksiPenitipanControllers extends Controller
         $penitipId = Auth::guard('penitip')->user()->id_penitip;
         $penitip = Penitip::find($penitipId);
 
-        $transaksiIds = TransaksiPenitipan::where('id_penitip', $penitipId)->pluck('id_transaksi_penitipan');
+        $transaksiIds = Transaksipenitipan::where('id_penitip', $penitipId)->pluck('id_transaksi_penitipan');
 
         $detailBarang = DetailTransaksiPenitipan::with(['barang', 'transaksipenitipan'])
             ->whereIn('id_transaksi_penitipan', $transaksiIds)
@@ -37,7 +37,7 @@ class TransaksiPenitipanControllers extends Controller
         $penitip = Penitip::find($penitipId);
 
         // Ambil semua transaksi penitipan milik penitip ini
-        $transaksiIds = TransaksiPenitipan::where('id_penitip', $penitipId)->pluck('id_transaksi_penitipan');
+        $transaksiIds = Transaksipenitipan::where('id_penitip', $penitipId)->pluck('id_transaksi_penitipan');
 
         // Ambil detail barang yang status_perpanjangan = 1
         $detailBarang = DetailTransaksiPenitipan::with(['barang', 'transaksipenitipan'])
@@ -159,7 +159,7 @@ class TransaksiPenitipanControllers extends Controller
 
     public function aturTanggalPengambilan($id)
     {
-        $detail = Detailtransaksipenitipan::with('transaksipenitipan', 'barang')->findOrFail($id);
+        $detail = DetailTransaksiPenitipan::with('transaksipenitipan', 'barang')->findOrFail($id);
 
         $tanggalSekarang = Carbon::now();
         $tanggalBatasPengambilan = $tanggalSekarang->copy()->addDays(7);
@@ -225,7 +225,7 @@ class TransaksiPenitipanControllers extends Controller
      public function showTitipanBarang(Request $request)
     {   
         $pegawaiLogin = Auth::guard('pegawai')->user();
-        $query = TransaksiPenitipan::with('penitip', 'pegawai', 'hunter');  // Gunakan nama class yang benar
+        $query = Transaksipenitipan::with('penitip', 'pegawai', 'hunter');  // Gunakan nama class yang benar
 
         // Handle search
         if ($request->has('search') && !empty($request->search)) {
@@ -421,7 +421,7 @@ class TransaksiPenitipanControllers extends Controller
             ]);
 
             // Save consignment transaction
-            $titipan = new TransaksiPenitipan();
+            $titipan = new Transaksipenitipan();
             $titipan->id = $this->generateCustomId();
             $titipan->id_pegawai = $pegawai->id_pegawai;
             $titipan->id_penitip = $validated['id_penitip'];
@@ -528,7 +528,7 @@ class TransaksiPenitipanControllers extends Controller
 
     private function generateCustomId()
     {
-        $last = DB::table('TransaksiPenitipan')
+        $last = DB::table('Transaksipenitipan')
             ->select('id')
             ->where('id', 'like', 'T%')
             ->orderByDesc(DB::raw('CAST(SUBSTRING(id, 2) AS UNSIGNED)'))
@@ -562,7 +562,7 @@ class TransaksiPenitipanControllers extends Controller
             ->orderBy('nama_penitip')
             ->get();
 
-        $titipans = TransaksiPenitipan::with('penitip', 'pegawai')  // Gunakan nama class yang benar
+        $titipans = Transaksipenitipan::with('penitip', 'pegawai')  // Gunakan nama class yang benar
             ->orderBy('tanggal_penitipan', 'desc')
             ->get();
 
@@ -633,7 +633,7 @@ class TransaksiPenitipanControllers extends Controller
 
     public function searchTitipan(Request $request)
     {
-        $query = transaksipenitipan::with([
+        $query = Transaksipenitipan::with([
             'penitip',
             'pegawai',
             'hunter',
@@ -809,7 +809,7 @@ class TransaksiPenitipanControllers extends Controller
         ]);
 
         try {
-            $titipan = TransaksiPenitipan::with('detailTransaksiPenitipan.barang')->findOrFail($id);
+            $titipan = Transaksipenitipan::with('detailTransaksiPenitipan.barang')->findOrFail($id);
 
             // Update data penitip
             $penitip = $titipan->penitip;

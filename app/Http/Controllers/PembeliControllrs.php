@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pembeli;
 use App\Models\Barang;
 use App\Models\Keranjang;
-use App\Models\TransaksiPenjualan;
+use App\Models\Transaksipenjualan;
 use App\Models\DetailTransaksiPenitipan;
 use App\Models\DetailTransaksiPenjualan; 
 use App\Models\Penitip;
@@ -210,7 +210,7 @@ class PembeliControllrs extends Controller
         try {
             $pembeli = Auth::guard('pembeli')->user();
 
-            $transaksiBisaDibatalkan = TransaksiPenjualan::where('id_pembeli', $pembeli->id_pembeli)
+            $transaksiBisaDibatalkan = Transaksipenjualan::where('id_pembeli', $pembeli->id_pembeli)
                 ->whereIn('status_transaksi', ['sedang disiapkan', 'dibatalkan pembeli'])
                 ->with('detailTransaksiPenjualan')
                 ->orderBy('tanggal_transaksi', 'desc')
@@ -230,7 +230,7 @@ class PembeliControllrs extends Controller
         try {
             $pembeli = Auth::guard('pembeli')->user();
 
-            $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $id)
+            $transaksi = Transaksipenjualan::where('id_transaksi_penjualan', $id)
                 ->where('id_pembeli', $pembeli->id_pembeli)
                 ->where('status_transaksi', 'sedang disiapkan')
                 ->with('detailTransaksiPenjualan.barang')

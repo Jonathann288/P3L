@@ -34,17 +34,17 @@ class Barang extends Model
 
     public function kategoribarang()
     {
-        return $this->belongsTo(kategoribarang::class, 'id_kategori');
+        return $this->belongsTo(KategoriBarang::class, 'id_kategori');
     }
 
     public function penitip()
     {
-        return $this->belongsTo(penitip::class, 'id'); // Asumsi relasi ke tabel penitip
+        return $this->belongsTo(Penitip::class, 'id'); // Asumsi relasi ke tabel penitip
     }
 
         public function kategori()
     {
-        return $this->belongsTo(kategoribarang::class, 'id_kategori');
+        return $this->belongsTo(KategoriBarang::class, 'id_kategori');
     }
 
         public function diskusi()

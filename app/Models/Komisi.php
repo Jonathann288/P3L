@@ -46,7 +46,7 @@ class Komisi extends Model
     {
         return $this->hasManyThrough(
             Barang::class,
-            detailtransaksipenjualan::class,
+            DetailTransaksiPenjualan::class,
             'id_transaksi_penjualan', // Foreign key di detailtransaksipenjualan yang mengarah ke transaksi
             'id_barang',              // Foreign key di barang
             'id_transaksi_penjualan', // Local key di komisi

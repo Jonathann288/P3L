@@ -24,12 +24,12 @@ class Donasi extends Model
 
     public function barang()
     {
-        return $this->belongsTo(barang::class, 'id_barang');
+        return $this->belongsTo(Barang::class, 'id_barang');
     }
 
     public function requestdonasi()
     {
-        return $this->belongsTo(requestdonasi::class, 'id_request');
+        return $this->belongsTo(RequestDonasi::class, 'id_request');
     }
 
     public function pegawai()

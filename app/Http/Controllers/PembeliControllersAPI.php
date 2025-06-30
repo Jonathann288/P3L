@@ -49,7 +49,7 @@ use Illuminate\Database\Eloquent\Builder;
         }
 
         // Langkah 3: Bangun query dasar untuk mengambil transaksi.
-        $query = TransaksiPenjualan::query()
+        $query = Transaksipenjualan::query()
             // Filter transaksi hanya untuk pembeli yang sedang login.
             ->where('id_pembeli', $pembeli->id_pembeli)
             // Eager load relasi untuk menghindari N+1 problem.

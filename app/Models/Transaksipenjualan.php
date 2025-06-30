@@ -50,12 +50,12 @@ class Transaksipenjualan extends Model
 
     public function detailTransaksi()
     {
-        return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_penjualan');
+        return $this->hasMany(DetailTransaksiPenjualan::class, 'id_transaksi_penjualan');
     }
 
     public function detailTransaksiPenjualan()
     {
-        return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_penjualan');
+        return $this->hasMany(DetailTransaksiPenjualan::class, 'id_transaksi_penjualan');
     }
     public function detailtrpj()
     {
@@ -64,7 +64,7 @@ class Transaksipenjualan extends Model
 
     public function detail()
     {
-        return $this->hasMany(detailtransaksipenjualan::class, 'id_transaksi_pembelian', 'id_transaksi_pembelian');
+        return $this->hasMany(DetailTransaksiPenjualan::class, 'id_transaksi_pembelian', 'id_transaksi_pembelian');
     }
 
     public function barang()

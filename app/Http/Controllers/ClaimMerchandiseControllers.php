@@ -13,7 +13,7 @@ class ClaimMerchandiseControllers extends Controller
     {
         $filter = $request->input('filter', 'all');
         
-        $query = claimmerchandise::with(['pembeli', 'merchandise']);
+        $query = Claimmerchandise::with(['pembeli', 'merchandise']);
         
         if ($filter === 'unclaimed') {
             $query->where('status', 'belum_diambil');
@@ -29,7 +29,7 @@ class ClaimMerchandiseControllers extends Controller
     
     public function updateClaimStatus(Request $request, $id)
     {
-        $claim = claimmerchandise::findOrFail($id);
+        $claim = Claimmerchandise::findOrFail($id);
         
         $claim->tanggal_pengambilan = now();
         $claim->status = 'sudah_diambil';

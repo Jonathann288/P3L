@@ -19,12 +19,12 @@ class Detailtransaksipenitipan extends Model
 
     public function transaksipenitipan()
     {
-        return $this->belongsTo(transaksipenitipan::class, 'id_transaksi_penitipan');
+        return $this->belongsTo(TransaksiPenitipan::class, 'id_transaksi_penitipan');
     }
 
     public function barang()
     {
-        return $this->belongsTo(barang::class, 'id_barang');
+        return $this->belongsTo(Barang::class, 'id_barang');
     }
 
     public function transaksipenjualan()

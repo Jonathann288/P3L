@@ -203,7 +203,7 @@ class TransaksiPenjualanControllers extends Controller
         }
 
         // 1. Buat ID transaksi baru
-        $lastTransaction = transaksipenjualan::where('id', 'like', 'TP%')
+        $lastTransaction = Transaksipenjualan::where('id', 'like', 'TP%')
             ->orderBy('id', 'desc')->first();
 
         $newId = !$lastTransaction
@@ -279,7 +279,7 @@ class TransaksiPenjualanControllers extends Controller
             }
 
             // Simpan header transaksi
-            $transaksi = transaksipenjualan::create($data);
+            $transaksi = Transaksipenjualan::create($data);
 
             foreach ($keranjang as $id_barang => $item) {
                 $barang = Barang::find($id_barang);
@@ -633,12 +633,12 @@ class TransaksiPenjualanControllers extends Controller
             $pegawaiLogin = Auth::guard('pegawai')->user();
 
             // Ambil transaksi dengan eager loading
-            $transaksiMenunggu = TransaksiPenjualan::with(['detailTransaksi.barang', 'pembeli'])
+            $transaksiMenunggu = Transaksipenjualan::with(['detailTransaksi.barang', 'pembeli'])
                 ->where('status_pembayaran', 'menunggu konfirmasi')
                 ->orderBy('tanggal_transaksi', 'desc')
                 ->get();
 
-            $transaksiTerverifikasi = TransaksiPenjualan::with(['detailTransaksi.barang', 'pembeli'])
+            $transaksiTerverifikasi = Transaksipenjualan::with(['detailTransaksi.barang', 'pembeli'])
                 ->where('status_pembayaran', 'Lunas')
                 ->orderBy('tanggal_transaksi', 'desc')
                 ->get();
@@ -658,7 +658,7 @@ class TransaksiPenjualanControllers extends Controller
         try {
             DB::beginTransaction();
 
-            $transaksi = TransaksiPenjualan::where('id', $id)->firstOrFail();
+            $transaksi = Transaksipenjualan::where('id', $id)->firstOrFail();
 
             // Validasi: hanya bisa ditolak jika status masih pending
             if ($transaksi->status_pembayaran !== 'Menunggu Konfirmasi') {
@@ -691,7 +691,7 @@ public function approveTransaction(Request $request, $id)
             DB::beginTransaction();
 
             // Ambil transaksi beserta relasi pembeli dan detail transaksi
-            $transaksi = TransaksiPenjualan::with(['pembeli', 'detailTransaksi'])->where('id', $id)->firstOrFail();
+            $transaksi = Transaksipenjualan::with(['pembeli', 'detailTransaksi'])->where('id', $id)->firstOrFail();
 
             // Validasi: hanya bisa di-approve jika status masih "Menunggu Konfirmasi"
             if ($transaksi->status_pembayaran !== 'Menunggu Konfirmasi') {
@@ -764,12 +764,12 @@ public function approveTransaction(Request $request, $id)
             $pegawaiLogin = Auth::guard('pegawai')->user();
 
             // Ambil transaksi dengan eager loading
-            $transaksiAntar = TransaksiPenjualan::with(['detailTransaksi.barang', 'pembeli', 'kurir'])
+            $transaksiAntar = Transaksipenjualan::with(['detailTransaksi.barang', 'pembeli', 'kurir'])
                 ->where('metode_pengantaran', 'diantar_kurir')
                 ->orderBy('tanggal_transaksi', 'desc')
                 ->get();
 
-            $transaksiAmbilsendiri = TransaksiPenjualan::with(['detailTransaksi.barang', 'pembeli'])
+            $transaksiAmbilsendiri = Transaksipenjualan::with(['detailTransaksi.barang', 'pembeli'])
                 ->where('metode_pengantaran', 'ambil_sendiri')
                 ->orderBy('tanggal_transaksi', 'desc')
                 ->get();
@@ -820,7 +820,7 @@ public function approveTransaction(Request $request, $id)
             'tanggal_ambil' => 'required|date|after_or_equal:today',
         ]);
 
-        $transaksi = TransaksiPenjualan::where('id_transaksi_penjualan', $request->transaksi_id)->first();
+        $transaksi = Transaksipenjualan::where('id_transaksi_penjualan', $request->transaksi_id)->first();
 
         $transaksi->update([
             'tanggal_ambil' => $request->tanggal_ambil,
@@ -834,7 +834,7 @@ public function approveTransaction(Request $request, $id)
         DB::beginTransaction();
 
         try {
-            $transaksi = TransaksiPenjualan::with([
+            $transaksi = Transaksipenjualan::with([
                 'pembeli',
                 'detailTransaksi.barang.detailTransaksiPenitipan.transaksiPenitipan.penitip'
             ])
@@ -992,7 +992,7 @@ public function approveTransaction(Request $request, $id)
 
     public function cekStatusHangus(Request $request, $id)
     {
-        $transaksi = TransaksiPenjualan::with('detailTransaksi.barang')->findOrFail($id);
+        $transaksi = Transaksipenjualan::with('detailTransaksi.barang')->findOrFail($id);
 
         if (!$transaksi->tanggal_ambil) {
             Log::info("Cek status hangus - transaksi ID {$id}: tanggal ambil belum ditentukan.");

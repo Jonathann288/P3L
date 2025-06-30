@@ -42,7 +42,7 @@ class DonasiControllers extends Controller
             \Log::info('✅ Status request diupdate jadi approved');
 
             // Simpan data ke tabel donasi
-            $donasi = donasi::create([
+            $donasi = Donasi::create([
                 'id_barang' => $request->id_barang,
                 'id_request' => $request->id_request,
                 'nama_penerima' => $request->nama_penerima,
@@ -175,7 +175,7 @@ class DonasiControllers extends Controller
     public function showLaporanTransaksiPenitip()
     {
         $pegawaiLogin = Auth::guard('pegawai')->user();
-        $transaksiPenitipan = transaksipenitipan::with(['detailtransaksipenitipan.barang', 'penitip'])->get()->groupBy('id_penitip');
+        $transaksiPenitipan = Transaksipenitipan::with(['detailtransaksipenitipan.barang', 'penitip'])->get()->groupBy('id_penitip');
 
         return view('owner.DashboardLaporanTransaksiPenitip', compact('pegawaiLogin', 'transaksiPenitipan'));
     }

@@ -15,7 +15,7 @@ class TransaksiPenjualanControllersAPI extends Controller
     public function index(Request $request)
     {
         try {
-            $query = TransaksiPenjualan::with([
+            $query = Transaksipenjualan::with([
                 'detailTransaksi.barang',
                 'pembeli',
                 'kurir'
@@ -86,7 +86,7 @@ class TransaksiPenjualanControllersAPI extends Controller
     public function show($id)
     {
         try {
-            $transaksi = TransaksiPenjualan::with([
+            $transaksi = Transaksipenjualan::with([
                 'detailTransaksi.barang',
                 'pembeli',
                 'kurir'
@@ -145,7 +145,7 @@ class TransaksiPenjualanControllersAPI extends Controller
     public function getByStatusPengiriman($status)
     {
         try {
-            $transaksi = TransaksiPenjualan::with([
+            $transaksi = Transaksipenjualan::with([
                 'detailTransaksi.barang',
                 'pembeli',
                 'kurir'
@@ -279,7 +279,7 @@ class TransaksiPenjualanControllersAPI extends Controller
 
     public function updateStatusTransaksi($id, Request $request)
     {
-        $transaksi = TransaksiPenjualan::where('id', $id)->first();
+        $transaksi = Transaksipenjualan::where('id', $id)->first();
 
         if (!$transaksi) {
             return response()->json([
