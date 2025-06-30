@@ -108,7 +108,7 @@ class Barang extends Model
     public function transaksiPenitipan()
     {
         return $this->hasManyThrough(
-            TransaksiPenitipan::class,
+            Transaksipenitipan::class,
             DetailTransaksiPenitipan::class,
             'id_barang', 
             'id_transaksi_penitipan', 

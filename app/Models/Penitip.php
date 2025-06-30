@@ -57,7 +57,7 @@ class Penitip extends Authenticatable
     public function transaksiPenitipan()
     {
         // Asumsi: tabel transaksipenitipan memiliki kolom 'id_penitip' sebagai FK
-        return $this->hasMany(TransaksiPenitipan::class, 'id_penitip', 'id_penitip');
+        return $this->hasMany(Transaksipenitipan::class, 'id_penitip', 'id_penitip');
     }
 
     public function updateAverageRating()

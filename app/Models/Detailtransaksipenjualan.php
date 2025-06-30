@@ -24,7 +24,7 @@ class Detailtransaksipenjualan extends Model
 
     public function transaksipenjualan()
     {
-        return $this->belongsTo(TransaksiPenjualan::class, 'id_transaksi_penjualan');
+        return $this->belongsTo(Transaksipenjualan::class, 'id_transaksi_penjualan');
     }
 
     public function barang()
@@ -35,6 +35,6 @@ class Detailtransaksipenjualan extends Model
     public function transaksiPenitipan()
     {
         // Asumsi: tabel ini punya 'id_transaksi_penitipan' sebagai FK ke 'transaksipenitipan'
-        return $this->belongsTo(TransaksiPenitipan::class, 'id_transaksi_penitipan', 'id_transaksi_penitipan');
+        return $this->belongsTo(Transaksipenitipan::class, 'id_transaksi_penitipan', 'id_transaksi_penitipan');
     }
 }
