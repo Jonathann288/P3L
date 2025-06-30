@@ -8,7 +8,8 @@
     <link rel="icon" type="image/png" sizes="128x128" href="images/logo2.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -22,17 +23,26 @@
             <nav>
                 <div class="space-y-4">
                     <div class="flex items-center space-x-4 p-3 bg-blue-600 rounded-lg">
-                        <img src="{{ asset($pembeli->foto_pembeli) }}" alt="profile" class="w-8 h-8 rounded-full object-cover">
+                        <img src="{{ asset($pembeli->foto_pembeli) }}" alt="profile"
+                            class="w-8 h-8 rounded-full object-cover">
                         <span>{{ $pembeli->nama_pembeli }}</span>
                     </div>
-                    <a href="{{ route('pembeli.historyPembeli') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
-                        <i class="fa-solid fa-clock-rotate-left" ></i>
+                    <a href="{{ route('pembeli.historyPembeli') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
                         <span>History</span>
                     </a>
-                    <a href="{{ route('pembeli.AlamatPembeli') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                    <a href="{{ route('pembeli.AlamatPembeli') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
                         <i class="fas fa-cog"></i>
                         <span>Alamat</span>
                     </a>
+                    <a href="{{ route('pembeli.pembatalanTransaksiValid') }}"
+                        class="flex items-center space-x-4 p-3 hover:bg-gray-700 rounded-lg">
+                        <i class="fas fa-ban"></i>
+                        <span>Pembatalan Transaksi</span>
+                    </a>
+
                 </div>
             </nav>
         </div>
@@ -43,7 +53,7 @@
             </button>
         </div>
     </div>
-                                  
+
     <!-- Main Content -->
     <div class="p-8 bg-gray-100">
         <div class="flex justify-between items-center mb-8">
@@ -54,10 +64,12 @@
             <!-- Profile Card -->
             <div class="bg-white p-6 rounded-lg shadow-md text-center">
                 <div class="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-6">
-                    <img src="{{ asset($pembeli->foto_pembeli) }}" alt="Foto Profil"class="w-full h-full object-cover rounded-full">
+                    <img src="{{ asset($pembeli->foto_pembeli) }}" alt="Foto Profil"
+                        class="w-full h-full object-cover rounded-full">
                 </div>
                 <div class="font-semibold text-xl mb-2">{{ $pembeli->nama_pembeli }}</div>
-                <button onclick="toggleModal()" class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-500 w-full mt-4">
+                <button onclick="toggleModal()"
+                    class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-500 w-full mt-4">
                     <i class="fas fa-pencil-alt"></i> Edit Profil
                 </button>
             </div>
@@ -114,7 +126,8 @@
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
         <div class="bg-white p-8 rounded-lg w-1/3">
             <h2 class="text-xl mb-4 font-semibold">Ubah Foto Profil</h2>
-            <form action="{{ route('pembeli.updateProfil', $pembeli->id_pembeli) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('pembeli.updateProfil', $pembeli->id_pembeli) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="space-y-4">
@@ -124,7 +137,8 @@
                     </div>
                 </div>
                 <div class="flex justify-end mt-6 space-x-2">
-                    <button type="button" onclick="toggleModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Batal</button>
+                    <button type="button" onclick="toggleModal()"
+                        class="bg-gray-500 text-white px-4 py-2 rounded-lg">Batal</button>
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Simpan</button>
                 </div>
             </form>
@@ -149,14 +163,14 @@
 
                     <div>
                         <label for="email_pembeli" class="block font-semibold">Email:</label>
-                        <input type="email" id="email_pembeli" name="email_pembeli" value="{{ $pembeli->email_pembeli }}"
-                            class="w-full p-2 border rounded-lg">
+                        <input type="email" id="email_pembeli" name="email_pembeli"
+                            value="{{ $pembeli->email_pembeli }}" class="w-full p-2 border rounded-lg">
                     </div>
 
                     <div>
                         <label for="nomor_telepon_pembeli" class="block font-semibold">Nomor Telepon:</label>
-                        <input type="text" id="nomor_telepon_pembeli" name="nomor_telepon_pembeli" value="{{ $pembeli->nomor_telepon_pembeli }}"
-                            class="w-full p-2 border rounded-lg">
+                        <input type="text" id="nomor_telepon_pembeli" name="nomor_telepon_pembeli"
+                            value="{{ $pembeli->nomor_telepon_pembeli }}" class="w-full p-2 border rounded-lg">
                     </div>
 
                     <div>

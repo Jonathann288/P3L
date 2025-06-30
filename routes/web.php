@@ -166,7 +166,9 @@ Route::middleware(['pembeli'])->group(function () {
         ->name('prosesPembayaran');
 
 
-        
+    Route::get('/pembeli/pembatalan-transaksi', [PembeliControllrs::class, 'showPembatalanTransaksi'])->name('pembeli.pembatalanTransaksiValid');
+    Route::delete('/pembeli/pembatalan-transaksi/{id}', [PembeliControllrs::class, 'batalkanTransaksi'])
+        ->name('pembeli.batalkanTransaksi');
 });
 
 Route::get('/registerOrganisasi', [OrganisasiControllrs::class, 'showRegisterOrganisasi'])->name('registerOrganisasi');
@@ -253,7 +255,7 @@ Route::middleware(['checkjabatan:Customer Service'])->group(function () {
     Route::delete('/DashboardPenitip/delete/{id}', [PenitipControllrs::class, 'destroy'])->name('CustomerService.penitip.destroy');
     Route::get('/DashboardPenitip/search', [PenitipControllrs::class, 'search'])->name('CustomerService.penitip.search');
 
-     Route::get('/DashboardClaimMerchandise', [ClaimMerchandiseControllers::class, 'showClaimMerchandise'])->name('CustomerService.DashboardClaimMerchandise');
+    Route::get('/DashboardClaimMerchandise', [ClaimMerchandiseControllers::class, 'showClaimMerchandise'])->name('CustomerService.DashboardClaimMerchandise');
     Route::put('/DashboardClaimMerchandise/update/{id}', [ClaimMerchandiseControllers::class, 'updateClaimStatus'])->name('CustomerService.updateClaimStatus');
 
 
