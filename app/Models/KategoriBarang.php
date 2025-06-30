@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Kategoribarang extends Model
+class KategoriBarang extends Model
 {
     protected $table = 'kategoribarang';
     protected $primaryKey = 'id_kategori';
