@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Donasi;
-use App\Models\Requestdonasi;
+use App\Models\RequestDonasi;
 use App\Models\Barang;
-use App\Models\TransaksiPenitipan;
+use App\Models\Transaksipenitipan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -31,7 +31,7 @@ class DonasiControllers extends Controller
             \Log::info('✅ Validasi Berhasil', $validated);
 
             // Update status request menjadi 'approved'
-            $donasiRequest = requestdonasi::find($request->id_request);
+            $donasiRequest = RequestDonasi::find($request->id_request);
             if (!$donasiRequest) {
                 \Log::error('❌ Request tidak ditemukan');
                 return redirect()->back()->with('error', 'Request tidak ditemukan.');

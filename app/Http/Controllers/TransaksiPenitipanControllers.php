@@ -9,7 +9,7 @@ use App\Models\DetailTransaksiPenitipan;
 use App\Models\Barang;
 use App\Models\Penitip;
 use App\Models\Pegawai;
-use App\Models\Kategoribarang;
+use App\Models\KategoriBarang;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
