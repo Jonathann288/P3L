@@ -28,7 +28,7 @@ class Komisi extends Model
 
     public function transaksipenjualan()
     {
-        return $this->belongsTo(TransaksiPenjualan::class, 'id_transaksi_penjualan');
+        return $this->belongsTo(Transaksipenjualan::class, 'id_transaksi_penjualan');
     }
 
 
