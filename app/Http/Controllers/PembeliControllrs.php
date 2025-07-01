@@ -83,7 +83,7 @@ class PembeliControllrs extends Controller
             $pembeli = Auth::guard('pembeli')->user();
 
             // Ambil transaksi berdasarkan id_pembeli, eager load detail + barang, dan urutkan berdasarkan tanggal
-            $transaksiPenjualan = transaksipenjualan::where('id_pembeli', $pembeli->id_pembeli)
+            $transaksiPenjualan = Transaksipenjualan::where('id_pembeli', $pembeli->id_pembeli)
                 ->with(['detailTransaksiPenjualan.barang.detailtransaksipenitipan.transaksiPenitipan.penitip'])
                 ->orderBy('tanggal_transaksi', 'desc')
                 ->get();
