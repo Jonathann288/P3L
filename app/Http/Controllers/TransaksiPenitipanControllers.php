@@ -528,7 +528,7 @@ class TransaksiPenitipanControllers extends Controller
 
     private function generateCustomId()
     {
-        $last = DB::table('Transaksipenitipan')
+        $last = DB::table('transaksipenitipan')
             ->select('id')
             ->where('id', 'like', 'T%')
             ->orderByDesc(DB::raw('CAST(SUBSTRING(id, 2) AS UNSIGNED)'))
@@ -543,7 +543,7 @@ class TransaksiPenitipanControllers extends Controller
 
     private function generateBarangId()
     {
-        $lastBarang = DB::table('Barang')
+        $lastBarang = DB::table('barang')
             ->select('id')
             ->where('id', 'like', 'B%')
             ->orderByDesc(DB::raw('CAST(SUBSTRING(id, 2) AS UNSIGNED)'))
